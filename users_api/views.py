@@ -1,15 +1,20 @@
 from django.shortcuts import render
-# from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
-from .serializers import UserSerializer
-from rest_framework import  serializers,viewsets
+from .serializers import UserSerializer,UserLogSerializer
+from rest_framework import  viewsets
+from .models import UserModel
 from rest_framework.permissions import IsAuthenticated
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserLogViewSet(viewsets.ModelViewSet):
     permission_classes=(IsAuthenticated,)
-    serializer_class=UserSerializer
+    serializer_class=UserLogSerializer
     queryset=get_user_model().objects.all()
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset=UserModel.objects.all()
+    serializer_class=UserSerializer
+    
         
     
 
