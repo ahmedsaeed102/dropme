@@ -28,7 +28,7 @@ class UserManager(BaseUserManager):
         return user
     
 class UserModel(AbstractBaseUser,PermissionsMixin):
-    
+    username=models.CharField(max_length=50)
     email=models.EmailField(unique=True,null=False,blank=False,max_length=50,validators=[validate_email])
     phone_number=models.CharField(unique=True,null=True,blank=True,max_length=10,validators=[phone_number_regex])
     otp=models.CharField(max_length=4)
@@ -42,5 +42,6 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
     objects=UserManager()
     
     USERNAME_FIELD="email"
+    
     def __str__(self):
         return self.email
