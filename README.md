@@ -30,6 +30,7 @@ cd dropme
 ```
 </li>
 <li>open your virtual enviroment
+  
 ```shell
 venv/bin/activate
 ```
