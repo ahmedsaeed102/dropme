@@ -1,27 +1,15 @@
 import random
 from datetime import datetime ,timedelta
 from django.conf import settings
-
-from django.contrib.auth import (get_user_model,authenticate)
 from .models import UserModel
 from rest_framework import  serializers
+from .otp_send_email import send_otp
+from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from rest_framework.exceptions import AuthenticationFailed
 
-class UserLogSerializer(serializers.ModelSerializer):
-    class Meta:
-       model = UserModel
-       fields = ['username','phone_number','email','password','profile_photo','gender','address' ]
-    
-    # def create(self, val_data):
-    #     return get_user_model().objects.create_user(**val_data)
-    def update(self,instance,val_data):
-        '''update profile'''
-        password=val_data.pop('password',None)
-        user=super.update(instance,val_data)
-        if password :
-            user.set_password(password)
-            user.save()
-        return user
-    
+
 
         
 class UserSerializer(serializers.ModelSerializer):
@@ -38,6 +26,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
         fields = ['username','phone_number','email','password1','password2' ]
+        
+      
     
     # to check password validation in sign up form
     def validate(self,data):
@@ -61,21 +51,68 @@ class UserSerializer(serializers.ModelSerializer):
         )
         user.set_password(val_data['password1'])
         user.save()
+        send_otp(val_data['email'],otp)
         return user
     
-  
+
+
+
+class UserProfileSerializer(UserSerializer):
+    class Meta:
+       model = UserModel
+       fields = ['username','phone_number','email','password1','password2','profile_photo','gender','address' ]
     
-    # @action(detail=True,methods=['PATCH'])
-    # def verify_otp(self,request,pk=None):
-    #     # if ()
-    #     pass
+    # def create(self, val_data):
+    #     return get_user_model().objects.create_user(**val_data)
+    def update(self,instance,val_data):
+        '''update profile'''
+        password=val_data.pop('password1',None)
+        user=super().update(instance,val_data)
+        if password :
+            user.set_password(password)
+            user.save()
+        return user
     
-# from django.conf import settings
-# from django.core.mail import send_mail
+
+
+
+class ResetPasswordEmailRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+    redirect_url = serializers.CharField(max_length=500, required=False)
+
+    class Meta:
+        fields = ['email']
+
+
+class SetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(
+        min_length=6, max_length=68, write_only=True)
+    token = serializers.CharField(
+        min_length=1, write_only=True)
+    uidb64 = serializers.CharField(
+        min_length=1, write_only=True)
+
+    class Meta:
+        fields = ['password', 'token', 'uidb64']
+
+    def validate(self, attrs):
+        try:
+            password = attrs.get('password')
+            token = attrs.get('token')
+            uidb64 = attrs.get('uidb64')
+
+            id = force_str(urlsafe_base64_decode(uidb64))
+            user = UserModel.objects.get(id=id)
+            if not PasswordResetTokenGenerator().check_token(user, token):
+                raise AuthenticationFailed('The reset link is invalid', 401)
+
+            user.set_password(password)
+            user.save()
+
+            return (user)
+        except Exception as e:
+            raise AuthenticationFailed('The reset link is invalid', 401)
+        return super().validate(attrs)
+
 
     
-# subject = 'Welcome to DropMe'
-# message = f'Hi {user.username}, thank you for registering in DropMe app enjoy recycling :).'
-# email_from = settings.EMAIL_HOST_USER
-# recipient_list = [user.email, ]
-# send_mail( subject, message, email_from, recipient_list )

@@ -10,7 +10,7 @@ from model_utils import Choices
 from django.core.validators import RegexValidator, validate_email
 
 class LocationModel(models.Model):
-    address=models.CharField(max_length=50)
+    address=models.CharField(max_length=50,default='Egypt')
     def __str__(self) :
         return self.address
 
@@ -54,7 +54,7 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
     GENDER = Choices('male', 'female')
     gender=models.CharField(choices=GENDER,default=GENDER.male, max_length=20) 
     points=models.IntegerField(default=0)
-    address = models.ForeignKey(LocationModel, on_delete=models.CASCADE)
+    address = models.ForeignKey(LocationModel, on_delete=models.CASCADE,null=True,default=1)
     
     objects=UserManager()
     
@@ -66,6 +66,17 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
     
     def get_image_url(self):
         return f"/media/{self.profile_photo}"
+    
+    
+# class ResetPasswordModel(models.Model):
+#     user=models.ForeignKey(UserModel, on_delete=models.CASCADE)
+#     reset_pass_token=models.CharField(null=True,blank=True,max_length=200)
+#     created_at=models.DateTimeField(auto_now_add=True)
+#     updated_at=models.DateTimeField(auto_now=True)
+    
+        
+#     def __str__(self):
+#         return self.user.email
 
 
 
