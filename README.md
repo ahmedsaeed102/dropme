@@ -1,6 +1,15 @@
 # dropme<h1>Dropme Api Project</h1>
 
 <h2>Getting started</h2>
+<h3>Prerequisites</h3>
+<ol>
+<li> download python <a href="https://www.python.org/downloads/">Download</a> </li>
+<li> download virtualenviroment 
+```shell
+pip install virtualenv
+```
+</li>
+</ol>
 <ol>
 <li>Create virtual environment for windows
 
@@ -21,7 +30,9 @@ cd dropme
 ```
 </li>
 <li>open your virtual enviroment
+```shell
 venv/bin/activate
+```
 </li>
 <li>Install requirements
 
