@@ -5,6 +5,7 @@
 <ol>
 <li> download python <a href="https://www.python.org/downloads/">Download</a> </li>
 <li> download virtualenviroment 
+
 ```shell
 pip install virtualenv
 ```
