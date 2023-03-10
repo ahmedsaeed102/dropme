@@ -12,6 +12,12 @@ pip install virtualenv
 </li>
 </ol>
 <ol>
+<li>go to dropme folder
+
+```shell
+cd dropme
+```
+</li>
 <li>Create virtual environment for windows
 
 ```shell
@@ -24,12 +30,7 @@ python -m venv venv
 git clone https://github.com/mariamkhaled99/dropme.git
 ```
 </li>
-<li>go to dropme folder
 
-```shell
-cd dropme
-```
-</li>
 <li>open your virtual enviroment
   
 ```shell
