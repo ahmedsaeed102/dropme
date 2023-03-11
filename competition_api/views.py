@@ -35,5 +35,13 @@ class Leaderboard(APIView):
 
     def get(self, request):
         users = UserModel.objects.all()[:10]
-        serializer = CustomUserSerializer(users, many=True,  context={'request': request})
-        return Response(serializer.data)
+        serializer = CustomUserSerializer(users, many=True,)
+        current_user = {
+             'current_user': request.user.username, 
+             'rank': request.user.ranking
+        }
+        data=[current_user]
+        data.append(serializer.data)
+        
+        return Response(data)
+    

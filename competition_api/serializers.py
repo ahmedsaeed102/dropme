@@ -29,14 +29,8 @@ class CompetitionRankingSerializer(serializers.ModelSerializer):
 
 class CustomUserSerializer(serializers.ModelSerializer):
     rank = serializers.ReadOnlyField(source='ranking')
-    current_user = serializers.SerializerMethodField('_user')
 
-    def _user(self, obj):
-        request = self.context.get('request', None)
-        if request:
-            return request.user.ranking
-        
     class Meta:
         model = UserModel
-        fields = ['username', "total_points", 'rank', 'current_user']
+        fields = ['username', "total_points", 'rank']
 
