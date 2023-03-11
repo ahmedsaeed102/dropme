@@ -12,11 +12,6 @@ class Competitions(generics.ListCreateAPIView):
     serializer_class = CompetitionSerializer
     permission_classes = [IsAuthenticated]
     
-    # def get_queryset(self):
-    #     return self.queryset.filter(user=self.request.user)
-
-    # def perform_create(self, serializer):
-    #     serializer.save(user=self.request.user)
 
 
 class CompetitionDetail(generics.RetrieveUpdateAPIView):
@@ -44,4 +39,10 @@ class Leaderboard(APIView):
         data.append(serializer.data)
         
         return Response(data)
+
+
+#TODO: Join competition
+
+
+#TODO: return competition leaderboard
     
