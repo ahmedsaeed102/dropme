@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from datetime import date
-from .models import Competition
+from users_api.models import UserModel
+from .models import Competition, CompetitionRanking
+
 
 class CompetitionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,3 +21,22 @@ class CompetitionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Target points can't be negative")
         
         return data
+
+class CompetitionRankingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompetitionRanking
+        fields = '__all__'
+
+class CustomUserSerializer(serializers.ModelSerializer):
+    rank = serializers.ReadOnlyField(source='ranking')
+    current_user = serializers.SerializerMethodField('_user')
+
+    def _user(self, obj):
+        request = self.context.get('request', None)
+        if request:
+            return request.user.ranking
+        
+    class Meta:
+        model = UserModel
+        fields = ['username', "total_points", 'rank', 'current_user']
+

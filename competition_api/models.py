@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from users_api.models import UserModel
+
 
 class Competition(models.Model):
     name = models.CharField(
@@ -26,3 +28,18 @@ class Competition(models.Model):
 
     def __str__(self):
         return self.name
+
+class CompetitionRanking(models.Model):
+    competition = models.ForeignKey(
+        Competition,
+        on_delete = models.CASCADE,
+    )
+    user = models.ForeignKey(
+        UserModel,
+        on_delete = models.CASCADE,
+    )
+    points = models.PositiveIntegerField(
+        default = 0,
+        blank = True,
+        help_text = _('user points in competition'),
+    )
