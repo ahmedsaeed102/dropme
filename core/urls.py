@@ -23,5 +23,6 @@ urlpatterns = [
     path('logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
     path('user_login/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('machine/', include('machine_api.urls'), name='machine_api'),
+    path('', include('competition_api.urls'), name='competition_api'),
 ]
 urlpatterns +=router.urls

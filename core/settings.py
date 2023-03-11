@@ -1,7 +1,5 @@
-
 import os
 import environ
-
 from pathlib import Path
 
 env=environ.Env()
@@ -41,14 +39,13 @@ INSTALLED_APPS = [
     'users_api',
     'community_api',
     'machine_api',
+    'competition_api',
 
     # Third party app
     'rest_framework',
     'rest_framework.authtoken',
     'geoposition',
     'rest_framework_simplejwt.token_blacklist',
-
-    
 ]
 
 
@@ -56,10 +53,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-
-],
-    
-
+    ],
 }
 
 
