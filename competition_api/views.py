@@ -14,3 +14,14 @@ class Competitions(generics.ListCreateAPIView):
 
     # def perform_create(self, serializer):
     #     serializer.save(user=self.request.user)
+
+
+class CompetitionDetail(generics.RetrieveUpdateAPIView):
+    queryset = Competition.objects.all()
+    serializer_class = CompetitionSerializer
+    permission_classes = [IsAuthenticated]
+
+class CompetitionDelete(generics.DestroyAPIView):
+    queryset = Competition.objects.all()
+    serializer_class = CompetitionSerializer
+    permission_classes = [IsAuthenticated]
