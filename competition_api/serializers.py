@@ -9,10 +9,13 @@ class CompetitionSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """
-        validate Competition dates
+        validate Competition dates and target points
         """
         if data['start_date'] > data['end_date']:
             raise serializers.ValidationError("End date cannot be before start date")
-        elif data["start_date"] < date.today():
+        if data["start_date"] < date.today():
             raise serializers.ValidationError("Start date cannot be in the past")
+        if data['target'] < 0:
+            raise serializers.ValidationError("Target points can't be negative")
+        
         return data

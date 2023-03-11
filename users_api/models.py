@@ -6,7 +6,7 @@ from django.contrib.auth.models import(
     PermissionsMixin,
 )
 from model_utils import Choices
-
+from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator, validate_email
 
 class LocationModel(models.Model):
@@ -53,7 +53,10 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
     profile_photo=models.ImageField(upload_to='upload_to',default='users_api/default.jpg')
     GENDER = Choices('male', 'female')
     gender=models.CharField(choices=GENDER,default=GENDER.male, max_length=20) 
-    points=models.IntegerField(default=0)
+    total_points=models.PositiveIntegerField(
+        default=0, 
+        help_text = _('User total earned points')
+    )
     address = models.ForeignKey(LocationModel, on_delete=models.CASCADE,null=True,default=1)
     
     objects=UserManager()

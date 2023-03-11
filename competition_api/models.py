@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-
 class Competition(models.Model):
     name = models.CharField(
         max_length=100,
@@ -13,9 +12,9 @@ class Competition(models.Model):
         blank = True,
         help_text = _('Format: optional, max-length:500')
     )
-    target = models.IntegerField(
+    target = models.PositiveIntegerField(
         default = 0,
-        help_text = _('Competition target points')
+        help_text = _('Competition target points'),
     )
     created_at = models.DateTimeField(auto_now_add=True)
     start_date = models.DateField(
