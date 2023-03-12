@@ -18,3 +18,4 @@ PyYAML==6.0
 sqlparse==0.4.3
 tzdata==2022.7
 uritemplate==4.1.1
+whitenoise==6.4.0
