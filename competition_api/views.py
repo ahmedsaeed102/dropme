@@ -1,3 +1,4 @@
+from django.shortcuts import redirect
 from rest_framework.exceptions import APIException, NotFound
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -63,7 +64,8 @@ class JoinCompetition(APIView):
         
         serializer = CompetitionSerializer(competition)
 
-        return Response(serializer.data)
+        # return Response(serializer.data)
+        return redirect('competition_ranking', competition.pk)
 
 
 class CompetitionRanking(APIView):
@@ -77,9 +79,10 @@ class CompetitionRanking(APIView):
         
         serializer = CustomCompetitionSerializer(competition)
 
-        users = competition.users.all()
+        # users = competition.users.all()
+        currentuser = competition.users.filter(pk=request.user.pk).first()
 
-        if request.user in users:
+        if currentuser:
             currentuser = competition.competitionranking_set.get(user=request.user.pk)
             current_user = {
                 'current_user': currentuser.user.username, 
@@ -95,4 +98,3 @@ class CompetitionRanking(APIView):
         data.append(serializer.data)
         
         return Response(data)
-        # return Response(serializer.data)
