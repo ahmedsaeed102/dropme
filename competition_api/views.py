@@ -5,8 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from users_api.models import UserModel
 from datetime import date
-from .serializers import CompetitionSerializer, CustomUserSerializer
-from .models import Competition, CompetitionRanking
+from .serializers import CompetitionSerializer, CustomUserSerializer, CustomCompetitionSerializer, CompetitionRankingSerializer
+from .models import Competition
 
 
 class Competitions(generics.ListCreateAPIView):
@@ -34,8 +34,8 @@ class Leaderboard(APIView):
         users = UserModel.objects.all()[:10]
         serializer = CustomUserSerializer(users, many=True,)
         current_user = {
-             'current_user': request.user.username, 
-             'rank': request.user.ranking
+            'current_user': request.user.username, 
+            'rank': request.user.ranking
         }
         data=[current_user]
         data.append(serializer.data)
@@ -69,14 +69,30 @@ class JoinCompetition(APIView):
 class CompetitionRanking(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        users = UserModel.objects.all()[:10]
-        serializer = CustomUserSerializer(users, many=True,)
-        current_user = {
-             'current_user': request.user.username, 
-             'rank': request.user.ranking
-        }
+    def get(self, request, pk):
+        try:
+            competition = Competition.objects.get(pk=pk)
+        except Competition.DoesNotExist:
+            raise NotFound(detail="Error 404, competition not found", code=404)
+        
+        serializer = CustomCompetitionSerializer(competition)
+
+        users = competition.users.all()
+
+        if request.user in users:
+            currentuser = competition.competitionranking_set.get(user=request.user.pk)
+            current_user = {
+                'current_user': currentuser.user.username, 
+                'rank': currentuser.points
+            }
+        else:
+            current_user = {
+                'current_user': request.user.username, 
+                'joined': False
+            }
+
         data=[current_user]
         data.append(serializer.data)
         
         return Response(data)
+        # return Response(serializer.data)

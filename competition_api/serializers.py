@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from datetime import date
 from users_api.models import UserModel
 from .models import Competition, CompetitionRanking
 
@@ -22,10 +21,6 @@ class CompetitionSerializer(serializers.ModelSerializer):
         
         return data
 
-class CompetitionRankingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CompetitionRanking
-        fields = '__all__'
 
 class CustomUserSerializer(serializers.ModelSerializer):
     rank = serializers.ReadOnlyField(source='ranking')
@@ -33,4 +28,25 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
         fields = ['username', "total_points", 'rank']
+
+
+class CompetitionRankingSerializer(serializers.ModelSerializer):
+    name = serializers.ReadOnlyField(source='user.username')
+
+    class Meta:
+        model = CompetitionRanking
+        fields = ('name', 'points',)
+
+
+class CustomCompetitionSerializer(serializers.ModelSerializer):
+    top_ten = serializers.SerializerMethodField()
+
+    def get_top_ten(self, obj):
+        ranking = obj.competitionranking_set.all()[:10] 
+        return CompetitionRankingSerializer(ranking, many=True).data
+    
+    class Meta:
+        model = Competition
+        fields = ('top_ten',)
+
 

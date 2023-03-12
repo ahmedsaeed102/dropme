@@ -46,6 +46,8 @@ class CompetitionRanking(models.Model):
         help_text = _('user points in competition'),
     )
 
+    
+
     class Meta:
         ordering = ('-points',)
 
