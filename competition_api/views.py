@@ -62,7 +62,7 @@ class JoinCompetition(APIView):
         
         competition.users.add(request.user.pk)
         
-        serializer = CompetitionSerializer(competition)
+        # serializer = CompetitionSerializer(competition)
 
         # return Response(serializer.data)
         return redirect('competition_ranking', competition.pk)
@@ -86,7 +86,8 @@ class CompetitionRanking(APIView):
             currentuser = competition.competitionranking_set.get(user=request.user.pk)
             current_user = {
                 'current_user': currentuser.user.username, 
-                'rank': currentuser.points
+                'points': currentuser.points,
+                'rank' : currentuser.ranking
             }
         else:
             current_user = {
