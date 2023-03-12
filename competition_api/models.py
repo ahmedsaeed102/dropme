@@ -26,6 +26,8 @@ class Competition(models.Model):
         help_text = _('Competition end date'),
     )
 
+    users = models.ManyToManyField(UserModel, through="CompetitionRanking", related_name="comp_user")
+
     def __str__(self):
         return self.name
 
@@ -43,3 +45,9 @@ class CompetitionRanking(models.Model):
         blank = True,
         help_text = _('user points in competition'),
     )
+
+    class Meta:
+        ordering = ('-points',)
+
+    def __str__(self):
+        return f'{self.competition.name} | {self.user.username}'
