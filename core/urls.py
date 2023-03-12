@@ -7,6 +7,8 @@ from django.urls import path ,include
 from users_api.views import UserViewSet,RequestPasswordResetEmail,PasswordTokenCheckAPI,SetNewPasswordAPIView,ManageUserProfileView,MyTokenObtainPairView
 from rest_framework_simplejwt.views import TokenBlacklistView
 from rest_framework.routers import DefaultRouter
+from django.conf import settings
+from django.conf.urls.static import static
 
 router=DefaultRouter()
 router.register('user_register',UserViewSet,basename='user_register')
@@ -23,5 +25,7 @@ urlpatterns = [
     path('logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
     path('user_login/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('machine/', include('machine_api.urls'), name='machine_api'),
+    path('', include('competition_api.urls'), name='competition_api'),
 ]
 urlpatterns +=router.urls
+urlpatterns +=static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
