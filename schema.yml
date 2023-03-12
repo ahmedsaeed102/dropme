@@ -1,0 +1,880 @@
+openapi: 3.0.3
+info:
+  title: 'Dropme Project api '
+  version: 0.0.0
+paths:
+  /competitions/:
+    get:
+      operationId: competitions_list
+      tags:
+      - competitions
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Competition'
+          description: ''
+    post:
+      operationId: competitions_create
+      tags:
+      - competitions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Competition'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Competition'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Competition'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competition'
+          description: ''
+  /competitions/{id}/:
+    get:
+      operationId: competitions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - competitions
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competition'
+          description: ''
+    put:
+      operationId: competitions_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - competitions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Competition'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Competition'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Competition'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competition'
+          description: ''
+    patch:
+      operationId: competitions_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - competitions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCompetition'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCompetition'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCompetition'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competition'
+          description: ''
+  /competitions/delete/{id}/:
+    delete:
+      operationId: competitions_delete_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - competitions
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /edit_profile/:
+    get:
+      operationId: edit_profile_retrieve
+      tags:
+      - edit_profile
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: ''
+    put:
+      operationId: edit_profile_update
+      tags:
+      - edit_profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserProfile'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: ''
+    patch:
+      operationId: edit_profile_partial_update
+      tags:
+      - edit_profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfile'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+          description: ''
+  /leaderboard/:
+    get:
+      operationId: leaderboard_retrieve
+      tags:
+      - leaderboard
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /logout/:
+    post:
+      operationId: logout_create
+      description: |-
+        Takes a token and blacklists it. Must be used with the
+        `rest_framework_simplejwt.token_blacklist` app installed.
+      tags:
+      - logout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenBlacklist'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenBlacklist'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenBlacklist'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenBlacklist'
+          description: ''
+  /machine/list:
+    get:
+      operationId: machine_list_retrieve
+      tags:
+      - machine
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /machine/list/{id}/:
+    get:
+      operationId: machine_list_retrieve_2
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - machine
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /password-reset/:
+    patch:
+      operationId: password_reset_partial_update
+      tags:
+      - password-reset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSetNewPassword'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSetNewPassword'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSetNewPassword'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetNewPassword'
+          description: ''
+  /password-reset/{uidb64}/{token}/:
+    get:
+      operationId: password_reset_retrieve
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: uidb64
+        schema:
+          type: string
+        required: true
+      tags:
+      - password-reset
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetNewPassword'
+          description: ''
+  /reset_password_emaillink/:
+    post:
+      operationId: reset_password_emaillink_create
+      tags:
+      - reset_password_emaillink
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordEmailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordEmailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordEmailRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResetPasswordEmailRequest'
+          description: ''
+  /user_login/:
+    post:
+      operationId: user_login_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - user_login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyTokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MyTokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MyTokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyTokenObtainPair'
+          description: ''
+  /user_register/:
+    get:
+      operationId: user_register_list
+      tags:
+      - user_register
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+          description: ''
+    post:
+      operationId: user_register_create
+      tags:
+      - user_register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /user_register/{id}/:
+    get:
+      operationId: user_register_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user model.
+        required: true
+      tags:
+      - user_register
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: user_register_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user model.
+        required: true
+      tags:
+      - user_register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: user_register_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user model.
+        required: true
+      tags:
+      - user_register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: user_register_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user model.
+        required: true
+      tags:
+      - user_register
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /user_register/{id}/regenerate_otp/:
+    patch:
+      operationId: user_register_regenerate_otp_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user model.
+        required: true
+      tags:
+      - user_register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /user_register/{id}/verify_otp/:
+    patch:
+      operationId: user_register_verify_otp_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user model.
+        required: true
+      tags:
+      - user_register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+components:
+  schemas:
+    Competition:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          description: 'Format: required, max-length:100'
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          description: 'Format: optional, max-length:500'
+          maxLength: 500
+        target:
+          type: integer
+          description: Competition target points
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+          description: Competition start date
+        end_date:
+          type: string
+          format: date
+          description: Competition end date
+      required:
+      - created_at
+      - end_date
+      - id
+      - name
+      - start_date
+    GenderEnum:
+      enum:
+      - male
+      - female
+      type: string
+      description: |-
+        * `male` - male
+        * `female` - female
+    MyTokenObtainPair:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - email
+      - password
+    PatchedCompetition:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          description: 'Format: required, max-length:100'
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          description: 'Format: optional, max-length:500'
+          maxLength: 500
+        target:
+          type: integer
+          description: Competition target points
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+          description: Competition start date
+        end_date:
+          type: string
+          format: date
+          description: Competition end date
+    PatchedSetNewPassword:
+      type: object
+      properties:
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 68
+          minLength: 6
+        token:
+          type: string
+          writeOnly: true
+          minLength: 1
+        uidb64:
+          type: string
+          writeOnly: true
+          minLength: 1
+    PatchedUser:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 50
+        phone_number:
+          type: string
+          nullable: true
+          pattern: ^\d{10}
+          maxLength: 10
+        email:
+          type: string
+          format: email
+          maxLength: 50
+        password1:
+          type: string
+          writeOnly: true
+          minLength: 8
+        password2:
+          type: string
+          writeOnly: true
+          minLength: 8
+    PatchedUserProfile:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 50
+        phone_number:
+          type: string
+          nullable: true
+          pattern: ^\d{10}
+          maxLength: 10
+        email:
+          type: string
+          format: email
+          maxLength: 50
+        password1:
+          type: string
+          writeOnly: true
+          minLength: 8
+        password2:
+          type: string
+          writeOnly: true
+          minLength: 8
+        profile_photo:
+          type: string
+          format: uri
+        gender:
+          $ref: '#/components/schemas/GenderEnum'
+        address:
+          type: integer
+          nullable: true
+    ResetPasswordEmailRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 2
+        redirect_url:
+          type: string
+          maxLength: 500
+      required:
+      - email
+    SetNewPassword:
+      type: object
+      properties:
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 68
+          minLength: 6
+        token:
+          type: string
+          writeOnly: true
+          minLength: 1
+        uidb64:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - token
+      - uidb64
+    TokenBlacklist:
+      type: object
+      properties:
+        refresh:
+          type: string
+      required:
+      - refresh
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 50
+        phone_number:
+          type: string
+          nullable: true
+          pattern: ^\d{10}
+          maxLength: 10
+        email:
+          type: string
+          format: email
+          maxLength: 50
+        password1:
+          type: string
+          writeOnly: true
+          minLength: 8
+        password2:
+          type: string
+          writeOnly: true
+          minLength: 8
+      required:
+      - email
+      - password1
+      - password2
+      - username
+    UserProfile:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 50
+        phone_number:
+          type: string
+          nullable: true
+          pattern: ^\d{10}
+          maxLength: 10
+        email:
+          type: string
+          format: email
+          maxLength: 50
+        password1:
+          type: string
+          writeOnly: true
+          minLength: 8
+        password2:
+          type: string
+          writeOnly: true
+          minLength: 8
+        profile_photo:
+          type: string
+          format: uri
+        gender:
+          $ref: '#/components/schemas/GenderEnum'
+        address:
+          type: integer
+          nullable: true
+      required:
+      - email
+      - password1
+      - password2
+      - username
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
