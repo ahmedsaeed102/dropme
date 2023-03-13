@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
 ]
 
-SITE_ID = 1
+SITE_ID = int(os.environ.get('SITE_ID'))
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
