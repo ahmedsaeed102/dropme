@@ -11,7 +11,7 @@ class Machines(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Machine.objects.all()
     serializer_class = MachineSerializer
-    
+
 
 class MachineDetail(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -27,14 +27,26 @@ class MachineDelete(generics.DestroyAPIView):
 
 class MachineQRCode(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = QRCodeSerializer
 
     def get(self, request, name):
         try:
             machine = Machine.objects.get(identification_name=name)
         except Machine.DoesNotExist:
             raise NotFound(detail="Error 404, Machine not found", code=404)
-               
-        
+
         serializer = QRCodeSerializer(machine)
 
-        return Response(serializer.data)
+        return Response({
+            'message': 'Success',
+            'machine pk': machine.pk,
+            'qr_code': serializer.data})
+
+# this class should open a socket connection between server and mobile app until recycling is done
+# it should also claculate the points and add it to user total points, and if
+# there is a ongoing competion, it should add it to user competition points
+class StartRecycle(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, name):
+        return Response({"message":"success", 'id':name})

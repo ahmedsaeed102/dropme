@@ -6,4 +6,5 @@ urlpatterns = [
     path('<int:pk>/', MachineDetail.as_view(), name='retrive_machine'),
     path('delete/<int:pk>/', MachineDelete.as_view(), name='delete_machine'),
     path('qrcode/<str:name>/', MachineQRCode.as_view(), name='retrive_qrcode'),
+    path('recycle/start/<str:name>/', StartRecycle.as_view(), name='start_recycle'),
 ]

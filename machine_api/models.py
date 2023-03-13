@@ -1,6 +1,6 @@
 import qrcode
 from io import BytesIO
-from PIL import Image
+from django.contrib.sites.models import Site
 from django.core.files import File
 from django.urls import reverse
 from django.db import models
@@ -42,15 +42,19 @@ class Machine(models.Model):
     qr_code = models.ImageField(upload_to='qr_codes', blank=True)
 
     def save(self, *args, **kwargs):
-        qrcode_img = qrcode.make("Test")
-        canvas = Image.new('RGB', (290, 290), 'white')
-        canvas.paste(qrcode_img)
+        path = reverse("start_recycle", kwargs={'name':self.identification_name})
+        domain = Site.objects.get_current().domain
+        qrcode_img = qrcode.make('http://{domain}{path}'.format(domain=domain, path=path))
+        # canvas = Image.new('RGB', (400, 400), 'white')
+        # canvas.paste(qrcode_img)
         fname = f'qr_code-{self.identification_name}.png'
         buffer = BytesIO()
-        canvas.save(buffer,'PNG')
+        # canvas.save(buffer,'PNG')
+        qrcode_img.save(buffer,'PNG')
         self.qr_code.save(fname, File(buffer), save=False)
-        canvas.close()
+        # canvas.close()
         super().save(*args, **kwargs)
+    
 
     def delete(self, using=None, keep_parents=False):
         self.qr_code.storage.delete(self.qr_code.name)
@@ -71,6 +75,8 @@ class RecycleLog(models.Model):
     cans = models.PositiveSmallIntegerField(default=0, blank=True,)
     points = models.IntegerField(default=0, blank=True) 
     created_at = models.DateTimeField(auto_now_add=True)
+    in_progess = models.BooleanField(default=False)
+    is_complete = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
