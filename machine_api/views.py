@@ -3,8 +3,8 @@ from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Machine
-from .serializers import MachineSerializer, QRCodeSerializer
+from .models import Machine, RecycleLog
+from .serializers import MachineSerializer, QRCodeSerializer, RecycleLogSerializer
 
 
 class Machines(generics.ListCreateAPIView):
@@ -50,3 +50,19 @@ class StartRecycle(APIView):
 
     def get(self, request, name):
         return Response({"message":"success", 'id':name})
+    
+
+class RetrieveRecycleLog(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = RecycleLogSerializer
+
+    def get(self, request, pk):
+        logs = RecycleLog.objects.filter(user=pk, is_complete=True)
+        if not logs:
+            raise NotFound(detail="Error 404, no logs for current user", code=404)
+
+        serializer = RecycleLogSerializer(logs, many=True)
+
+        return Response({
+            'message': 'Success',
+            'data': serializer.data,})
