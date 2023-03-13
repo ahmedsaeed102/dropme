@@ -1,45 +1,72 @@
+import qrcode
+from io import BytesIO
+from PIL import Image
+from django.core.files import File
+from django.urls import reverse
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-# Create your models here.
+from model_utils import Choices
+from users_api.models import UserModel
+
+
+STATUS = Choices('available', 'break down')
 
 
 class Machine(models.Model):
-    name = models.CharField(
+    identification_name = models.CharField(
         max_length=200,
-        null = False,
-        blank = False,
+        unique=True,
         verbose_name = _('Machine name'),
-        help_text = _('Format: required, max-length:200')
+        help_text = _('Unique identification name for the machine, max-length:200')
     )
+    
     longitude = models.DecimalField(
         max_digits = 9,
         decimal_places = 6,
-        null = True,
-        blank = True,
-        verbose_name = _('Longitude'),
-        help_text = _('Format:required')
+        blank= True,
+        help_text = _('Longitude, Format:required')
     )
 
     latitdue = models.DecimalField(
         max_digits = 9,
         decimal_places = 6,
-        null = True,
-        blank = True,
-        verbose_name = _('Latitdue'),
-        help_text = _('Format:required')
+        blank= True,
+        help_text = _('Latitdue, Format:required')
     )
 
-    qr_code = models.CharField(
-        max_length = 50,
-        null = False,
-        blank = False,
-        verbose_name = _('Machine Code'),
-        help_text = _('Format: required, max-length:50'),
-    )
+    location = models.CharField(max_length=50)
+    place = models.CharField(max_length=50)
 
-    class Meta:
-        verbose_name = _('Machine details')
-        verbose_name_plural = _('Machines details')
+    status = models.CharField(choices=STATUS, default=STATUS.available, max_length=20)
+
+    qr_code = models.ImageField(upload_to='qr_codes', blank=True)
+
+    def save(self, *args, **kwargs):
+        qrcode_img = qrcode.make("Test")
+        canvas = Image.new('RGB', (290, 290), 'white')
+        canvas.paste(qrcode_img)
+        fname = f'qr_code-{self.identification_name}.png'
+        buffer = BytesIO()
+        canvas.save(buffer,'PNG')
+        self.qr_code.save(fname, File(buffer), save=False)
+        canvas.close()
+        super().save(*args, **kwargs)
+
+    @property
+    def address(self):
+        return f'{self.location}, {self.place}'
 
     def __str__(self):
-        return self.name
+        return self.identification_name
+    
+
+class RecycleLog(models.Model):
+    machine_name = models.CharField(max_length=200)
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
+    bottles = models.PositiveSmallIntegerField(default=0, blank=True,)
+    cans = models.PositiveSmallIntegerField(default=0, blank=True,)
+    points = models.IntegerField(default=0, blank=True) 
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
