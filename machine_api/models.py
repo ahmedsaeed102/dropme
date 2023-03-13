@@ -52,6 +52,10 @@ class Machine(models.Model):
         canvas.close()
         super().save(*args, **kwargs)
 
+    def delete(self, using=None, keep_parents=False):
+        self.qr_code.storage.delete(self.qr_code.name)
+        super().delete()
+
     @property
     def address(self):
         return f'{self.location}, {self.place}'
