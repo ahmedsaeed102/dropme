@@ -13,4 +13,4 @@ class QRCodeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Machine
-        fields = ['identification_name', 'qr_code']
+        fields = ['qr_code']
