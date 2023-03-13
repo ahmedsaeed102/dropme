@@ -32,10 +32,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 class CompetitionRankingSerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField(source='user.username')
+    rank = serializers.ReadOnlyField(source='ranking')
 
     class Meta:
         model = CompetitionRanking
-        fields = ('name', 'points',)
+        fields = ('name', 'points', 'rank')
 
 
 class CustomCompetitionSerializer(serializers.ModelSerializer):

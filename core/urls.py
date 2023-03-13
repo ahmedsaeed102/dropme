@@ -31,7 +31,7 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('', SpectacularSwaggerView.as_view(url_name='schema')),
     path('machine/', include('machine_api.urls'), name='machine_api'),
-    path('competition/', include('competition_api.urls'), name='competition_api'),
+    path('', include('competition_api.urls'), name='competition_api'),
 ]
 # urlpatterns +=router.urls
 urlpatterns +=static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

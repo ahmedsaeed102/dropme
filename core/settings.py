@@ -205,4 +205,9 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 STATICFILES_DIRS=[BASE_DIR/'static']
 MEDIA_ROOT=os.path.join(BASE_DIR,'static/images')
 MEDIA_URL='/images/'
+<<<<<<< HEAD
 # STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage"
+=======
+STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+>>>>>>> dddbb4b98690785ae74f5d27528f554631459f96

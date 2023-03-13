@@ -46,7 +46,10 @@ class CompetitionRanking(models.Model):
         help_text = _('user points in competition'),
     )
 
-    
+    @property
+    def ranking(self):
+        count = CompetitionRanking.objects.filter(competition=self.competition.pk, points__gt=self.points).count()
+        return count + 1
 
     class Meta:
         ordering = ('-points',)
