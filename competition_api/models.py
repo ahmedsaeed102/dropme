@@ -1,3 +1,4 @@
+from datetime import date
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from users_api.models import UserModel
@@ -27,6 +28,10 @@ class Competition(models.Model):
     )
 
     users = models.ManyToManyField(UserModel, through="CompetitionRanking", related_name="comp_user")
+
+    @property
+    def is_ongoing(self):
+        return self.end_date > date.today()
 
     def __str__(self):
         return self.name
