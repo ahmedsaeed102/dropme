@@ -1,8 +1,15 @@
-from django.urls import path ,include
+from django.urls import path
 from .views import *
 
 urlpatterns = [
-    path('list', ListMachines.as_view(), name='list_machines'),
-    path('list/<str:pk>/', RetrieveMachine.as_view(), name='retrive_machine'),
+    path('machines/list/', Machines.as_view(), name='machines'),
+    path('machines/<int:pk>/', MachineDetail.as_view(), name='retrive_machine'),
+    path('machines/delete/<int:pk>/', MachineDelete.as_view(), name='delete_machine'),
 
+    path('machines/qrcode/<str:name>/', MachineQRCode.as_view(), name='retrive_qrcode'),
+
+    # path('machines/recycle/start/<str:name>/', StartRecycle.as_view(), name='start_recycle'),
+    path('machines/recycle/update/<str:name>/', UpdateRecycle.as_view(), name='update_recycle'),
+
+    path('recyclelog/user/<int:pk>/', RetrieveRecycleLog.as_view(), name='recycle_log'),
 ]

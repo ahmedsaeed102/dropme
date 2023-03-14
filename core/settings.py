@@ -28,12 +28,14 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 
     # my apps
     'users_api',
@@ -44,12 +46,14 @@ INSTALLED_APPS = [
     # Third party app
     'rest_framework',
     'rest_framework.authtoken',
+    "channels",
     'geoposition',
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
     # 'whitenoise.runserver_nostatic',
 ]
 
+SITE_ID = int(os.environ.get('SITE_ID'))
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -63,6 +67,12 @@ REST_FRAMEWORK = {
 }
 SPECTACULAR_SETTINGS={
     "TITLE":"Dropme Project api ",
+}
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
 }
 
 
@@ -139,7 +149,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-
+ASGI_APPLICATION = "core.asgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
