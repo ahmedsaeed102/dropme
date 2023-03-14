@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
@@ -36,12 +37,13 @@ class MachineQRCode(APIView):
         except Machine.DoesNotExist:
             raise NotFound(detail="Error 404, Machine not found", code=404)
 
-        serializer = QRCodeSerializer(machine)
+        # serializer = QRCodeSerializer(machine)
 
-        return Response({
-            'message': 'Success',
-            'machine pk': machine.pk,
-            'qr_code': serializer.data})
+        # return Response({
+        #     'message': 'Success',
+        #     'machine pk': machine.pk,
+        #     'qr_code': serializer.data})
+        return HttpResponse(machine.qr_code, content_type="image/png")
 
 
 class UpdateRecycle(APIView):

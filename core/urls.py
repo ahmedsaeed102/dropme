@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path ,include
+from django.urls import path, include
 # from django.views.decorators.csrf import csrf_exempt
 # from rest_framework_simplejwt.views import (
 #     TokenObtainPairView,
@@ -32,6 +32,7 @@ urlpatterns = [
     path('', SpectacularSwaggerView.as_view(url_name='schema')),
     path('', include('machine_api.urls'), name='machine_api'),
     path('', include('competition_api.urls'), name='competition_api'),
+    path('', include('machine_api.routing')),
 ]
 # urlpatterns +=router.urls
 urlpatterns +=static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
