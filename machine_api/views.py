@@ -26,7 +26,6 @@ class MachineDelete(generics.DestroyAPIView):
 
 
 class MachineQRCode(APIView):
-    permission_classes = [IsAuthenticated]
     serializer_class = QRCodeSerializer
 
     def get(self, request, name):
@@ -42,17 +41,52 @@ class MachineQRCode(APIView):
             'machine pk': machine.pk,
             'qr_code': serializer.data})
 
-# this class should open a socket connection between server and mobile app until recycling is done
-# it should also claculate the points and add it to user total points, and if
-# there is a ongoing competion, it should add it to user competition points
+
 class StartRecycle(APIView):
+    '''
+    this class should open a socket connection between server and mobile app until recycling is done
+    it should also claculate the points and add it to user total points, and if
+    there is an ongoing competion, it should add it to user competition points
+    '''
     permission_classes = [IsAuthenticated]
 
     def get(self, request, name):
         return Response({"message":"success", 'id':name})
+
+
+class UpdateRecycle(APIView):
+    '''
+    The machine should send a request to this endpoint with the number of items recycled
+    data schema: {
+    bottles: int,
+    cans: int
+    } 
+    '''
+    # permission_classes = [IsAuthenticated] removed for now
+    def post(self, request, name):
+        bottles = request.data.get('bottles', 0)
+        cans = request.data.get('cans', 0)
+        log = RecycleLog.objects.filter(machine_name=name, in_progess=True).first()
+
+        if not log:
+            raise NotFound(detail="Error 404, log not found", code=404)
+        
+        points = (bottles + cans) * 10
+
+        log.bottles = bottles
+        log.cans = cans
+        log.points = points
+        log.in_progess = False
+        log.is_complete= True
+        log.save()
+
+        return Response({"message":"success", 'bottles':bottles, 'cans': cans})
     
 
 class RetrieveRecycleLog(APIView):
+    '''
+    Retrieve the user's recycling logs
+    '''
     permission_classes = [IsAuthenticated]
     serializer_class = RecycleLogSerializer
 
