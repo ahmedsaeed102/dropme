@@ -74,6 +74,7 @@ class RecycleLog(models.Model):
     bottles = models.PositiveSmallIntegerField(default=0, blank=True,)
     cans = models.PositiveSmallIntegerField(default=0, blank=True,)
     points = models.IntegerField(default=0, blank=True) 
+    channel_name = models.CharField(max_length=300, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     in_progess = models.BooleanField(default=False)
     is_complete = models.BooleanField(default=False)

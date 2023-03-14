@@ -1,6 +1,9 @@
 import asyncio
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
+from .models import RecycleLog
+from .utlis import update_user_points
+
 
 class StartRecycle(AsyncJsonWebsocketConsumer):
     '''
@@ -13,32 +16,42 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
 
         self.user = self.scope["user"]
         self.machine_name = self.scope['url_route']['kwargs']['name']
+        
+        await database_sync_to_async(self.create_log)()
 
-        # self.username = await database_sync_to_async(self.get_name)()
         await self.send_json({
-            'username': self.user.username,
-            'machine_name': self.machine_name
+            'status': "success",
+            'message': f'welcome {self.user.username}'
         })
-        await self.close()
+        await asyncio.sleep(1)
 
-        # self.websocket_disconnect('disconnect')
-        # while self.connected:
-        #     await asyncio.sleep(5)
-        #     await self.send({
-        #     'type': 'websocket.send',
-        #     'text': "hi"
-        # })
+        await self.send_json({
+            'status': "success",
+            'message': f'we are waiting for you to throw your bottle or can'
+        })
+
         
     async def receive_json(self, content=None):
         print('recieve')
-        # await self.send({
-        #     'type': 'websocket.send',
-        #     'payload': event['text']
-        # })
+
         
     async def disconnect(self, close_code):
-        print('disconnected')
-    
-    def get_name(self):
-        pass
+        update_user_points(self.user.pk)
+        print('disconnected', close_code)
 
+    
+    def create_log(self):
+        RecycleLog.objects.create(
+            machine_name=self.machine_name,
+            user=self.user,
+            channel_name=self.channel_name,
+            in_progess=True
+        )
+    
+    async def receive_update(self, event):
+        await self.send_json({
+            'status': "success",
+            'message': f"{event['bottles']} bottles and {event['cans']} cans",
+            'points': event['points']
+        })
+        await self.close()

@@ -68,6 +68,12 @@ SPECTACULAR_SETTINGS={
     "TITLE":"Dropme Project api ",
 }
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
+
 
 from datetime import timedelta
 ...

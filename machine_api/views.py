@@ -3,6 +3,8 @@ from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 from .models import Machine, RecycleLog
 from .serializers import MachineSerializer, QRCodeSerializer, RecycleLogSerializer
 
@@ -42,18 +44,6 @@ class MachineQRCode(APIView):
             'qr_code': serializer.data})
 
 
-# class StartRecycle(APIView):
-#     '''
-#     this class should open a socket connection between server and mobile app until recycling is done
-#     it should also claculate the points and add it to user total points, and if
-#     there is an ongoing competion, it should add it to user competition points
-#     '''
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request, name):
-#         return Response({"message":"success", 'id':name})
-
-
 class UpdateRecycle(APIView):
     '''
     The machine should send a request to this endpoint with the number of items recycled
@@ -77,8 +67,20 @@ class UpdateRecycle(APIView):
         log.cans = cans
         log.points = points
         log.in_progess = False
-        # log.is_complete= True
+        log.is_complete= True
         log.save()
+        channel_layer = get_channel_layer()
+        try:
+            async_to_sync(channel_layer.send)(log.channel_name,{
+                "type": "receive.update",
+                'bottles':log.bottles,
+                'cans': log.cans,
+                'points': log.points
+            })
+        except Exception as e:
+            print(e)
+            return Response({'message':'failed!'})
+
 
         return Response({"message":"success", 'bottles':bottles, 'cans': cans})
     
