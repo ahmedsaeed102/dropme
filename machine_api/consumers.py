@@ -36,7 +36,6 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
 
         
     async def disconnect(self, close_code):
-        update_user_points(self.user.pk)
         print('disconnected', close_code)
 
     
@@ -54,4 +53,5 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
             'message': f"{event['bottles']} bottles and {event['cans']} cans",
             'points': event['points']
         })
+        await update_user_points(self.user.pk, event['points'])
         await self.close()
