@@ -8,9 +8,8 @@ urlpatterns = [
 
     path('machines/qrcode/<str:name>/', MachineQRCode.as_view(), name='retrive_qrcode'),
 
-    path('machines/recycle/start/<str:name>/', StartRecycle.as_view(), name='start_recycle'),
+    # path('machines/recycle/start/<str:name>/', StartRecycle.as_view(), name='start_recycle'),
     path('machines/recycle/update/<str:name>/', UpdateRecycle.as_view(), name='update_recycle'),
-
 
     path('recyclelog/user/<int:pk>/', RetrieveRecycleLog.as_view(), name='recycle_log'),
 ]

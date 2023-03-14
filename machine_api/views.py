@@ -42,16 +42,16 @@ class MachineQRCode(APIView):
             'qr_code': serializer.data})
 
 
-class StartRecycle(APIView):
-    '''
-    this class should open a socket connection between server and mobile app until recycling is done
-    it should also claculate the points and add it to user total points, and if
-    there is an ongoing competion, it should add it to user competition points
-    '''
-    permission_classes = [IsAuthenticated]
+# class StartRecycle(APIView):
+#     '''
+#     this class should open a socket connection between server and mobile app until recycling is done
+#     it should also claculate the points and add it to user total points, and if
+#     there is an ongoing competion, it should add it to user competition points
+#     '''
+#     permission_classes = [IsAuthenticated]
 
-    def get(self, request, name):
-        return Response({"message":"success", 'id':name})
+#     def get(self, request, name):
+#         return Response({"message":"success", 'id':name})
 
 
 class UpdateRecycle(APIView):
@@ -77,7 +77,7 @@ class UpdateRecycle(APIView):
         log.cans = cans
         log.points = points
         log.in_progess = False
-        log.is_complete= True
+        # log.is_complete= True
         log.save()
 
         return Response({"message":"success", 'bottles':bottles, 'cans': cans})
