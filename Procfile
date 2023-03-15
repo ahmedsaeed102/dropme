@@ -1,1 +1,1 @@
-web: gunicorn core.wsgi --log-file -
+gunicorn core.wsgi:application --bind 0.0.0.0:8000 --reload & daphne -b 0.0.0.0 -p 8089 core.asgi:application &
