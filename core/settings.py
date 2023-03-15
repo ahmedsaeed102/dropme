@@ -1,6 +1,8 @@
 import os
 import environ
 from pathlib import Path
+import django
+django.setup()
 
 env=environ.Env()
 
