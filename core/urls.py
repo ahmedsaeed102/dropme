@@ -33,6 +33,6 @@ urlpatterns = [
     path('', include('machine_api.urls'), name='machine_api'),
     path('', include('competition_api.urls'), name='competition_api'),
     path('', include('machine_api.routing')),
-]
+]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 # urlpatterns +=router.urls
 urlpatterns +=static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
