@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .models import Machine, RecycleLog
-from .serializers import MachineSerializer, QRCodeSerializer, RecycleLogSerializer
+from .serializers import MachineSerializer, QRCodeSerializer, RecycleLogSerializer, CustomMachineSerializer
 
 
 class Machines(generics.ListCreateAPIView):
@@ -52,6 +52,39 @@ class MachineDetail(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Machine.objects.all()
     serializer_class = MachineSerializer
+
+
+class SetMachineCoordinates(APIView):
+    '''
+    Assuming the machine has a GPS it should send a request to this endpoint to set its coordinates
+        data schema: {
+            longitude: decimal,
+            latitdue: decimal
+        } 
+    '''
+    permission_classes = [IsAuthenticated]
+    serializer_class = CustomMachineSerializer
+
+    def patch(self, request, name):
+        try:
+            machine = Machine.objects.get(identification_name=name)
+        except Machine.DoesNotExist:
+            raise NotFound(detail="Error 404, Machine not found", code=404)
+
+        longitude = request.data.get('longitude', 0)
+        latitdue = request.data.get('latitdue', 0)
+        
+        machine.longitude = longitude
+        machine.latitdue = latitdue
+        machine.save()
+
+        serializer = MachineSerializer(machine)
+
+        return Response({
+            'message': 'Success',
+            'machine': serializer.data,
+        })
+
 
 
 class MachineDelete(generics.DestroyAPIView):

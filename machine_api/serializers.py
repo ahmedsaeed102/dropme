@@ -10,6 +10,12 @@ class MachineSerializer(serializers.ModelSerializer):
         # read_only_fields = ('qr_code',)
 
 
+class CustomMachineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Machine
+        fields = ['longitude', 'latitdue']
+
+
 class QRCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Machine
