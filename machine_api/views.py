@@ -1,5 +1,9 @@
+import qrcode
+from io import BytesIO
+from django.core.files import File
 from django.http import HttpResponse
 from rest_framework import generics
+from django.urls import reverse
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -29,6 +33,9 @@ class MachineDelete(generics.DestroyAPIView):
 
 
 class MachineQRCode(APIView):
+    '''
+    Returns a QR code for the given machine name
+    '''
     serializer_class = QRCodeSerializer
 
     def get(self, request, name):
@@ -38,6 +45,12 @@ class MachineQRCode(APIView):
             raise NotFound(detail="Error 404, Machine not found", code=404)
 
         # serializer = QRCodeSerializer(machine)
+        path = request.build_absolute_uri(reverse("start_recycle", kwargs={'name':machine.identification_name}))
+        qrcode_img = qrcode.make(path)
+        fname = f'qr_code-{machine.identification_name}.png'
+        buffer = BytesIO()
+        qrcode_img.save(buffer,'PNG')
+        machine.qr_code.save(fname, File(buffer), save=True)
 
         # return Response({
         #     'message': 'Success',
@@ -54,7 +67,6 @@ class UpdateRecycle(APIView):
     cans: int
     } 
     '''
-    # permission_classes = [IsAuthenticated] removed for now
     def post(self, request, name):
         bottles = request.data.get('bottles', 0)
         cans = request.data.get('cans', 0)
@@ -72,6 +84,7 @@ class UpdateRecycle(APIView):
         log.is_complete= True
         log.save()
         channel_layer = get_channel_layer()
+
         try:
             async_to_sync(channel_layer.send)(log.channel_name,{
                 "type": "receive.update",
@@ -79,6 +92,7 @@ class UpdateRecycle(APIView):
                 'cans': log.cans,
                 'points': log.points
             })
+
         except Exception as e:
             print(e)
             return Response({'message':'failed!'})
