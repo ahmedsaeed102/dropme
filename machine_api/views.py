@@ -15,12 +15,40 @@ from .serializers import MachineSerializer, QRCodeSerializer, RecycleLogSerializ
 
 
 class Machines(generics.ListCreateAPIView):
+    '''
+    [GET] return all machines in database
+    [Post] add new machine to database
+    '''
     permission_classes = [IsAuthenticated]
     queryset = Machine.objects.all()
     serializer_class = MachineSerializer
 
 
+class MachinesByCity(APIView):
+    '''
+    Returns a all machines in given city
+    '''
+    permission_classes = [IsAuthenticated]
+    serializer_class = MachineSerializer
+
+    def get(self, request, city):
+        try:
+            machines = Machine.objects.filter(city=city)
+        except Machine.DoesNotExist:
+            raise NotFound(detail="Error 404, Machine not found", code=404)
+
+        serializer = MachineSerializer(machines, many=True)
+
+        return Response({
+            'message': 'Success',
+            'machines': serializer.data,
+        })
+
+
 class MachineDetail(generics.RetrieveUpdateAPIView):
+    '''
+    given an id return machine details
+    '''
     permission_classes = [IsAuthenticated]
     queryset = Machine.objects.all()
     serializer_class = MachineSerializer

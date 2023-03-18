@@ -5,8 +5,9 @@ from .models import Machine, RecycleLog
 class MachineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Machine
-        fields = '__all__'
-        read_only_fields = ('qr_code',)
+        # fields = '__all__'
+        exclude = ('qr_code', )
+        # read_only_fields = ('qr_code',)
 
 
 class QRCodeSerializer(serializers.ModelSerializer):

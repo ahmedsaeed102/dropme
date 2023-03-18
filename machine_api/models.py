@@ -1,8 +1,3 @@
-import qrcode
-from io import BytesIO
-from django.contrib.sites.models import Site
-from django.core.files import File
-from django.urls import reverse
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
@@ -63,7 +58,7 @@ class Machine(models.Model):
 
     @property
     def address(self):
-        return f'{self.location}, {self.place}'
+        return f'{self.city}, {self.place}'
 
     def __str__(self):
         return self.identification_name
