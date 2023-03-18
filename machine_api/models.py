@@ -27,7 +27,6 @@ class Machine(models.Model):
         decimal_places = 6,
         blank= True,
         null=True,
-        help_text = _('Latitdue, Format:required')
     )
 
     city = models.CharField(max_length=50, null=True, help_text = _('Machine city'))
