@@ -1,4 +1,5 @@
 import requests
+import os
 from users_api.models import UserModel
 from channels.db import database_sync_to_async
 
@@ -33,4 +34,13 @@ def claculate_travel_distance_and_time(userlocation, machinelocation):
     data['timebycar'] = timebycar['routes'][0]['duration'] / 60
     data['timebybike'] = timebybike['routes'][0]['duration'] / 60
 
+    return data
+
+def get_directions(userlocation, machinelocation):
+    key = os.environ.get('apikey')
+    data = requests.get(
+            f'https://api.openrouteservice.org/v2/directions/driving-car?api_key={key}&start={userlocation[0]},{userlocation[1]}&end={machinelocation[0]},{machinelocation[1]}'
+        ).json()
+    del data['metadata']
+    del data['type']
     return data

@@ -14,7 +14,7 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .models import Machine, RecycleLog
 from .serializers import MachineSerializer, QRCodeSerializer, RecycleLogSerializer, CustomMachineSerializer
-from .utlis import claculate_travel_distance_and_time
+from .utlis import claculate_travel_distance_and_time, get_directions
 # from geopy.distance import lonlat, geodesic
 
 
@@ -91,7 +91,22 @@ class GetDirections(APIView):
     Takes the machine id and the user location
     Returns a path to the machine
     '''
-    pass
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk, long, lat):
+        try:
+            machine = Machine.objects.get(id=pk)
+        except Machine.DoesNotExist:
+            raise NotFound(detail="Error 404, Machine not found", code=404)
+        
+        current_location = Point(float(long), float(lat))
+
+        data = get_directions(current_location.tuple, machine.location.tuple)
+
+        return Response({
+            'message': 'Success',
+            'directions': data,
+        })
 
 
 class MachinesByCity(APIView):

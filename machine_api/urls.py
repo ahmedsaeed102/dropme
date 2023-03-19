@@ -18,6 +18,6 @@ urlpatterns = [
 
     path('machines/setcoordinates/<str:name>/', SetMachineCoordinates.as_view(), name='set_coordinates'),
     path('machines/nearestmachine/<float:long>/<float:lat>/', GetNearestMachine.as_view(), name='nearest_machine'),
-    path('map/machine/<int:pk>/<float:long>/<float:lat>/', GetTravelInfo.as_view(), name='travel_info'),
-    path('map/directions/<str:name>/<float:long>/<float:lat>/', GetDirections.as_view(), name='directions'),
+    path('machines/travelinfo/<int:pk>/<float:long>/<float:lat>/', GetTravelInfo.as_view(), name='travel_info'),
+    path('machines/directions/<int:pk>/<float:long>/<float:lat>/', GetDirections.as_view(), name='directions'),
 ]
