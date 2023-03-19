@@ -1,4 +1,5 @@
-# dropme<h1>Dropme Api Project</h1>
+# dropme
+# Dropme Api Project
 
 <h2>Getting started</h2>
 <h3>Prerequisites</h3>
@@ -10,8 +11,6 @@
 pip install virtualenv
 ```
 </li>
-</ol>
-<ol>
 <li>go to dropme folder
 
 ```shell
@@ -42,6 +41,10 @@ venv/bin/activate
 ```shell
 pip install -r requirements.txt
 ```
+</li>
+<li>
+Install GeoDjango
+https://docs.djangoproject.com/en/4.1/ref/contrib/gis/install/
 </li>
 <li>migrate to database
 
