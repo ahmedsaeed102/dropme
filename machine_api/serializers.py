@@ -5,9 +5,16 @@ from .models import Machine, RecycleLog
 class MachineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Machine
-        # fields = '__all__'
-        exclude = ('qr_code', )
-        # read_only_fields = ('qr_code',)
+        exclude = ('qr_code', "longitude", 'latitdue')
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        location = instance.location
+        if location:
+            location = [coord for coord in location]
+            representation['location'] = {'longitude':location[0], 'latitude':location[1]}
+
+        return representation
 
 
 class CustomMachineSerializer(serializers.ModelSerializer):

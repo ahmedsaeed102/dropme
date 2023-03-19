@@ -3,6 +3,7 @@ from io import BytesIO
 from django.core.files import File
 from django.http import HttpResponse
 from rest_framework import generics
+from django.contrib.gis.geos import Point
 from django.urls import reverse
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
@@ -22,6 +23,9 @@ class Machines(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Machine.objects.all()
     serializer_class = MachineSerializer
+
+
+
 
 
 class MachinesByCity(APIView):
@@ -58,8 +62,8 @@ class SetMachineCoordinates(APIView):
     '''
     Assuming the machine has a GPS it should send a request to this endpoint to set its coordinates
         data schema: {
-            longitude: decimal,
-            latitdue: decimal
+            longitude: float,
+            latitdue: float
         } 
     '''
     permission_classes = [IsAuthenticated]
@@ -74,8 +78,8 @@ class SetMachineCoordinates(APIView):
         longitude = request.data.get('longitude', 0)
         latitdue = request.data.get('latitdue', 0)
         
-        machine.longitude = longitude
-        machine.latitdue = latitdue
+        pnt = Point(float(longitude), float(latitdue))
+        machine.location = pnt
         machine.save()
 
         serializer = MachineSerializer(machine)

@@ -13,5 +13,7 @@ urlpatterns = [
     path('recyclelog/user/<int:pk>/', RetrieveRecycleLog.as_view(), name='recycle_log'),
 
     path('machines/setcoordinates/<str:name>/', SetMachineCoordinates.as_view(), name='set_coordinates'),
+    
+    
 
 ]
