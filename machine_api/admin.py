@@ -5,6 +5,7 @@ from .models import Machine, RecycleLog
 class MachineAdmin(admin.ModelAdmin):
     list_display = ['identification_name', 'location', 'status']
     readonly_fields = ['qr_code']
+    exclude=['longitude', 'latitdue']
 
 
 class RecycleLogAdmin(admin.ModelAdmin):

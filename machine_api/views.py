@@ -9,10 +9,13 @@ from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.gis.db.models.functions import Distance
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .models import Machine, RecycleLog
 from .serializers import MachineSerializer, QRCodeSerializer, RecycleLogSerializer, CustomMachineSerializer
+from .utlis import claculate_travel_distance_and_time
+# from geopy.distance import lonlat, geodesic
 
 
 class Machines(generics.ListCreateAPIView):
@@ -25,7 +28,47 @@ class Machines(generics.ListCreateAPIView):
     serializer_class = MachineSerializer
 
 
+class GetNearestMachine(APIView):
+    '''
+    Gives the nearest machine to the user
+    Takes the long and lat of the user location
+    Returns the machine information, the distance and the time it takes to go there
+    '''
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request, long, lat):
+        current_location = Point(float(long), float(lat))
+        machine = Machine.objects.filter(
+            location__dwithin=(current_location, 1000.0) # should convert km to degrees 1km = 1/111.325 degrees 0.45 = 50km
+            ).annotate(
+            distance=Distance('location', current_location, spheroid=True)).order_by('distance').first()
+            
+        if not machine:
+            raise NotFound(detail="Error 404, Machine not found", code=404)
+        
+
+        serializer = MachineSerializer(machine)
+        # distance = geodesic(lonlat(*current_location.tuple), lonlat(*machine.location.tuple)).km
+        data = claculate_travel_distance_and_time(current_location.tuple, machine.location.tuple)
+        
+
+        return Response({
+            'message': 'Success',
+            'machine': serializer.data,
+            'distance meters': data['distance'],
+            'timebyfoot minutes': data['timebyfoot'],
+            'timebycar': data['timebycar'],
+            'timebybike': data['timebybike'],
+        })
+
+
+class GetDirections(APIView):
+    '''
+    Get direction for a machine
+    Takes the machine id and the user location
+    Returns a path to the machine
+    '''
+    pass
 
 
 class MachinesByCity(APIView):

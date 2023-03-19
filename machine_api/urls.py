@@ -1,5 +1,9 @@
-from django.urls import path
+from django.urls import path, register_converter
+from . import converts
 from .views import *
+
+
+register_converter(converts.FloatUrlParameterConverter, 'float')
 
 urlpatterns = [
     path('machines/list/', Machines.as_view(), name='machines'),
@@ -13,7 +17,7 @@ urlpatterns = [
     path('recyclelog/user/<int:pk>/', RetrieveRecycleLog.as_view(), name='recycle_log'),
 
     path('machines/setcoordinates/<str:name>/', SetMachineCoordinates.as_view(), name='set_coordinates'),
+    path('machines/nearestmachine/<float:long>/<float:lat>/', GetNearestMachine.as_view(), name='nearest_machine'),
+    path('map/directions/<str:name>/<float:long>/<float:lat>/', GetDirections.as_view(), name='directions'),
     
-    
-
 ]
