@@ -18,12 +18,13 @@ class Machine(models.Model):
     
     location = PointField(null=True, srid=4326)
 
+    # gives error when trying to remove longitude and latitdue
     longitude = models.DecimalField(
         max_digits = 9,
         decimal_places = 6,
         blank= True,
-        null=True,
-    )
+        null=True, 
+    ) 
 
     latitdue = models.DecimalField(
         max_digits = 9,
