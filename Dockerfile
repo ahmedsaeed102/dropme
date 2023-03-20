@@ -31,7 +31,7 @@ ENV C_INCLUDE_PATH=/usr/include/gdal
                             
 # setup environment variable  
 ARG DockerHOME
-# ARG PORT
+ARG PORT
 ARG apikey
 ARG EMAIL_HOST_USER
 ARG PYTHON_VERSION
