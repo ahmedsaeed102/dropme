@@ -1,14 +1,10 @@
 # base image  
 FROM ubuntu:20.04
 # FROM python:ubuntu
-
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git zip openssh-client sqlite3 libsqlite3-dev
 
-RUN apt-get update -qq && \
-    apt-get upgrade -qq && \
-    apt-get install -qq build-essential     \
-                        python3.10          \
+RUN apt-get install -qq python3.10     \
                         wget                \
                         unzip               \
     apt-get install     libpq-dev           \
