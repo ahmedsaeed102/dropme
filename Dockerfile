@@ -11,7 +11,8 @@ ARG SITE_ID
 # set work directory  
 RUN mkdir -p $DockerHOME  
 RUN sudo apt install gdal-bin
-RUN sudo apt install libsqlite3-mod-spatialite
+# RUN sudo apt install libsqlite3-mod-spatialite
+RUN sudo apt-get install libsqlite3-mod-spatialite
 # where your code lives  
 # WORKDIR $DockerHOME  
 WORKDIR /app  
