@@ -54,6 +54,6 @@ RUN pip install --upgrade pip
 COPY . $DockerHOME  
 
 RUN pip install -r requirements.txt  
-# EXPOSE $PORT  
+EXPOSE $PORT  
 # EXPOSE 7139  
 # CMD daphne -b 0.0.0.0 -p $PORT core.asgi:application
