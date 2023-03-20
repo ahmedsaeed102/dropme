@@ -1,5 +1,8 @@
 # base image  
 FROM python:3.10   
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git zip openssh-client sqlite3 libsqlite3-dev
 # setup environment variable  
 ARG DockerHOME
 ARG PORT
