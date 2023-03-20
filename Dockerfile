@@ -30,7 +30,7 @@ ENV C_INCLUDE_PATH=/usr/include/gdal
                             
 # setup environment variable  
 ARG DockerHOME
-ARG PORT
+# ARG PORT
 ARG apikey
 ARG EMAIL_HOST_USER
 ARG PYTHON_VERSION
@@ -52,5 +52,5 @@ RUN pip install --upgrade pip
 COPY . $DockerHOME  
 
 RUN pip install -r requirements.txt  
-EXPOSE $PORT  
+EXPOSE 7139  
 # CMD daphne -b 0.0.0.0 -p $PORT core.asgi:application
