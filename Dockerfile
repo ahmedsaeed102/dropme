@@ -13,9 +13,9 @@ ARG SITE_ID
 ENV DockerHOME=/app/  
 
 RUN mkdir -p $DockerHOME  
-RUN sudo apt install gdal-bin
+RUN apt install gdal-bin
 # RUN sudo apt install libsqlite3-mod-spatialite
-RUN sudo apt-get install libsqlite3-mod-spatialite
+RUN apt-get install libsqlite3-mod-spatialite
 
 # RUN LDFLAGS="-L/usr/local/opt/sqlite/lib -L/usr/local/opt/zlib/lib" CPPFLAGS="-I/usr/local/opt/sqlite/include -I/usr/local/opt/zlib/include" PYTHON_CONFIGURE_OPTS="--enable-loadable-sqlite-extensions" pyenv install 3.10.6
 # where your code lives  
