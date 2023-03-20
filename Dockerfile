@@ -1,5 +1,5 @@
 # base image  
-FROM python:3.10   
+FROM python:ubunto  
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git zip openssh-client sqlite3 libsqlite3-dev
@@ -23,8 +23,8 @@ RUN apt-get install libsqlite3-mod-spatialite
 WORKDIR /app  
 
 # set environment variables  
-# ENV PYTHONDONTWRITEBYTECODE 1
-# ENV PYTHONUNBUFFERED 1  
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1  
 
 # install dependencies  
 RUN pip install --upgrade pip  
