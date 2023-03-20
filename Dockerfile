@@ -1,11 +1,23 @@
 # base image  
-FROM python:ubuntu
+FROM ubuntu:20.04
+# FROM python:ubuntu
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git zip openssh-client sqlite3 libsqlite3-dev
+
+RUN apt-get update -qq && \
+    apt-get upgrade -qq && \
+    apt-get install -qq build-essential     \
+                        python3.10          \
+                        wget                \
+                        unzip               \
+    apt-get install     libpq-dev           \
+                        binutils            \
+                        libproj-dev         \
+                        gdal-bin -qq
 # setup environment variable  
 ARG DockerHOME
-ARG PORT
+# ARG PORT
 ARG apikey
 ARG EMAIL_HOST_USER
 ARG PYTHON_VERSION
@@ -13,7 +25,7 @@ ARG SITE_ID
 ENV DockerHOME=/app/  
 
 RUN mkdir -p $DockerHOME  
-RUN apt-get install binutils libproj-dev gdal-bin
+# RUN apt-get install binutils libproj-dev gdal-bin
 # RUN sudo apt install libsqlite3-mod-spatialite
 RUN apt-get install libsqlite3-mod-spatialite
 
@@ -29,13 +41,13 @@ ENV PYTHONUNBUFFERED 1
 # install dependencies  
 RUN pip install --upgrade pip  
 # RUN /opt/render/project/src/.venv/bin/python -m pip install --upgrade pip
-RUN pip install -r requirements.txt
+# RUN pip install -r requirements.txt
 # copy whole project to your docker home directory. 
 COPY . $DockerHOME  
 # run this command to install all dependencies  
-# RUN pip install -r requirements.txt  
+RUN pip install -r requirements.txt  
 # port where the Django app runs  
 # EXPOSE $PORT  
-EXPOSE 7139  
+# EXPOSE 7139  
 # start server  
-CMD daphne -b 0.0.0.0 -p 7139 core.asgi:application
+CMD daphne -b 0.0.0.0 -p $PORT core.asgi:application
