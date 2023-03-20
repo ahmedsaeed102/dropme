@@ -6,6 +6,7 @@ class MachineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Machine
         exclude = ('qr_code', "longitude", 'latitdue')
+        read_only_fields = ('location',)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
