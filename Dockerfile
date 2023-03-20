@@ -13,7 +13,7 @@ ARG SITE_ID
 ENV DockerHOME=/app/  
 
 RUN mkdir -p $DockerHOME  
-RUN apt-get install gdal-bin
+RUN apt-get install binutils libproj-dev gdal-bin
 # RUN sudo apt install libsqlite3-mod-spatialite
 RUN apt-get install libsqlite3-mod-spatialite
 
