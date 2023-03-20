@@ -2,15 +2,16 @@
 FROM ubuntu:20.04
 # FROM python:ubuntu
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends git zip openssh-client sqlite3 libsqlite3-dev
-
-RUN apt-get install -qq python3.10     \
-                        wget                \
-                        unzip               \
+    apt-get install -y --no-install-recommends git zip openssh-client sqlite3 libsqlite3-dev \
+    python3.10 \
+    wget\
+    unzip\
     apt-get install     libpq-dev           \
                         binutils            \
                         libproj-dev         \
                         gdal-bin -qq
+
+                        
 # setup environment variable  
 ARG DockerHOME
 # ARG PORT
