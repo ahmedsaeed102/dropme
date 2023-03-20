@@ -10,14 +10,14 @@ ARG apikey
 ARG EMAIL_HOST_USER
 ARG PYTHON_VERSION
 ARG SITE_ID
-# ENV DockerHOME=/home/app/  
-# set work directory  
+ENV DockerHOME=/app/  
+
 RUN mkdir -p $DockerHOME  
 RUN sudo apt install gdal-bin
 # RUN sudo apt install libsqlite3-mod-spatialite
 RUN sudo apt-get install libsqlite3-mod-spatialite
 
-RUN LDFLAGS="-L/usr/local/opt/sqlite/lib -L/usr/local/opt/zlib/lib" CPPFLAGS="-I/usr/local/opt/sqlite/include -I/usr/local/opt/zlib/include" PYTHON_CONFIGURE_OPTS="--enable-loadable-sqlite-extensions" pyenv install 3.10.6
+# RUN LDFLAGS="-L/usr/local/opt/sqlite/lib -L/usr/local/opt/zlib/lib" CPPFLAGS="-I/usr/local/opt/sqlite/include -I/usr/local/opt/zlib/include" PYTHON_CONFIGURE_OPTS="--enable-loadable-sqlite-extensions" pyenv install 3.10.6
 # where your code lives  
 # WORKDIR $DockerHOME  
 WORKDIR /app  
@@ -29,12 +29,13 @@ WORKDIR /app
 # install dependencies  
 RUN pip install --upgrade pip  
 # RUN /opt/render/project/src/.venv/bin/python -m pip install --upgrade pip
-# RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt
 # copy whole project to your docker home directory. 
 COPY . $DockerHOME  
 # run this command to install all dependencies  
 # RUN pip install -r requirements.txt  
 # port where the Django app runs  
-EXPOSE $PORT  
+# EXPOSE $PORT  
+EXPOSE 8000  
 # start server  
-# CMD python manage.py runserver  
+CMD daphne -b 0.0.0.0 -p 8000 core.asgi:application
