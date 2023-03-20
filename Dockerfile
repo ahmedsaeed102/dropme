@@ -1,5 +1,5 @@
 # base image  
-FROM python:ubunto  
+FROM python:ubuntu
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git zip openssh-client sqlite3 libsqlite3-dev
