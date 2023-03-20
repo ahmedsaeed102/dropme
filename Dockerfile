@@ -2,7 +2,8 @@
 FROM ubuntu:focal
 
 RUN apt-get update
-
+ENV DEBIAN_FRONTEND=noninteractive
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 ENV TZ 'GB'
 RUN echo $TZ > /etc/timezone && \
     apt-get install -y tzdata && \
@@ -23,7 +24,7 @@ RUN echo 'alias pip=pip3' >> ~/.bashrc
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
 
-RUN pip3 install GDAL==3.0.4
+RUN pip3 install GDAL==3.6.3
 
 # RUN apt-get update && \
 #     apt-get install -y -qq build-essential git zip openssh-client sqlite3 libsqlite3-dev python3.10 wget unzip libpq-dev binutils libproj-dev gdal-bin libsqlite3-mod-spatialite
@@ -55,4 +56,4 @@ COPY . $DockerHOME
 RUN pip install -r requirements.txt  
 # EXPOSE $PORT  
 # EXPOSE 7139  
-CMD daphne -b 0.0.0.0 -p $PORT core.asgi:application
+# CMD daphne -b 0.0.0.0 -p $PORT core.asgi:application
