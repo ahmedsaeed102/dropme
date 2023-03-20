@@ -12,8 +12,8 @@ RUN echo $TZ > /etc/timezone && \
     dpkg-reconfigure -f noninteractive tzdata && \
     apt-get clean
  
-
-RUN apt-get install -y python3.10 python3-pip libgdal-dev locales sqlite3 libsqlite3-dev libsqlite3-mod-spatialite
+# libsqlite3-dev libpq-dev libgdal-dev
+RUN apt-get install -y python3.10 python3-pip locales sqlite3 binutils libproj-dev gdal-bin libsqlite3-mod-spatialite
 
 RUN locale-gen en_GB.UTF-8
 ENV LC_ALL='en_GB.utf8'
@@ -24,7 +24,7 @@ RUN echo 'alias pip=pip3' >> ~/.bashrc
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
 
-RUN pip3 install GDAL==3.6.3
+# RUN pip3 install GDAL==3.6.3
 
 # RUN apt-get update && \
 #     apt-get install -y -qq build-essential git zip openssh-client sqlite3 libsqlite3-dev python3.10 wget unzip libpq-dev binutils libproj-dev gdal-bin libsqlite3-mod-spatialite
