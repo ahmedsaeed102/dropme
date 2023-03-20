@@ -1,8 +1,32 @@
-# base image  
-FROM ubuntu:20.04
-# FROM python:ubuntu
-RUN apt-get update && \
-    apt-get install -y -qq build-essential git zip openssh-client sqlite3 libsqlite3-dev python3.10 wget unzip libpq-dev binutils libproj-dev gdal-bin libsqlite3-mod-spatialite
+# FROM ubuntu:20.04
+FROM ubuntu:focal
+
+RUN apt-get update
+
+ENV TZ 'GB'
+RUN echo $TZ > /etc/timezone && \
+    apt-get install -y tzdata && \
+    rm /etc/localtime && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata && \
+    apt-get clean
+ 
+
+RUN apt-get install -y python3.10 python3-pip libgdal-dev locales sqlite3 libsqlite3-dev libsqlite3-mod-spatialite
+
+RUN locale-gen en_GB.UTF-8
+ENV LC_ALL='en_GB.utf8'
+
+RUN echo 'alias python=python3' >> ~/.bashrc
+RUN echo 'alias pip=pip3' >> ~/.bashrc
+
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+ENV C_INCLUDE_PATH=/usr/include/gdal
+
+RUN pip3 install GDAL==3.0.4
+
+# RUN apt-get update && \
+#     apt-get install -y -qq build-essential git zip openssh-client sqlite3 libsqlite3-dev python3.10 wget unzip libpq-dev binutils libproj-dev gdal-bin libsqlite3-mod-spatialite
                             
 # setup environment variable  
 ARG DockerHOME
@@ -25,11 +49,9 @@ ENV PYTHONUNBUFFERED 1
 
 # install dependencies  
 RUN pip install --upgrade pip  
-# RUN /opt/render/project/src/.venv/bin/python -m pip install --upgrade pip
-# RUN pip install -r requirements.txt
-# copy whole project to your docker home directory. 
+
 COPY . $DockerHOME  
-# run this command to install all dependencies  
+
 RUN pip install -r requirements.txt  
 # EXPOSE $PORT  
 # EXPOSE 7139  
