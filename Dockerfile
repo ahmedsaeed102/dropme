@@ -1,4 +1,3 @@
-# FROM ubuntu:20.04
 FROM ubuntu:focal
 
 RUN apt-get update
@@ -48,12 +47,10 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1  
 
-# install dependencies  
 RUN pip install --upgrade pip  
 
 COPY . $DockerHOME  
 
 RUN pip install -r requirements.txt  
 EXPOSE $PORT  
-# EXPOSE 7139  
 # CMD daphne -b 0.0.0.0 -p $PORT core.asgi:application
