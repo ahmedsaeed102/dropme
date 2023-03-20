@@ -17,7 +17,7 @@ RUN sudo apt install gdal-bin
 # RUN sudo apt install libsqlite3-mod-spatialite
 RUN sudo apt-get install libsqlite3-mod-spatialite
 
-RUN LDFLAGS="-L/usr/local/opt/sqlite/lib -L/usr/local/opt/zlib/lib" CPPFLAGS="-I/usr/local/opt/sqlite/include -I/usr/local/opt/zlib/include" PYTHON_CONFIGURE_OPTS="--enable-loadable-sqlite-extensions" asdf python install
+RUN LDFLAGS="-L/usr/local/opt/sqlite/lib -L/usr/local/opt/zlib/lib" CPPFLAGS="-I/usr/local/opt/sqlite/include -I/usr/local/opt/zlib/include" PYTHON_CONFIGURE_OPTS="--enable-loadable-sqlite-extensions" pyenv install 3.10.6
 # where your code lives  
 # WORKDIR $DockerHOME  
 WORKDIR /app  
@@ -28,7 +28,8 @@ WORKDIR /app
 
 # install dependencies  
 RUN pip install --upgrade pip  
-
+RUN /opt/render/project/src/.venv/bin/python -m pip install --upgrade pip
+RUN pip install -r requirements.txt
 # copy whole project to your docker home directory. 
 COPY . $DockerHOME  
 # run this command to install all dependencies  
