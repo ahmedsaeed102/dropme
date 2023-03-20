@@ -28,8 +28,8 @@ WORKDIR /app
 
 # install dependencies  
 RUN pip install --upgrade pip  
-RUN /opt/render/project/src/.venv/bin/python -m pip install --upgrade pip
-RUN pip install -r requirements.txt
+# RUN /opt/render/project/src/.venv/bin/python -m pip install --upgrade pip
+# RUN pip install -r requirements.txt
 # copy whole project to your docker home directory. 
 COPY . $DockerHOME  
 # run this command to install all dependencies  
