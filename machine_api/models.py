@@ -16,7 +16,7 @@ class Machine(models.Model):
         help_text = _('[required] Unique identification name for the machine, max-length:200')
     )
     
-    location = PointField(null=True)
+    location = PointField(null=True, srid=4326)
 
     # gives error when trying to remove longitude and latitdue
     longitude = models.DecimalField(

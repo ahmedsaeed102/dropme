@@ -37,13 +37,13 @@ class GetNearestMachine(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, long, lat):
-        current_location = Point(float(long), float(lat))
-        machine = Machine.objects.filter(
-            location__dwithin=(current_location, 1000.0), # should convert km to degrees 1km = 1/111.325 degrees 0.45 = 50km
-            status = 'available'
-            ).annotate(
-            distance=Distance('location', current_location, spheroid=True)).order_by('distance').first()
-            
+        current_location = Point(float(long), float(lat), srid=4326)
+        # machine = Machine.objects.filter(
+        #     location__dwithin=(current_location, 0.45), # should convert km to degrees 1km = 1/111.325 degrees 0.45 = 50km
+        #     status = 'available'
+        #     ).annotate(
+        #     distance=Distance('location', current_location, spheroid=True)).order_by('distance').first()
+        machine = Machine.objects.annotate(distance=Distance('location', current_location, spheroid=True)).order_by('distance').first()
         if not machine:
             raise NotFound(detail="Error 404, there is no machine near the user", code=404)
 
@@ -51,8 +51,9 @@ class GetNearestMachine(APIView):
         # distance = geodesic(lonlat(*current_location.tuple), lonlat(*machine.location.tuple)).km
         
         return Response({
-            'message': 'Success',
-            'machine': serializer.data,
+            'status': 'Success',
+            'message': 'got nearest machine successfully',
+            'data': serializer.data,
         })
 
 
@@ -76,12 +77,15 @@ class GetTravelInfo(APIView):
         
 
         return Response({
-            'message': 'Success',
-            'machine': serializer.data,
-            'distance meters': data['distance'],
-            'timebyfoot minutes': data['timebyfoot'],
-            'timebycar': data['timebycar'],
-            'timebybike': data['timebybike'],
+            'status': 'success',
+            'message': 'got travel info successfully',
+            'data':{
+                'machine': serializer.data,
+                'distance meters': int(data['distance']),
+                'timebyfoot minutes': int(data['timebyfoot']),
+                'timebycar minutes': int(data['timebycar']),
+                'timebybike minutes': int(data['timebybike']),
+            }  
         })
 
 
@@ -104,8 +108,9 @@ class GetDirections(APIView):
         data = get_directions(current_location.tuple, machine.location.tuple)
 
         return Response({
-            'message': 'Success',
-            'directions': data,
+            'status':'success',
+            'message': 'got travel directions successfully',
+            'data': data,
         })
 
 
@@ -125,8 +130,9 @@ class MachinesByCity(APIView):
         serializer = MachineSerializer(machines, many=True)
 
         return Response({
-            'message': 'Success',
-            'machines': serializer.data,
+            'status':'success',
+            'message': 'got machines by city successfully',
+            'data': serializer.data,
         })
 
 
@@ -166,8 +172,9 @@ class SetMachineCoordinates(APIView):
         serializer = MachineSerializer(machine)
 
         return Response({
-            'message': 'Success',
-            'machine': serializer.data,
+            'status':'success',
+            'message': 'set machine Coordinates successfully',
+            'data': serializer.data,
         })
 
 
