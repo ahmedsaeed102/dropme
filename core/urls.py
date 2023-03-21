@@ -18,6 +18,7 @@ urlpatterns = [
     path('edit_profile/', ManageUserProfileView.as_view(), name='edit_profile'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('machine/', include('machine_api.urls'), name='machine_api')
+    path('machine/', include('machine_api.urls'), name='machine_api'),
+    path('community/', include('community_api.urls'), name='community_api'),
 ]
 urlpatterns +=router.urls
