@@ -1,15 +1,11 @@
-import qrcode
-from io import BytesIO
-from django.contrib.sites.models import Site
-from django.core.files import File
-from django.urls import reverse
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from users_api.models import UserModel
+from django.contrib.gis.db.models import PointField
 
 
-STATUS = Choices('available', 'break down')
+STATUS = Choices('available', 'breakdown')
 
 
 class Machine(models.Model):
@@ -17,43 +13,46 @@ class Machine(models.Model):
         max_length=200,
         unique=True,
         verbose_name = _('Machine name'),
-        help_text = _('Unique identification name for the machine, max-length:200')
+        help_text = _('[required] Unique identification name for the machine, max-length:200')
     )
     
+    location = PointField(null=True, srid=4326)
+
+    # gives error when trying to remove longitude and latitdue
     longitude = models.DecimalField(
         max_digits = 9,
         decimal_places = 6,
         blank= True,
-        help_text = _('Longitude, Format:required')
-    )
+        null=True, 
+    ) 
 
     latitdue = models.DecimalField(
         max_digits = 9,
         decimal_places = 6,
         blank= True,
-        help_text = _('Latitdue, Format:required')
+        null=True,
     )
 
-    location = models.CharField(max_length=50)
-    place = models.CharField(max_length=50)
+    city = models.CharField(max_length=50, null=True, help_text = _('Machine city'))
+    place = models.CharField(max_length=50, null=True, help_text = _('machin place inside city'))
 
     status = models.CharField(choices=STATUS, default=STATUS.available, max_length=20)
 
     qr_code = models.ImageField(upload_to='qr_codes', blank=True)
 
-    def save(self, *args, **kwargs):
-        path = reverse("start_recycle", kwargs={'name':self.identification_name})
-        domain = Site.objects.get_current().domain
-        qrcode_img = qrcode.make('http://{domain}{path}'.format(domain=domain, path=path))
-        # canvas = Image.new('RGB', (400, 400), 'white')
-        # canvas.paste(qrcode_img)
-        fname = f'qr_code-{self.identification_name}.png'
-        buffer = BytesIO()
-        # canvas.save(buffer,'PNG')
-        qrcode_img.save(buffer,'PNG')
-        self.qr_code.save(fname, File(buffer), save=False)
-        # canvas.close()
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     path = reverse("start_recycle", kwargs={'name':self.identification_name})
+    #     domain = Site.objects.get_current().domain
+    #     qrcode_img = qrcode.make('http://{domain}{path}'.format(domain=domain, path=path))
+    #     # canvas = Image.new('RGB', (400, 400), 'white')
+    #     # canvas.paste(qrcode_img)
+    #     fname = f'qr_code-{self.identification_name}.png'
+    #     buffer = BytesIO()
+    #     # canvas.save(buffer,'PNG')
+    #     qrcode_img.save(buffer,'PNG')
+    #     self.qr_code.save(fname, File(buffer), save=False)
+    #     # canvas.close()
+    #     super().save(*args, **kwargs)
     
 
     def delete(self, using=None, keep_parents=False):
@@ -62,7 +61,7 @@ class Machine(models.Model):
 
     @property
     def address(self):
-        return f'{self.location}, {self.place}'
+        return f'{self.city}, {self.place}'
 
     def __str__(self):
         return self.identification_name
