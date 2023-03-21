@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from users_api.models import UserModel
+from django.contrib.gis.db.models import PointField
 
 
 STATUS = Choices('available', 'breakdown')
@@ -15,12 +16,15 @@ class Machine(models.Model):
         help_text = _('[required] Unique identification name for the machine, max-length:200')
     )
     
+    location = PointField(null=True)
+
+    # gives error when trying to remove longitude and latitdue
     longitude = models.DecimalField(
         max_digits = 9,
         decimal_places = 6,
         blank= True,
-        null=True,
-    )
+        null=True, 
+    ) 
 
     latitdue = models.DecimalField(
         max_digits = 9,
