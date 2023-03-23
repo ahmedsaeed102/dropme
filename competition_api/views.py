@@ -35,11 +35,18 @@ class Leaderboard(APIView):
         users = UserModel.objects.all()[:10]
         serializer = CustomUserSerializer(users, many=True,)
         current_user = {
-            'current_user': request.user.username, 
+            'username': request.user.username, 
+            'photo': request.user.profile_photo.url,
             'rank': request.user.ranking
         }
-        data=[current_user]
-        data.append(serializer.data)
+        data={
+            "status":'success',
+            'message':'got leaderboard successfully',
+            "data":{
+                "current_user":current_user,
+                "ranking": serializer.data
+            }
+        }
         
         return Response(data)
 
@@ -85,17 +92,25 @@ class CompetitionRanking(APIView):
         if currentuser:
             currentuser = competition.competitionranking_set.get(user=request.user.pk)
             current_user = {
-                'current_user': currentuser.user.username, 
+                'username': request.user.username, 
+                'photo':  request.user.profile_photo.url,
                 'points': currentuser.points,
                 'rank' : currentuser.ranking
             }
         else:
             current_user = {
-                'current_user': request.user.username, 
+                'username': request.user.username, 
+                'photo':  request.user.profile_photo.url,
                 'joined': False
             }
 
-        data=[current_user]
-        data.append(serializer.data)
+        data={
+            "status":'success',
+            'message':'got competition ranking successfully',
+            "data":{
+                "current_user":current_user,
+                "ranking": serializer.data['top_ten']
+            }
+        }
         
         return Response(data)

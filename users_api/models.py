@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator, validate_email
 
 class LocationModel(models.Model):
-    address=models.CharField(max_length=50,default='Egypt')
+    address=models.CharField(max_length=50, default='Egypt')
     def __str__(self) :
         return self.address
 
@@ -51,7 +51,7 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
     is_staff=models.BooleanField(default=False)
     registered_at=models.DateTimeField(auto_now_add=True)
 
-    profile_photo=models.ImageField(upload_to='upload_to', default=None)
+    profile_photo=models.ImageField(upload_to='upload_to', default='upload_to/default.jpg')
 
     GENDER = Choices('male', 'female')
     gender=models.CharField(choices=GENDER,default=GENDER.male, max_length=20) 
@@ -61,7 +61,7 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
         help_text = _('User total earned points')
     )
 
-    address = models.ForeignKey(LocationModel, on_delete=models.CASCADE,null=True,default=1)
+    address = models.ForeignKey(LocationModel, on_delete=models.CASCADE, null=True, default=1)
     
     objects=UserManager()
     

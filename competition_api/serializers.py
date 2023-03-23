@@ -7,6 +7,7 @@ class CompetitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Competition
         fields = '__all__'
+        read_only_fields = ('created_at',)
 
     def validate(self, data):
         """
@@ -27,16 +28,17 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        fields = ['username', "total_points", 'rank']
+        fields = ['username', 'profile_photo', "total_points", 'rank']
 
 
 class CompetitionRankingSerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField(source='user.username')
+    photo = serializers.ReadOnlyField(source='user.profile_photo.url')
     rank = serializers.ReadOnlyField(source='ranking')
 
     class Meta:
         model = CompetitionRanking
-        fields = ('name', 'points', 'rank')
+        fields = ('name', 'photo', 'points', 'rank')
 
 
 class CustomCompetitionSerializer(serializers.ModelSerializer):
