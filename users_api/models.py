@@ -51,7 +51,7 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
     is_staff=models.BooleanField(default=False)
     registered_at=models.DateTimeField(auto_now_add=True)
 
-    profile_photo=models.ImageField(upload_to='upload_to',default='users_api/default.jpg')
+    profile_photo=models.ImageField(upload_to='upload_to', default=None)
 
     GENDER = Choices('male', 'female')
     gender=models.CharField(choices=GENDER,default=GENDER.male, max_length=20) 
