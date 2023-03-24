@@ -33,9 +33,15 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 class CompetitionRankingSerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField(source='user.username')
-    photo = serializers.ReadOnlyField(source='user.profile_photo.url')
+    # photo = serializers.ReadOnlyField(source='user.profile_photo.url')
+    photo = serializers.SerializerMethodField()
     rank = serializers.ReadOnlyField(source='ranking')
 
+    def get_photo(self,obj):
+        photo = obj.profile_photo.url
+        request = self.context.get("request")
+        return request.build_absolute_uri(photo)
+    
     class Meta:
         model = CompetitionRanking
         fields = ('name', 'photo', 'points', 'rank')

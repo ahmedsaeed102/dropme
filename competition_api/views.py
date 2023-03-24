@@ -33,10 +33,10 @@ class Leaderboard(APIView):
 
     def get(self, request):
         users = UserModel.objects.all()[:10]
-        serializer = CustomUserSerializer(users, many=True,)
+        serializer = CustomUserSerializer(users, many=True, context={'request': request})
         current_user = {
             'username': request.user.username, 
-            'photo': request.user.profile_photo.url,
+            'photo': request.build_absolute_uri(request.user.profile_photo.url),
             'rank': request.user.ranking
         }
         data={
@@ -84,7 +84,7 @@ class CompetitionRanking(APIView):
         except Competition.DoesNotExist:
             raise NotFound(detail="Error 404, competition not found", code=404)
         
-        serializer = CustomCompetitionSerializer(competition)
+        serializer = CustomCompetitionSerializer(competition, context={'request': request})
 
         # users = competition.users.all()
         currentuser = competition.users.filter(pk=request.user.pk).first()
@@ -93,17 +93,18 @@ class CompetitionRanking(APIView):
             currentuser = competition.competitionranking_set.get(user=request.user.pk)
             current_user = {
                 'username': request.user.username, 
-                'photo':  request.user.profile_photo.url,
+                'photo':  request.build_absolute_uri(request.user.profile_photo.url),
                 'points': currentuser.points,
                 'rank' : currentuser.ranking
             }
+        
         else:
             current_user = {
                 'username': request.user.username, 
-                'photo':  request.user.profile_photo.url,
+                'photo':  request.build_absolute_uri(request.user.profile_photo.url),
                 'joined': False
             }
-
+        
         data={
             "status":'success',
             'message':'got competition ranking successfully',
