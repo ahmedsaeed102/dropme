@@ -11,8 +11,8 @@ RUN echo $TZ > /etc/timezone && \
     dpkg-reconfigure -f noninteractive tzdata && \
     apt-get clean
  
-# libsqlite3-dev libpq-dev libgdal-dev
-RUN apt-get install -y python3.10 python3-pip locales sqlite3 binutils libproj-dev gdal-bin libsqlite3-mod-spatialite
+# libsqlite3-dev libpq-dev libgdal-dev libsqlite3-mod-spatialite
+RUN apt-get install -y python3.10 python3-pip locales libpq-dev sqlite3 binutils libproj-dev gdal-bin 
 
 RUN locale-gen en_GB.UTF-8
 ENV LC_ALL='en_GB.utf8'
