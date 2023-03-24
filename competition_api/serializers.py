@@ -52,7 +52,7 @@ class CustomCompetitionSerializer(serializers.ModelSerializer):
 
     def get_top_ten(self, obj):
         ranking = obj.competitionranking_set.all()[:10] 
-        return CompetitionRankingSerializer(ranking, many=True).data
+        return CompetitionRankingSerializer(ranking, many=True,context={'request': self.context.get("request")}).data
     
     class Meta:
         model = Competition
