@@ -38,7 +38,7 @@ class CompetitionRankingSerializer(serializers.ModelSerializer):
     rank = serializers.ReadOnlyField(source='ranking')
 
     def get_photo(self,obj):
-        photo = obj.profile_photo.url
+        photo = obj.user.profile_photo.url
         request = self.context.get("request")
         return request.build_absolute_uri(photo)
     
