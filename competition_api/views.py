@@ -37,7 +37,7 @@ class Leaderboard(APIView):
         current_user = {
             'username': request.user.username, 
             'photo': request.build_absolute_uri(request.user.profile_photo.url),
-            'points': request.user.total_points,
+            'total_points': request.user.total_points,
             'rank': request.user.ranking
         }
         data={
