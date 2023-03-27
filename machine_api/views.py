@@ -13,7 +13,7 @@ from django.contrib.gis.db.models.functions import Distance
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .models import Machine, RecycleLog
-from .serializers import MachineSerializer, QRCodeSerializer, RecycleLogSerializer, CustomMachineSerializer
+from .serializers import MachineSerializer, QRCodeSerializer, UpdateRecycleLog, RecycleLogSerializer, CustomMachineSerializer
 from .utlis import claculate_travel_distance_and_time, get_directions
 # from geopy.distance import lonlat, geodesic
 
@@ -220,10 +220,11 @@ class UpdateRecycle(APIView):
     cans: int
     } 
     '''
+    serializer_class = UpdateRecycleLog
     def post(self, request, name):
         bottles = request.data.get('bottles', 0)
         cans = request.data.get('cans', 0)
-        log = RecycleLog.objects.filter(machine_name=name, in_progess=True).first()
+        log = RecycleLog.objects.filter(machine_name=name, in_progess=True).order_by('-created_at').first()
 
         if not log:
             raise NotFound(detail="Error 404, log not found", code=404)

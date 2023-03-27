@@ -36,9 +36,14 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
 
         
     async def disconnect(self, close_code):
+        await database_sync_to_async(self.delete_incomplete_logs)()
         print('disconnected', close_code)
 
     
+    def delete_incomplete_logs(self):
+        RecycleLog.objects.filter(in_progess=True, channel_name=self.channel_name).delete()
+
+
     def create_log(self):
         RecycleLog.objects.create(
             machine_name=self.machine_name,
@@ -48,6 +53,7 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
         )
     
     async def receive_update(self, event):
+        print('here')
         await self.send_json({
             'status': "success",
             'message': f"{event['bottles']} bottles and {event['cans']} cans",

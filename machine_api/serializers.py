@@ -34,3 +34,9 @@ class RecycleLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecycleLog
         fields = ['machine_name', 'bottles', 'cans', 'created_at']
+
+
+class UpdateRecycleLog(serializers.ModelSerializer):
+    class Meta:
+        model = RecycleLog
+        fields = ['bottles', 'cans',]
