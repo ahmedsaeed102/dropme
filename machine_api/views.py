@@ -199,6 +199,7 @@ class MachineQRCode(APIView):
 
         # serializer = QRCodeSerializer(machine)
         path = request.build_absolute_uri(reverse("start_recycle", kwargs={'name':machine.identification_name}))
+        path = path.replace('http','wss')
         qrcode_img = qrcode.make(path)
         fname = f'qr_code-{machine.identification_name}.png'
         buffer = BytesIO()
