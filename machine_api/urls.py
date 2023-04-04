@@ -11,6 +11,7 @@ urlpatterns = [
     path('machines/getbycity/<str:city>/', MachinesByCity.as_view(), name='retrive_machine_by_city'),
     path('machines/delete/<int:pk>/', MachineDelete.as_view(), name='delete_machine'),
     path('machines/qrcode/<str:name>/', MachineQRCode.as_view(), name='retrive_qrcode'),
+    path('machines/isbusy/<str:name>/', IsMachineBusy.as_view(), name='is_machine_busy'),
 
     path('machines/recycle/update/<str:name>/', UpdateRecycle.as_view(), name='update_recycle'),
 

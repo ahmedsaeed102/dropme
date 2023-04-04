@@ -15,7 +15,7 @@ from asgiref.sync import async_to_sync
 from .models import Machine, RecycleLog
 from .serializers import MachineSerializer, QRCodeSerializer, UpdateRecycleLog, RecycleLogSerializer, CustomMachineSerializer
 from .utlis import claculate_travel_distance_and_time, get_directions
-# from geopy.distance import lonlat, geodesic
+from users_api.serializers import UserSerializer
 
 
 class Machines(generics.ListCreateAPIView):
@@ -273,3 +273,24 @@ class RetrieveRecycleLog(APIView):
         return Response({
             'message': 'Success',
             'data': serializer.data,})
+    
+
+class IsMachineBusy(APIView):
+    '''
+    Tells the machine if the user logedin using the QR Code or not.
+    '''
+
+    def get(self, request, name):
+        logs = RecycleLog.objects.filter(machine_name=name, in_progess=True)
+        if not logs:
+            return Response({
+            'message': 'no user logged in',
+            'busy': False,
+            })
+        
+        user = UserSerializer(logs[0].user)
+
+        return Response({
+            'message': 'User logged in',
+            'busy': True,
+            'user': user.data,})
