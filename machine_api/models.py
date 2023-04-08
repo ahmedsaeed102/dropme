@@ -21,7 +21,7 @@ class Machine(models.Model):
         help_text = _('arabic machine name')
     )
     
-    location = PointField(null=True, srid=4326)
+    location = PointField(null=True, srid=4326, blank=True)
 
     city = models.CharField(max_length=50, null=True, help_text = _('Machine city'))
     city_ar = models.CharField(

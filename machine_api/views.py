@@ -197,7 +197,6 @@ class MachineQRCode(APIView):
         except Machine.DoesNotExist:
             raise NotFound(detail="Error 404, Machine not found", code=404)
 
-        # serializer = QRCodeSerializer(machine)
         path = request.build_absolute_uri(reverse("start_recycle", kwargs={'name':machine.identification_name}))
         path = path.replace('http','wss')
         qrcode_img = qrcode.make(path)
@@ -206,10 +205,6 @@ class MachineQRCode(APIView):
         qrcode_img.save(buffer,'PNG')
         machine.qr_code.save(fname, File(buffer), save=True)
 
-        # return Response({
-        #     'message': 'Success',
-        #     'machine pk': machine.pk,
-        #     'qr_code': serializer.data})
         return HttpResponse(machine.qr_code, content_type="image/png")
 
 
