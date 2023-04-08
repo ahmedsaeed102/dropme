@@ -1,45 +1,33 @@
-from django.shortcuts import render
-from .serializers import UserSerializer,UserProfileSerializer,SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer
-from rest_framework import  viewsets,status,generics,permissions,authentication
-from rest_framework.settings import api_settings
-from .models import UserModel
-from rest_framework.permissions import IsAuthenticated
-
-# help in otp function
-
+import os
 import random
-from datetime import datetime ,timedelta
+from datetime import datetime, timedelta
+
 from django.conf import settings
 from django.utils import timezone
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from .otp_send_email import send_otp,send_mail_pass
-
-
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
+from django.utils.encoding import smart_str, smart_bytes, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-import os
 from django.http import HttpResponsePermanentRedirect
 
-
+from rest_framework import viewsets, status, generics, permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-
-
+from .otp_send_email import send_otp,send_mail_pass
+from .models import UserModel
+from .serializers import UserSerializer,UserProfileSerializer,SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer
 
 
 class CustomRedirect(HttpResponsePermanentRedirect):
-
     allowed_schemes = [os.environ.get('APP_SCHEME'), 'http', 'https']
 
 
 # custom serializer from rest_framework_simplejwt.serializers
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-
     def validate(self,attrs):
         data = super().validate(attrs)
 
@@ -76,9 +64,8 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=True,methods=['PATCH'])
     def regenerate_otp(self,request,pk=None):
         instance=self.get_object()
-        if int( instance.max_otp_try== 0) and timezone.now() < instance.max_otp_out :
-            
-            return Response("Max OTP try reached ,try after an hour.",status=status.HTTP_400_BAD_REQUEST)
+        if int( instance.max_otp_try== 0) and timezone.now() < instance.max_otp_out:
+            return Response("Max OTP try reached, try after an hour.", status=status.HTTP_400_BAD_REQUEST)
 
         otp=random.randint(1000,9999)
         otp_expiration=datetime.now()+timedelta(minutes=5) 
@@ -92,14 +79,14 @@ class UserViewSet(viewsets.ModelViewSet):
             instance.max_otp_out=timezone.now()+datetime.timedelta(hours=1)
         elif max_otp_try == -1:
             instance.max_otp_try=max_otp_try
-        send_otp(instance.email,otp)
+
+        send_otp(instance.email, otp)
         instance.save()
         return Response("successfully regenrated the new OTP.",status=status.HTTP_200_OK)
 
     
 # for edit_profile
 class ManageUserProfileView(generics.RetrieveUpdateAPIView):
-
     serializer_class = UserProfileSerializer
     permission_classes=(permissions.IsAuthenticated,)
     
@@ -182,15 +169,4 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response({'success': True, 'message': 'Password reset success'}, status=status.HTTP_200_OK)
-
-
-
-class CustomRedirect(HttpResponsePermanentRedirect):
-
-    allowed_schemes = [os.environ.get('APP_SCHEME'), 'http', 'https']
     
-        
-    
-
-
-
