@@ -18,10 +18,9 @@ class MachineSerializer(serializers.ModelSerializer):
         return representation
 
 
-class CustomMachineSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Machine
-        fields = ['longitude', 'latitdue']
+class MachineCoordinatesSerializer(serializers.Serializer):
+    longitude = serializers.FloatField()
+    latitude = serializers.FloatField()
 
 
 class QRCodeSerializer(serializers.ModelSerializer):

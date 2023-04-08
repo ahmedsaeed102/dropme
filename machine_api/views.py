@@ -13,7 +13,7 @@ from django.contrib.gis.db.models.functions import Distance
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .models import Machine, RecycleLog
-from .serializers import MachineSerializer, QRCodeSerializer, UpdateRecycleLog, RecycleLogSerializer, CustomMachineSerializer
+from .serializers import MachineSerializer, QRCodeSerializer, UpdateRecycleLog, RecycleLogSerializer, MachineCoordinatesSerializer
 from .utlis import claculate_travel_distance_and_time, get_directions
 from users_api.serializers import UserSerializer
 
@@ -154,7 +154,7 @@ class SetMachineCoordinates(APIView):
         } 
     '''
     permission_classes = [IsAuthenticated]
-    # serializer_class = CustomMachineSerializer
+    serializer_class = MachineCoordinatesSerializer
 
     def patch(self, request, name):
         try:
