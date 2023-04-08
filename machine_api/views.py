@@ -163,9 +163,9 @@ class SetMachineCoordinates(APIView):
             raise NotFound(detail="Error 404, Machine not found", code=404)
 
         longitude = request.data.get('longitude', 0)
-        latitdue = request.data.get('latitdue', 0)
+        latitude = request.data.get('latitude', 0)
         
-        pnt = Point(float(longitude), float(latitdue))
+        pnt = Point(float(longitude), float(latitude))
         machine.location = pnt
         machine.save()
 
