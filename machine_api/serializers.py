@@ -5,7 +5,7 @@ from .models import Machine, RecycleLog
 class MachineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Machine
-        exclude = ('qr_code', "longitude", 'latitdue')
+        exclude = ('qr_code',)
         read_only_fields = ('location',)
 
     def to_representation(self, instance):
