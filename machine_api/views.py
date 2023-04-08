@@ -154,7 +154,7 @@ class SetMachineCoordinates(APIView):
         } 
     '''
     permission_classes = [IsAuthenticated]
-    serializer_class = CustomMachineSerializer
+    # serializer_class = CustomMachineSerializer
 
     def patch(self, request, name):
         try:
