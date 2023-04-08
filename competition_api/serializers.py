@@ -15,8 +15,7 @@ class CompetitionSerializer(serializers.ModelSerializer):
         """
         if data['start_date'] > data['end_date']:
             raise serializers.ValidationError("End date cannot be before start date")
-        # if data["start_date"] < date.today():
-            # raise serializers.ValidationError("Start date cannot be in the past")
+        
         if data['target'] < 0:
             raise serializers.ValidationError("Target points can't be negative")
         
@@ -33,7 +32,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 class CompetitionRankingSerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField(source='user.username')
-    # photo = serializers.ReadOnlyField(source='user.profile_photo.url')
     photo = serializers.SerializerMethodField()
     rank = serializers.ReadOnlyField(source='ranking')
 
@@ -57,5 +55,3 @@ class CustomCompetitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Competition
         fields = ('top_ten',)
-
-

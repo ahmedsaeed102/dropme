@@ -27,6 +27,7 @@ class CompetitionDelete(generics.DestroyAPIView):
     serializer_class = CompetitionSerializer
     permission_classes = [IsAuthenticated]
 
+
 # Global leaderboard
 class Leaderboard(APIView):
     permission_classes = [IsAuthenticated]
@@ -70,9 +71,6 @@ class JoinCompetition(APIView):
         
         competition.users.add(request.user.pk)
         
-        # serializer = CompetitionSerializer(competition)
-
-        # return Response(serializer.data)
         return redirect('competition_ranking', competition.pk)
 
 
@@ -87,7 +85,6 @@ class CompetitionRanking(APIView):
         
         serializer = CustomCompetitionSerializer(competition, context={'request': request})
 
-        # users = competition.users.all()
         currentuser = competition.users.filter(pk=request.user.pk).first()
 
         if currentuser:
