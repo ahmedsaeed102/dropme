@@ -21,13 +21,15 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
 
         await self.send_json({
             'status': "success",
-            'message': f'welcome {self.user.username}'
+            'message': f'welcome {self.user.username}',
+            'message_ar': f'مرحبا {self.user.username}'
         })
         await asyncio.sleep(1)
 
         await self.send_json({
             'status': "success",
-            'message': f'we are waiting for you to throw your bottle or can'
+            'message': f'we are waiting for you to throw your bottle or can',
+            'message_ar': f'نحن في انتظارك لرمي الزجاجة أو العلبة'
         })
 
         
@@ -57,6 +59,7 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
         await self.send_json({
             'status': "success",
             'message': f"{event['bottles']} bottles and {event['cans']} cans",
+            'message_ar': f"{event['bottles']} زجاجة and {event['cans']} علبة",
             'points': event['points']
         })
         await update_user_points(self.user.pk, event['points'])
