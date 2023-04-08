@@ -1,11 +1,20 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from model_utils import Choices
+# from model_utils import Choices
 from users_api.models import UserModel
 from django.contrib.gis.db.models import PointField
 
 
-STATUS = Choices('available', 'breakdown')
+# STATUS = Choices('available', 'breakdown')
+STATUS = (
+    ("available", "available"),
+    ("breakdown", "breakdown"),
+)
+STATUS_AR = (
+    ("available", "متاح"),
+    ("breakdown", "لا تعمل"),
+)
+
 
 class Machine(models.Model):
     identification_name = models.CharField(
@@ -39,7 +48,8 @@ class Machine(models.Model):
         help_text = _('arabic machine address inside city')
     )
     
-    status = models.CharField(choices=STATUS, default=STATUS.available, max_length=20)
+    status = models.CharField(choices=STATUS, default="available", max_length=20)
+    status_ar = models.CharField(choices=STATUS_AR, default="available", max_length=20)
 
     qr_code = models.ImageField(upload_to='qr_codes', blank=True)
     
