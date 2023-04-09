@@ -27,19 +27,28 @@ class CompetitionDelete(generics.DestroyAPIView):
     serializer_class = CompetitionSerializer
     permission_classes = [IsAuthenticated]
 
+
 # Global leaderboard
 class Leaderboard(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         users = UserModel.objects.all()[:10]
-        serializer = CustomUserSerializer(users, many=True,)
+        serializer = CustomUserSerializer(users, many=True, context={'request': request})
         current_user = {
-            'current_user': request.user.username, 
+            'username': request.user.username, 
+            'photo': request.build_absolute_uri(request.user.profile_photo.url),
+            'total_points': request.user.total_points,
             'rank': request.user.ranking
         }
-        data=[current_user]
-        data.append(serializer.data)
+        data={
+            "status":'success',
+            'message':'got leaderboard successfully',
+            "data":{
+                "current_user":current_user,
+                "ranking": serializer.data
+            }
+        }
         
         return Response(data)
 
@@ -62,9 +71,6 @@ class JoinCompetition(APIView):
         
         competition.users.add(request.user.pk)
         
-        # serializer = CompetitionSerializer(competition)
-
-        # return Response(serializer.data)
         return redirect('competition_ranking', competition.pk)
 
 
@@ -77,25 +83,33 @@ class CompetitionRanking(APIView):
         except Competition.DoesNotExist:
             raise NotFound(detail="Error 404, competition not found", code=404)
         
-        serializer = CustomCompetitionSerializer(competition)
+        serializer = CustomCompetitionSerializer(competition, context={'request': request})
 
-        # users = competition.users.all()
         currentuser = competition.users.filter(pk=request.user.pk).first()
 
         if currentuser:
             currentuser = competition.competitionranking_set.get(user=request.user.pk)
             current_user = {
-                'current_user': currentuser.user.username, 
+                'username': request.user.username, 
+                'photo':  request.build_absolute_uri(request.user.profile_photo.url),
                 'points': currentuser.points,
                 'rank' : currentuser.ranking
             }
+        
         else:
             current_user = {
-                'current_user': request.user.username, 
+                'username': request.user.username, 
+                'photo':  request.build_absolute_uri(request.user.profile_photo.url),
                 'joined': False
             }
-
-        data=[current_user]
-        data.append(serializer.data)
+        
+        data={
+            "status":'success',
+            'message':'got competition ranking successfully',
+            "data":{
+                "current_user":current_user,
+                "ranking": serializer.data['top_ten']
+            }
+        }
         
         return Response(data)

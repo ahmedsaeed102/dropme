@@ -1,20 +1,32 @@
-""" this function handle sending email to user in case of 
-1)activate account after sign up """
-
 from django.conf import settings
 from django.core.mail import send_mail
+from django.template.loader import get_template
 from .models import UserModel
   
+
 def send_otp(email, otp):
+    """ 
+    this function handle sending email to user in case of activating account after sign up 
+    """
     user = UserModel.objects.get(email=email)
     user.otp = otp
     user.save()
+
+    context = {'username': user.username, 'otp': otp}
+    template = get_template('otp_email.html').render(context)
     
-    subject = 'Welcome to DropMe'
-    message = f'Hi {user.username}, thank you for registering in DropMe app,this is your OTP:{otp} enjoy recycling :).'
+    subject = 'Your One-Time Password (OTP) for DropMe'
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [email]
-    send_mail(subject, message, email_from,recipient_list)
+
+    send_mail(
+        subject, 
+        None, 
+        email_from, 
+        recipient_list, 
+        fail_silently=False, 
+        html_message=template
+    )
 
 
 """ 2) reset password using email_link """

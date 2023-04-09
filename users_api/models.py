@@ -1,3 +1,4 @@
+import re
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import(
@@ -7,21 +8,30 @@ from django.contrib.auth.models import(
 )
 from model_utils import Choices
 from django.utils.translation import gettext_lazy as _
-from django.core.validators import RegexValidator, validate_email
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+
 
 class LocationModel(models.Model):
-    address=models.CharField(max_length=50,default='Egypt')
+    address=models.CharField(max_length=50, default='Egypt')
     def __str__(self) :
         return self.address
 
 def upload_to(instance,filename):
     return 'users_api/{filename}'.format(filename=filename)
 
-phone_number_regex=RegexValidator(
-    regex=r"^\d{11}",message="Phone Number must be 11 number only ."
-)
+# phone_number_regex=RegexValidator(
+#     regex=r"^\d{11}",message="Phone Number must be 10 number only ."
+# )
+def validate_phone_number(value):
+    if not re.match(r"^01[0125]{1}", value):
+        raise ValidationError("Phone number must start with 010 or 011 or 012 or 015")
+
+    if not re.match(r"^\d{11}$", value):
+        raise ValidationError("Phone number must be 11 numbers")
+
+
 class UserManager(BaseUserManager):
-    
     def create_user(self,email,password=None,**extra_fields):
         if not email:
             raise ValueError("email is required .")
@@ -29,6 +39,7 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
+     
     def create_superuser(self,email,password):
         user=self.create_user(email,password)
         user.is_active=True
@@ -40,7 +51,7 @@ class UserManager(BaseUserManager):
 class UserModel(AbstractBaseUser,PermissionsMixin):
     username=models.CharField(max_length=50)
     email=models.EmailField(unique=True,null=False,blank=False,max_length=50,validators=[validate_email])
-    phone_number=models.CharField(unique=True,null=True,blank=True,max_length=10,validators=[phone_number_regex])
+    phone_number=models.CharField(unique=True, null=True, blank=True, max_length=11, validators=[validate_phone_number])
 
     otp=models.CharField(max_length=4)
     otp_expiration=models.DateTimeField(null=True,blank=True)
@@ -51,7 +62,7 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
     is_staff=models.BooleanField(default=False)
     registered_at=models.DateTimeField(auto_now_add=True)
 
-    profile_photo=models.ImageField(upload_to='upload_to',default='users_api/default.jpg')
+    profile_photo=models.ImageField(upload_to='upload_to', default='upload_to/default.png')
 
     GENDER = Choices('male', 'female')
     gender=models.CharField(choices=GENDER,default=GENDER.male, max_length=20) 
@@ -61,7 +72,7 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
         help_text = _('User total earned points')
     )
 
-    address = models.ForeignKey(LocationModel, on_delete=models.CASCADE,null=True,default=1)
+    address = models.ForeignKey(LocationModel, on_delete=models.CASCADE, null=True, default=1)
     
     objects=UserManager()
     

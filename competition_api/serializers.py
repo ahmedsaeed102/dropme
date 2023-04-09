@@ -7,6 +7,7 @@ class CompetitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Competition
         fields = '__all__'
+        read_only_fields = ('created_at',)
 
     def validate(self, data):
         """
@@ -14,8 +15,7 @@ class CompetitionSerializer(serializers.ModelSerializer):
         """
         if data['start_date'] > data['end_date']:
             raise serializers.ValidationError("End date cannot be before start date")
-        # if data["start_date"] < date.today():
-            # raise serializers.ValidationError("Start date cannot be in the past")
+        
         if data['target'] < 0:
             raise serializers.ValidationError("Target points can't be negative")
         
@@ -27,16 +27,22 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        fields = ['username', "total_points", 'rank']
+        fields = ['username', 'profile_photo', "total_points", 'rank']
 
 
 class CompetitionRankingSerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField(source='user.username')
+    photo = serializers.SerializerMethodField()
     rank = serializers.ReadOnlyField(source='ranking')
 
+    def get_photo(self,obj):
+        photo = obj.user.profile_photo.url
+        request = self.context.get("request")
+        return request.build_absolute_uri(photo)
+    
     class Meta:
         model = CompetitionRanking
-        fields = ('name', 'points', 'rank')
+        fields = ('name', 'photo', 'points', 'rank')
 
 
 class CustomCompetitionSerializer(serializers.ModelSerializer):
@@ -44,10 +50,8 @@ class CustomCompetitionSerializer(serializers.ModelSerializer):
 
     def get_top_ten(self, obj):
         ranking = obj.competitionranking_set.all()[:10] 
-        return CompetitionRankingSerializer(ranking, many=True).data
+        return CompetitionRankingSerializer(ranking, many=True,context={'request': self.context.get("request")}).data
     
     class Meta:
         model = Competition
         fields = ('top_ten',)
-
-

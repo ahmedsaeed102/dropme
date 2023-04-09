@@ -76,7 +76,6 @@ CHANNEL_LAYERS = {
 
 
 from datetime import timedelta
-...
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
@@ -153,13 +152,26 @@ ASGI_APPLICATION = "core.asgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+
+    # 'default': {
+    # #     # 'ENGINE': 'django.db.backends.sqlite3',
+    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
+    #     "HOST": 'localhost',
+    #     "NAME": 'dropme',
+    #     "PASSWORD": 'password',
+    #     "PORT": 5432,
+
+    # 'default': {
     #     # 'ENGINE': 'django.db.backends.sqlite3',
+    #     "ENGINE": "django.contrib.gis.db.backends.spatialite",
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
+    "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "HOST": 'localhost',
-        "NAME": 'dropme',
-        "PASSWORD": 'password',
-        "PORT": 5432,
+        "HOST": os.environ.get('db_host'),
+        "NAME": os.environ.get('db_name'),
+        "PASSWORD": os.environ.get('db_password'),
+        "PORT": 5793,
         "USER": "postgres",
     }
     # "default": {

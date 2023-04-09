@@ -5,7 +5,7 @@ from .models import Machine, RecycleLog
 class MachineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Machine
-        exclude = ('qr_code', "longitude", 'latitdue')
+        exclude = ('qr_code',)
         read_only_fields = ('location',)
 
     def to_representation(self, instance):
@@ -18,10 +18,9 @@ class MachineSerializer(serializers.ModelSerializer):
         return representation
 
 
-class CustomMachineSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Machine
-        fields = ['longitude', 'latitdue']
+class MachineCoordinatesSerializer(serializers.Serializer):
+    longitude = serializers.FloatField()
+    latitude = serializers.FloatField()
 
 
 class QRCodeSerializer(serializers.ModelSerializer):
@@ -34,3 +33,9 @@ class RecycleLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecycleLog
         fields = ['machine_name', 'bottles', 'cans', 'created_at']
+
+
+class UpdateRecycleLog(serializers.ModelSerializer):
+    class Meta:
+        model = RecycleLog
+        fields = ['bottles', 'cans',]

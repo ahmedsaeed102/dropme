@@ -9,12 +9,26 @@ class Competition(models.Model):
         max_length=100,
         help_text = _('Format: required, max-length:100')
     )
+    name_ar = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text = _('arabic translation for name field')
+    )
+
     description = models.TextField(
         max_length=500,
         null = True,
         blank = True,
         help_text = _('Format: optional, max-length:500')
     )
+    description_ar = models.TextField(
+        max_length=500,
+        null = True,
+        blank = True,
+        help_text = _('arabic translation for description')
+    )
+
     target = models.PositiveIntegerField(
         default = 0,
         help_text = _('Competition target points'),

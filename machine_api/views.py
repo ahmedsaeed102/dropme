@@ -13,9 +13,9 @@ from django.contrib.gis.db.models.functions import Distance
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .models import Machine, RecycleLog
-from .serializers import MachineSerializer, QRCodeSerializer, RecycleLogSerializer, CustomMachineSerializer
+from .serializers import MachineSerializer, QRCodeSerializer, UpdateRecycleLog, RecycleLogSerializer, MachineCoordinatesSerializer
 from .utlis import claculate_travel_distance_and_time, get_directions
-# from geopy.distance import lonlat, geodesic
+from users_api.serializers import UserSerializer
 
 
 class Machines(generics.ListCreateAPIView):
@@ -154,7 +154,7 @@ class SetMachineCoordinates(APIView):
         } 
     '''
     permission_classes = [IsAuthenticated]
-    serializer_class = CustomMachineSerializer
+    serializer_class = MachineCoordinatesSerializer
 
     def patch(self, request, name):
         try:
@@ -163,9 +163,9 @@ class SetMachineCoordinates(APIView):
             raise NotFound(detail="Error 404, Machine not found", code=404)
 
         longitude = request.data.get('longitude', 0)
-        latitdue = request.data.get('latitdue', 0)
+        latitude = request.data.get('latitude', 0)
         
-        pnt = Point(float(longitude), float(latitdue))
+        pnt = Point(float(longitude), float(latitude))
         machine.location = pnt
         machine.save()
 
@@ -197,18 +197,14 @@ class MachineQRCode(APIView):
         except Machine.DoesNotExist:
             raise NotFound(detail="Error 404, Machine not found", code=404)
 
-        # serializer = QRCodeSerializer(machine)
         path = request.build_absolute_uri(reverse("start_recycle", kwargs={'name':machine.identification_name}))
+        path = path.replace('http','wss')
         qrcode_img = qrcode.make(path)
         fname = f'qr_code-{machine.identification_name}.png'
         buffer = BytesIO()
         qrcode_img.save(buffer,'PNG')
         machine.qr_code.save(fname, File(buffer), save=True)
 
-        # return Response({
-        #     'message': 'Success',
-        #     'machine pk': machine.pk,
-        #     'qr_code': serializer.data})
         return HttpResponse(machine.qr_code, content_type="image/png")
 
 
@@ -220,10 +216,11 @@ class UpdateRecycle(APIView):
     cans: int
     } 
     '''
+    serializer_class = UpdateRecycleLog
     def post(self, request, name):
         bottles = request.data.get('bottles', 0)
         cans = request.data.get('cans', 0)
-        log = RecycleLog.objects.filter(machine_name=name, in_progess=True).first()
+        log = RecycleLog.objects.filter(machine_name=name, in_progess=True).order_by('-created_at').first()
 
         if not log:
             raise NotFound(detail="Error 404, log not found", code=404)
@@ -271,3 +268,24 @@ class RetrieveRecycleLog(APIView):
         return Response({
             'message': 'Success',
             'data': serializer.data,})
+    
+
+class IsMachineBusy(APIView):
+    '''
+    Tells the machine if the user logedin using the QR Code or not.
+    '''
+
+    def get(self, request, name):
+        logs = RecycleLog.objects.filter(machine_name=name, in_progess=True)
+        if not logs:
+            return Response({
+            'message': 'no user logged in',
+            'busy': False,
+            })
+        
+        user = UserSerializer(logs[0].user)
+
+        return Response({
+            'message': 'User logged in',
+            'busy': True,
+            'user': user.data,})
