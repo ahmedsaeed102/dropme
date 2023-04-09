@@ -3,9 +3,11 @@ from django.urls import path, include
 # from django.views.decorators.csrf import csrf_exempt
 # from rest_framework_simplejwt.views import (
 #     TokenObtainPairView,
-    
+# ,PasswordTokenCheckAPI
+# RequestPasswordOtp,
+    # 
 # )
-from users_api.views import UserViewSet,RequestPasswordResetEmail,PasswordTokenCheckAPI,SetNewPasswordAPIView,ManageUserProfileView,MyTokenObtainPairView
+from users_api.views import RequestPasswordOtp,UserViewSet,RequestPasswordResetEmail,SetNewPasswordAPIView,ManageUserProfileView,MyTokenObtainPairView
 from rest_framework_simplejwt.views import TokenBlacklistView
 from rest_framework.routers import DefaultRouter
 from django.conf import settings
@@ -17,14 +19,14 @@ router=DefaultRouter()
 router.register('user_register',UserViewSet,basename='user_register')
 
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path(' ', include('users_api.urls',namespace='users_api')),
     path('user_register/', include(router.urls)),
     path('edit_profile/', ManageUserProfileView.as_view(), name='edit_profile'),
     path('reset_password_emaillink/',RequestPasswordResetEmail.as_view(), name='send_email_password'),
-    path('password-reset/<uidb64>/<token>/',PasswordTokenCheckAPI.as_view(), name='password-reset-confirm'),
+    path('reset_password_otp/',RequestPasswordOtp.as_view(), name='otp_for_password'),
+    # path('password-reset/<uidb64>/<token>/',PasswordTokenCheckAPI.as_view(), name='password-reset-confirm'),
     path('password-reset/', SetNewPasswordAPIView.as_view(),name='password-reset-complete'),
     path('logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
     path('user_login/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),

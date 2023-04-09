@@ -22,7 +22,7 @@ SECRET_KEY = 'django-insecure-jdcvfnqn0vc3qlbyka-i*$0ya*)nkt&23+&vz%$k$3tqn#+@@c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 # CSRF_TRUSTED_ORIGINS = [ 'https://web-production-86d4.up.railway.app/']
-CSRF_TRUSTED_ORIGINS =['https://*.railway.app']
+CSRF_TRUSTED_ORIGINS =['https://*.railway.app','https://127.0.0.1']
 ALLOWED_HOSTS = ['*']
 
 
@@ -154,10 +154,22 @@ ASGI_APPLICATION = "core.asgi.application"
 
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        "ENGINE": "django.contrib.gis.db.backends.spatialite",
-        'NAME': BASE_DIR / 'db.sqlite3',
+    #     # 'ENGINE': 'django.db.backends.sqlite3',
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "HOST": 'localhost',
+        "NAME": 'dropme',
+        "PASSWORD": 'password',
+        "PORT": 5432,
+        "USER": "postgres",
     }
+    # "default": {
+    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
+    #     "HOST": os.environ.get('db_host'),
+    #     "NAME": os.environ.get('db_name'),
+    #     "PASSWORD": os.environ.get('db_password'),
+    #     "PORT": 5793,
+    #     "USER": "postgres",
+    # }
 }
 
 if os.name == 'nt':

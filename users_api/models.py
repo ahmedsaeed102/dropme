@@ -18,7 +18,7 @@ def upload_to(instance,filename):
     return 'users_api/{filename}'.format(filename=filename)
 
 phone_number_regex=RegexValidator(
-    regex=r"^\d{10}",message="Phone Number must be 10 number only ."
+    regex=r"^\d{11}",message="Phone Number must be 11 number only ."
 )
 class UserManager(BaseUserManager):
     

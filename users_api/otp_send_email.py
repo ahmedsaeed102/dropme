@@ -23,16 +23,29 @@ from django.core.mail import EmailMessage
 import threading
 
 
-class EmailThread(threading.Thread):
+# class EmailThread(threading.Thread):
 
-    def __init__(self, email):
-        self.email = email
-        threading.Thread.__init__(self)
+#     def __init__(self, email):
+#         self.email = email
+#         threading.Thread.__init__(self)
 
-    def run(self):
-        self.email.send()
+#     def run(self):
+#         self.email.send()
      
-def send_mail_pass(data):
+# def send_mail_pass(data):
       
-      email = EmailMessage(subject=data['email_subject'], body=data['email_body'], to=[data['to_email']])
-      EmailThread(email).start()
+#       email = EmailMessage(subject=data['email_subject'], body=data['email_body'], to=[data['to_email']])
+#       EmailThread(email).start()
+
+
+def send_mail_pass(email, otp):
+    user = UserModel.objects.get(email=email)
+    user.otp = otp
+    user.save()
+    
+    subject = 'Welcome to DropMe'
+    message = f'Hi {user.username}, Use this otp to reset your password in DropMe app,this is your OTP:{otp} enjoy recycling :).'
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = [email]
+    send_mail(subject, message, email_from,recipient_list)
+
