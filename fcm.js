@@ -1,8 +1,5 @@
-// Import the functions you need from the SDKs you need
-// import { initializeApp } from "firebase/app";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-// import { getMessaging, getToken, onMessage } from "firebase/firebase-messaging"
-import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging.js"
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-messaging.js"
 
 // Your web app's Firebase configuration
 
