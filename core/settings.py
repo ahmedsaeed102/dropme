@@ -1,6 +1,9 @@
 import os
 import environ
 from pathlib import Path
+from firebase_admin import initialize_app
+from firebase_admin import credentials
+
 
 env=environ.Env()
 
@@ -12,11 +15,9 @@ MAX_OTP_TRY=3
 AUTH_USER_MODEL='users_api.UserModel'
 MIN_PASSWORD_LENGTH=8
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-jdcvfnqn0vc3qlbyka-i*$0ya*)nkt&23+&vz%$k$3tqn#+@@c'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -49,12 +50,48 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     "channels",
+    "fcm_django",
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
+    "corsheaders",
     # 'whitenoise.runserver_nostatic',
 ]
 
 SITE_ID = int(os.environ.get('SITE_ID'))
+
+cert = {
+    "type": os.environ.get('type'), 
+    "project_id": os.environ.get('project_id'),
+    "private_key_id": os.environ.get('private_key_id'),
+    "private_key": os.environ.get('private_key').replace(r'\n', '\n'),
+    "client_email": os.environ.get('client_email'),
+    "client_id": os.environ.get('client_id'),
+    "auth_uri": os.environ.get('auth_uri'),
+    "token_uri": os.environ.get('token_uri'),
+    "auth_provider_x509_cert_url": os.environ.get('auth_provider_x509_cert_url'),
+    "client_x509_cert_url": os.environ.get('client_x509_cert_url')
+}
+cred = credentials.Certificate(cert)
+FIREBASE_APP = initialize_app(cred)
+
+FCM_DJANGO_SETTINGS = {
+     # an instance of firebase_admin.App to be used as default for all fcm-django requests
+     # default: None (the default Firebase app)
+    "DEFAULT_FIREBASE_APP": FIREBASE_APP,
+    "APP_VERBOSE_NAME": "notification",
+     # true if you want to have only one active device per registered user at a time
+     # default: False
+    "ONE_DEVICE_PER_USER": False,
+     # devices to which notifications cannot be sent,
+     # are deleted upon receiving error response from FCM
+     # default: False
+    "DELETE_INACTIVE_DEVICES": False,
+    # Transform create of an existing Device (based on registration id) into
+                # an update. See the section
+    # "Update of device with duplicate registration ID" for more details.
+    # default: False
+    "UPDATE_ON_DUPLICATE_REG_ID": True,
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -117,10 +154,13 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
+CORS_ALLOW_ALL_ORIGINS = True
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     # "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -153,19 +193,22 @@ ASGI_APPLICATION = "core.asgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    # 'default': {
-    #     # 'ENGINE': 'django.db.backends.sqlite3',
-    #     "ENGINE": "django.contrib.gis.db.backends.spatialite",
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "HOST": os.environ.get('db_host'),
-        "NAME": os.environ.get('db_name'),
-        "PASSWORD": os.environ.get('db_password'),
-        "PORT": 5793,
+        "HOST": "localhost",
+        "NAME": "postgres",
+        "PASSWORD": "admin",
+        "PORT": 5433,
         "USER": "postgres",
-    }
+    },
+    # "default": {
+    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
+    #     "HOST": os.environ.get('db_host'),
+    #     "NAME": os.environ.get('db_name'),
+    #     "PASSWORD": os.environ.get('db_password'),
+    #     "PORT": 5793,
+    #     "USER": "postgres",
+    # }
 }
 
 if os.name == 'nt':
@@ -181,6 +224,7 @@ if os.name == 'nt':
     os.environ['PROJ_LIB'] = OSGEO4W + r"\share\proj"
     GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal306'
     os.environ['PATH'] = OSGEO4W + r"\bin;" + os.environ['PATH']
+
 # GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal306.dll'
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
