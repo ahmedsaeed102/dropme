@@ -201,22 +201,22 @@ DATABASES = {
     #     "PORT": 5432,
     #}
 
-    "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "HOST": "localhost",
-        "NAME": "postgres",
-        "PASSWORD": "admin",
-        "PORT": 5433,
-        "USER": "postgres",
-    },
     # "default": {
     #     "ENGINE": "django.contrib.gis.db.backends.postgis",
-    #     "HOST": os.environ.get('db_host'),
-    #     "NAME": os.environ.get('db_name'),
-    #     "PASSWORD": os.environ.get('db_password'),
-    #     "PORT": 5793,
+    #     "HOST": "localhost",
+    #     "NAME": "postgres",
+    #     "PASSWORD": "admin",
+    #     "PORT": 5433,
     #     "USER": "postgres",
-    # }
+    # },
+    "default": {
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "HOST": os.environ.get('db_host'),
+        "NAME": os.environ.get('db_name'),
+        "PASSWORD": os.environ.get('db_password'),
+        "PORT": 5793,
+        "USER": "postgres",
+    }
 }
 
 if os.name == 'nt':
