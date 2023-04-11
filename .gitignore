@@ -5,6 +5,11 @@ __pycache__/
 
 # C extensions
 *.so
+credentials.json
+package.json
+package-lock.json
+node_modules/
+webpack.config.js
 
 # Distribution / packaging
 .Python

@@ -1,11 +1,9 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-# from model_utils import Choices
 from users_api.models import UserModel
 from django.contrib.gis.db.models import PointField
 
 
-# STATUS = Choices('available', 'breakdown')
 STATUS = (
     ("available", "available"),
     ("breakdown", "breakdown"),
@@ -49,7 +47,7 @@ class Machine(models.Model):
     )
     
     status = models.CharField(choices=STATUS, default="available", max_length=20)
-    status_ar = models.CharField(choices=STATUS_AR, default="available", max_length=20)
+    status_ar = models.CharField(choices=STATUS_AR, default="متاح", max_length=20)
 
     qr_code = models.ImageField(upload_to='qr_codes', blank=True)
     
