@@ -16,6 +16,8 @@ from .models import Machine, RecycleLog
 from .serializers import MachineSerializer, QRCodeSerializer, UpdateRecycleLog, RecycleLogSerializer, MachineCoordinatesSerializer
 from .utlis import claculate_travel_distance_and_time, get_directions
 from users_api.serializers import UserSerializer
+from firebase_admin.messaging import Message, Notification
+from fcm_django.models import FCMDevice
 
 
 class Machines(generics.ListCreateAPIView):
@@ -164,6 +166,25 @@ class SetMachineCoordinates(APIView):
 
         longitude = request.data.get('longitude', 0)
         latitude = request.data.get('latitude', 0)
+        
+        if machine.location:
+            FCMDevice.objects.send_message(
+                Message(
+                    notification=Notification(
+                    title=f"Machine location changed", 
+                    body=f"A machine moved to a new location check it out!", 
+                    )
+                )
+            )
+        else:
+            FCMDevice.objects.send_message(
+                Message(
+                    notification=Notification(
+                    title="New Mahcine added", 
+                    body="New recycle machine added check it out!", 
+                    )
+                )
+            )
         
         pnt = Point(float(longitude), float(latitude))
         machine.location = pnt
