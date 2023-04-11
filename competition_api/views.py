@@ -6,14 +6,28 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from users_api.models import UserModel
 from datetime import date
-from .serializers import CompetitionSerializer, CustomUserSerializer, CustomCompetitionSerializer, CompetitionRankingSerializer
+from .serializers import CompetitionSerializer, CustomUserSerializer, CustomCompetitionSerializer
 from .models import Competition
+from firebase_admin.messaging import Message, Notification
+from fcm_django.models import FCMDevice
 
 
 class Competitions(generics.ListCreateAPIView):
     queryset = Competition.objects.all()
     serializer_class = CompetitionSerializer
     permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        FCMDevice.objects.send_message(
+            Message(
+            notification=Notification(
+            title="New Competition", 
+            body="New competition created check it out!", 
+            )
+            )
+        )
+
+        return self.create(request, *args, **kwargs)
     
 
 class CompetitionDetail(generics.RetrieveUpdateAPIView):
