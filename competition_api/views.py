@@ -16,8 +16,9 @@ class Competitions(generics.ListCreateAPIView):
     queryset = Competition.objects.all()
     serializer_class = CompetitionSerializer
     permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
+    
+    def perform_create(self, serializer):
+        serializer.save()
         FCMDevice.objects.send_message(
             Message(
             notification=Notification(
@@ -27,7 +28,6 @@ class Competitions(generics.ListCreateAPIView):
             )
         )
 
-        return self.create(request, *args, **kwargs)
     
 
 class CompetitionDetail(generics.RetrieveUpdateAPIView):
