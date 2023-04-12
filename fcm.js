@@ -21,12 +21,12 @@ requestPermission()
 
 getToken(messaging, { vapidKey: 'BH-Tqv50WY9US7Bkdox-iONNS3TcksPgMVPNsZESc0SphayQcZMVzQAB66DlHP66eTCq3rl_4S0h6K72C5ePeug' }).then((currentToken) => {
     if (currentToken) {
-        fetch('http://127.0.0.1:8000/user_register/devices/', {
+        fetch('https://dropme.up.railway.app/user_register/devices/', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json',
-                'authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjgzNzI5MzcwLCJpYXQiOjE2ODExMzczNzAsImp0aSI6IjViMDdjNTAwYzFmODRlYmViNDJlMDNiNTRiNzQ4MmM1IiwidXNlcl9pZCI6Mn0.kJuhdUsAPP4ghItua8ZzLb1-5INqnqwoX7tU_c3ATTw'
+                'authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjgzODE3MjM4LCJpYXQiOjE2ODEyMjUyMzgsImp0aSI6IjM1Y2E3ZGEwY2RiNDQ3OTdiY2JlNDY3ZjEwYzU0MmNkIiwidXNlcl9pZCI6Mn0.hWqarUh8FkOumMVYFGekAVZX7lx44j5rc12ab1dwXk4'
             },
             body: JSON.stringify({ "registration_id": currentToken, type: 'web' })
         }).then(res => res.json()).then(res => console.log(res));
