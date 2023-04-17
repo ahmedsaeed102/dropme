@@ -16,19 +16,20 @@ AUTH_USER_MODEL='users_api.UserModel'
 MIN_PASSWORD_LENGTH=8
 
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# CSRF_TRUSTED_ORIGINS = [ 'https://web-production-86d4.up.railway.app/']
+if os.environ.get('state') == 'production':
+    DEBUG = False
+else:
+    DEBUG = True
+
+
 CSRF_TRUSTED_ORIGINS =['https://*.railway.app','https://127.0.0.1']
 ALLOWED_HOSTS = ['*']
 
 
 # Application definition
-
 INSTALLED_APPS = [
     "daphne",
     'django.contrib.admin',
