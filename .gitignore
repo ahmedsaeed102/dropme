@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 dump.sql
 welcomeemail.html
+locustfile.py
 # C extensions
 *.so
 credentials.json

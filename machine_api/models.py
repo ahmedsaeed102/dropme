@@ -9,8 +9,8 @@ STATUS = (
     ("breakdown", "breakdown"),
 )
 STATUS_AR = (
-    ("available", "متاح"),
-    ("breakdown", "لا تعمل"),
+    ("متاح", "متاح"),
+    ("لا تعمل", "لا تعمل"),
 )
 
 
