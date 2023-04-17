@@ -16,8 +16,11 @@ from .models import Machine, RecycleLog
 from .serializers import MachineSerializer, QRCodeSerializer, UpdateRecycleLog, RecycleLogSerializer, MachineCoordinatesSerializer
 from .utlis import claculate_travel_distance_and_time, get_directions
 from users_api.serializers import UserSerializer
+from users_api.models import UserModel
 from firebase_admin.messaging import Message, Notification
 from fcm_django.models import FCMDevice
+from django.conf import settings
+from django.core.mail import send_mail
 
 
 class Machines(generics.ListCreateAPIView):
@@ -310,3 +313,34 @@ class IsMachineBusy(APIView):
             'message': 'User logged in',
             'busy': True,
             'user': user.data,})
+
+
+class MachineIsFull(APIView):
+    def get(self, request, name):
+        machine = Machine.objects.get(identification_name=name)
+        machine.status = 'breakdown'
+        machine.status_ar = 'لا تعمل'
+        machine.save()
+
+        FCMDevice.objects.get(name='admin').send_message(
+             Message(
+                notification=Notification(
+                title="Machine is full", 
+                body=f"{name} machine is full empty it!", 
+                )
+            )
+        )
+
+        subject = 'Machine is full'
+        email_from = settings.EMAIL_HOST_USER
+        to = UserModel.objects.get(username='admin').email
+        recipient_list = [to]
+
+        send_mail(
+            subject, 
+            f"Machine {name} is full", 
+            email_from, 
+            recipient_list, 
+        )
+
+        return Response({'message': 'success',})
