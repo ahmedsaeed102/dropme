@@ -289,5 +289,6 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 STATICFILES_DIRS=[BASE_DIR/'static']
 MEDIA_ROOT=os.path.join(BASE_DIR,'static/images')
 MEDIA_URL='/images/'
-STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage"
+# STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 STATIC_ROOT = BASE_DIR / "staticfiles"
