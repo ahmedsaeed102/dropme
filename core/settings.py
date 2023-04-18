@@ -20,7 +20,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 
 if os.environ.get('state') == 'production':
-    DEBUG = False
+    DEBUG = True
 else:
     DEBUG = True
 
