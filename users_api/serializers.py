@@ -1,7 +1,8 @@
 import random
 from datetime import datetime ,timedelta
 from django.conf import settings
-from .models import UserModel
+from .models import UserModel,LocationModel
+import random
 from rest_framework import  serializers
 from .otp_send_email import send_otp,send_mail_pass
 from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
@@ -32,10 +33,14 @@ class UserSerializer(serializers.ModelSerializer):
     
     # to check password validation in sign up form
     def validate(self,data):
-        if data['password1']!=data['password2']:
-            raise serializers.ValidationError("the two password does not match")
-        return data
+            password1 = data.get('password1')
+            password2 = data.get('password2')
+            if  password1!=password2:
+                raise serializers.ValidationError("the two password does not match")
+            return data
     
+            
+       
     # create and return user with encrybted password
     def create(self, val_data):
         otp=random.randint(1000,9999)
@@ -59,14 +64,27 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(UserSerializer):
+    password1=serializers.CharField(
+        write_only=True,
+        min_length=settings.MIN_PASSWORD_LENGTH,
+        error_messages={'min_length':f"Password must be longer than{settings.MIN_PASSWORD_LENGTH} length"}
+        )
+    password2=serializers.CharField(
+        write_only=True,
+        min_length=settings.MIN_PASSWORD_LENGTH,
+        error_messages={'min_length':f"Password must be longer than{settings.MIN_PASSWORD_LENGTH} length"}
+        )
+    email=serializers.EmailField()
+    username= serializers.CharField(
+        max_length=80)
     class Meta:
        model = UserModel
-       fields = ['username','phone_number','email','password1','password2','profile_photo','gender','address' ]
+       fields = ['username','phone_number','age','email','password1','password2','profile_photo','gender','address' ]
     
     # def create(self, val_data):
-    #     return get_user_model().objects.create_user(**val_data)
+    #     return UserModel.objects.create_user(**val_data)
     def update(self,instance,val_data):
-        '''update profile'''
+        '''update profile for User'''
         password=val_data.pop('password1',None)
         user=super().update(instance,val_data)
         if password :
@@ -141,6 +159,21 @@ class SetNewPasswordSerializer(serializers.Serializer):
         except Exception as e:
             raise AuthenticationFailed('The reset otp is invalid', 401)
         
+    
+
+    
+
+        
+       
+        
+
+class LocationModelserializers(serializers.ModelSerializer):
+    class Meta:
+        model=LocationModel
+        fields='__all__'
+    # queryset=LocationModel.objects.all()
+    # serializ
+
     
 
     

@@ -63,7 +63,7 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
     registered_at=models.DateTimeField(auto_now_add=True)
 
     profile_photo=models.ImageField(upload_to='upload_to', default='upload_to/default.png')
-
+    age=models.IntegerField(null=True)
     GENDER = Choices('male', 'female')
     gender=models.CharField(choices=GENDER,default=GENDER.male, max_length=20) 
 
@@ -94,15 +94,6 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
         ordering = ('-total_points',)
     
     
-# class ResetPasswordModel(models.Model):
-#     user=models.ForeignKey(UserModel, on_delete=models.CASCADE)
-#     reset_pass_token=models.CharField(null=True,blank=True,max_length=200)
-#     created_at=models.DateTimeField(auto_now_add=True)
-#     updated_at=models.DateTimeField(auto_now=True)
-    
-        
-#     def __str__(self):
-#         return self.user.email
 
 
 

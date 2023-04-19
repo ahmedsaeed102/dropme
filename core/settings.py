@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "channels",
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
+    'emoji',
     # 'whitenoise.runserver_nostatic',
 ]
 
@@ -73,6 +74,7 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
+
 
 
 from datetime import timedelta
@@ -153,25 +155,12 @@ ASGI_APPLICATION = "core.asgi.application"
 
 DATABASES = {
 
-    # 'default': {
-    # #     # 'ENGINE': 'django.db.backends.sqlite3',
-    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
-    #     "HOST": 'localhost',
-    #     "NAME": 'dropme',
-    #     "PASSWORD": 'password',
-    #     "PORT": 5432,
-
-    # 'default': {
-    #     # 'ENGINE': 'django.db.backends.sqlite3',
-    #     "ENGINE": "django.contrib.gis.db.backends.spatialite",
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "HOST": os.environ.get('db_host'),
-        "NAME": os.environ.get('db_name'),
-        "PASSWORD": os.environ.get('db_password'),
-        "PORT": 5793,
+        "HOST": 'localhost',
+        "NAME": 'dropme',
+        "PASSWORD": 'password',
+        "PORT": 5432,
         "USER": "postgres",
     }
     # "default": {

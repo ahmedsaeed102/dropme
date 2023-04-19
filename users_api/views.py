@@ -8,7 +8,7 @@ from django.utils import timezone
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .otp_send_email import send_otp,send_mail_pass
-from users_api.models import UserModel
+from users_api.models import UserModel,LocationModel
 
 # from django.contrib.sites.shortcuts import get_current_site
 # from django.urls import reverse
@@ -28,7 +28,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .otp_send_email import send_otp,send_mail_pass
 from .models import UserModel
-from .serializers import UserSerializer,UserProfileSerializer,SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer
+from .serializers import LocationModelserializers,UserSerializer,UserProfileSerializer,SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer
 
 
 class CustomRedirect(HttpResponsePermanentRedirect):
@@ -97,19 +97,22 @@ class UserViewSet(viewsets.ModelViewSet):
 # for edit_profile
 class ManageUserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
+    queryset=UserModel.objects.all()
+    lookup_field = 'pk'
     permission_classes=(permissions.IsAuthenticated,)
     
-    def get_object(self):
-        return self.request.user
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "user profile updated successfully"})
+
+        else:
+            return Response({"message": "failed", "details": serializer.errors})
     
-# for reseting password
-# class ResetPasswordView(generics.RetrieveUpdateAPIView):
-    
-#     serializer_class = UserProfileSerializer
-#     permission_classes=(permissions.IsAuthenticated,)
-    
-#     def get_object(self):
-#         return self.request.user
+
 
 
 class RequestPasswordResetEmail(generics.GenericAPIView,):
@@ -141,7 +144,6 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
 
 
     
-        
 class RequestPasswordOtp(generics.GenericAPIView):
     """ regenerate otp for reset password """
     serializer_class = ResetPasswordEmailRequestSerializer    
@@ -169,31 +171,7 @@ class RequestPasswordOtp(generics.GenericAPIView):
         instance.save()
         return Response("successfully regenrated the new OTP.",status=status.HTTP_200_OK)
 
-# @api_view(['PUT'])
-# def reset_password(request):
-#     """reset_password with email, OTP and new password"""
-#     data = request.data
-#     user = UserModel.objects.get(email=data['email'])
-#     if user.is_active:
-#         # Check if otp is valid
-#         if data['otp'] == user.opt:
-#             if new_password != '':
-#                 # Change Password
-#                 user.set_password(data['password'])
-#                 user.save() # Here user otp will also be changed on save automatically 
-#                 return Response('any response or you can add useful information with response as well. ')
-#             else:
-#                 message = {
-#                     'detail': 'Password cant be empty'}
-#                 return Response(message, status=status.HTTP_400_BAD_REQUEST)
-#         else:
-#             message = {
-#                 'detail': 'OTP did not matched'}
-#             return Response(message, status=status.HTTP_400_BAD_REQUEST)
-#     else:
-#         message = {
-#             'detail': 'Something went wrong'}
-#         return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
-
-
+class LocationList(generics.ListCreateAPIView):
+    queryset=LocationModel.objects.all()
+    serializer_class=LocationModelserializers
