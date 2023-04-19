@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.utils import timezone
+from django.http import HttpResponsePermanentRedirect
 
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -15,10 +16,6 @@ from users_api.models import UserModel,LocationModel
 # from django.contrib.auth.tokens import PasswordResetTokenGenerator
 # from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
 # from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-import os
-
-
-from django.http import HttpResponsePermanentRedirect
 
 from rest_framework import viewsets, status, generics, permissions
 from rest_framework.decorators import action
@@ -26,9 +23,11 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .otp_send_email import send_otp,send_mail_pass
-from .models import UserModel
+
 from .serializers import LocationModelserializers,UserSerializer,UserProfileSerializer,SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer
+
+
+
 
 
 class CustomRedirect(HttpResponsePermanentRedirect):
@@ -43,6 +42,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Add custom claims
         data['username'] = self.user.username
         data['email'] = self.user.email
+        data['id']=self.user.id
         
         return data
 
@@ -121,14 +121,14 @@ class RequestPasswordResetEmail(generics.GenericAPIView,):
     def post(self, request,pk=None):
         serializer = self.serializer_class(data=request.data)
         email = request.data.get('email', '')
-        user = UserModel.objects.get(email=email)
-        if UserModel.objects.filter(email=email).exists():
+        user = UserModel.objects.filter(email=email).first()
+        if user:
             # send email with otp
             send_mail_pass(email,user.otp)
         
-            return Response("successfully genrated the new OTP.",status=status.HTTP_200_OK)
-
-
+            return Response("Reset password email sent",status=status.HTTP_200_OK)
+        else:
+            return Response("There is no account registered with this email.",status=status.HTTP_404_NOT_FOUND)
 
 
 class SetNewPasswordAPIView(generics.GenericAPIView):
@@ -142,8 +142,6 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
 
     
 
-
-    
 class RequestPasswordOtp(generics.GenericAPIView):
     """ regenerate otp for reset password """
     serializer_class = ResetPasswordEmailRequestSerializer    
@@ -172,6 +170,8 @@ class RequestPasswordOtp(generics.GenericAPIView):
         return Response("successfully regenrated the new OTP.",status=status.HTTP_200_OK)
 
 
+
 class LocationList(generics.ListCreateAPIView):
     queryset=LocationModel.objects.all()
     serializer_class=LocationModelserializers
+

@@ -77,6 +77,7 @@ class UserProfileSerializer(UserSerializer):
     email=serializers.EmailField()
     username= serializers.CharField(
         max_length=80)
+    # address_name = serializers.StringRelatedField()
     class Meta:
        model = UserModel
        fields = ['username','phone_number','age','email','password1','password2','profile_photo','gender','address' ]

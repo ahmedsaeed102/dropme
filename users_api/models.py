@@ -72,7 +72,7 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
         help_text = _('User total earned points')
     )
 
-    address = models.ForeignKey(LocationModel, on_delete=models.CASCADE, null=True, default=1)
+    address = models.ForeignKey(LocationModel, on_delete=models.CASCADE, null=True,related_name="address_name" ,default=1)
     
     objects=UserManager()
     

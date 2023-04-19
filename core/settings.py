@@ -1,6 +1,9 @@
 import os
 import environ
 from pathlib import Path
+from firebase_admin import initialize_app
+from firebase_admin import credentials
+
 
 env=environ.Env()
 
@@ -12,22 +15,21 @@ MAX_OTP_TRY=3
 AUTH_USER_MODEL='users_api.UserModel'
 MIN_PASSWORD_LENGTH=8
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-jdcvfnqn0vc3qlbyka-i*$0ya*)nkt&23+&vz%$k$3tqn#+@@c'
+os.environ.get('SECRET_KEY')
+SECRET_KEY = "django-insecure-jdcvfnqn0vc3qlbyka-i*$0ya*)nkt&23+&vz%$k$3tqn#+@@c"
 
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# CSRF_TRUSTED_ORIGINS = [ 'https://web-production-86d4.up.railway.app/']
+if os.environ.get('state') == 'production':
+    DEBUG = True
+else:
+    DEBUG = True
+
+
 CSRF_TRUSTED_ORIGINS =['https://*.railway.app','https://127.0.0.1']
 ALLOWED_HOSTS = ['*']
 
 
 # Application definition
-
 INSTALLED_APPS = [
     "daphne",
     'django.contrib.admin',
@@ -49,13 +51,50 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     "channels",
+    "fcm_django",
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
-    'emoji',
+    # 'emoji',
+    # "corsheaders",
+
     # 'whitenoise.runserver_nostatic',
 ]
 
 SITE_ID = int(os.environ.get('SITE_ID'))
+
+# cert = {
+#     "type": os.environ.get('type'), 
+#     "project_id": os.environ.get('project_id'),
+#     "private_key_id": os.environ.get('private_key_id'),
+#     "private_key": os.environ.get('private_key').replace(r'\n', '\n'),
+#     "client_email": os.environ.get('client_email'),
+#     "client_id": os.environ.get('client_id'),
+#     "auth_uri": os.environ.get('auth_uri'),
+#     "token_uri": os.environ.get('token_uri'),
+#     "auth_provider_x509_cert_url": os.environ.get('auth_provider_x509_cert_url'),
+#     "client_x509_cert_url": os.environ.get('client_x509_cert_url')
+# }
+# cred = credentials.Certificate(cert)
+# FIREBASE_APP = initialize_app(cred)
+
+# FCM_DJANGO_SETTINGS = {
+#      # an instance of firebase_admin.App to be used as default for all fcm-django requests
+#      # default: None (the default Firebase app)
+#     "DEFAULT_FIREBASE_APP": FIREBASE_APP,
+#     "APP_VERBOSE_NAME": "notification",
+#      # true if you want to have only one active device per registered user at a time
+#      # default: False
+#     "ONE_DEVICE_PER_USER": False,
+#      # devices to which notifications cannot be sent,
+#      # are deleted upon receiving error response from FCM
+#      # default: False
+#     "DELETE_INACTIVE_DEVICES": False,
+#     # Transform create of an existing Device (based on registration id) into
+#                 # an update. See the section
+#     # "Update of device with duplicate registration ID" for more details.
+#     # default: False
+#     "UPDATE_ON_DUPLICATE_REG_ID": True,
+# }
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -118,10 +157,13 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
+CORS_ALLOW_ALL_ORIGINS = True
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # "whitenoise.middleware.WhiteNoiseMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -163,14 +205,6 @@ DATABASES = {
         "PORT": 5432,
         "USER": "postgres",
     }
-    # "default": {
-    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
-    #     "HOST": os.environ.get('db_host'),
-    #     "NAME": os.environ.get('db_name'),
-    #     "PASSWORD": os.environ.get('db_password'),
-    #     "PORT": 5793,
-    #     "USER": "postgres",
-    # }
 }
 
 if os.name == 'nt':
@@ -186,6 +220,7 @@ if os.name == 'nt':
     os.environ['PROJ_LIB'] = OSGEO4W + r"\share\proj"
     GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal306'
     os.environ['PATH'] = OSGEO4W + r"\bin;" + os.environ['PATH']
+
 # GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal306.dll'
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -241,5 +276,6 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 STATICFILES_DIRS=[BASE_DIR/'static']
 MEDIA_ROOT=os.path.join(BASE_DIR,'static/images')
 MEDIA_URL='/images/'
-STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage"
+# STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 STATIC_ROOT = BASE_DIR / "staticfiles"
