@@ -41,6 +41,6 @@ RUN pip install --upgrade pip
 COPY . $DockerHOME  
 
 RUN pip install -r requirements.txt
-RUN python manage.py migrate
+RUN python3 manage.py migrate
 
 EXPOSE 7139
