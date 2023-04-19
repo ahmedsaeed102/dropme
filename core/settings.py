@@ -15,8 +15,8 @@ MAX_OTP_TRY=3
 AUTH_USER_MODEL='users_api.UserModel'
 MIN_PASSWORD_LENGTH=8
 
-os.environ.get('SECRET_KEY')
-# SECRET_KEY = "django-insecure-jdcvfnqn0vc3qlbyka-i*$0ya*)nkt&23+&vz%$k$3tqn#+@@c"
+
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 
 if os.environ.get('state') == 'production':
@@ -54,9 +54,7 @@ INSTALLED_APPS = [
     "fcm_django",
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
-    # 'emoji',
     "corsheaders",
-
     # 'whitenoise.runserver_nostatic',
 ]
 
@@ -113,7 +111,6 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
-
 
 
 from datetime import timedelta
@@ -196,13 +193,29 @@ ASGI_APPLICATION = "core.asgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    # #     # 'ENGINE': 'django.db.backends.sqlite3',
+    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
+    #     "HOST": 'localhost',
+    #     "NAME": 'dropme',
+    #     "PASSWORD": 'password',
+    #     "PORT": 5432,
+    #}
 
+    # "default": {
+    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
+    #     "HOST": "localhost",
+    #     "NAME": "postgres",
+    #     "PASSWORD": "admin",
+    #     "PORT": 5433,
+    #     "USER": "postgres",
+    # },
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "HOST": 'localhost',
-        "NAME": 'dropme',
-        "PASSWORD": 'password',
-        "PORT": 5432,
+        "HOST": os.environ.get('db_host'),
+        "NAME": os.environ.get('db_name'),
+        "PASSWORD": os.environ.get('db_password'),
+        "PORT": 5793,
         "USER": "postgres",
     }
 }
