@@ -1,3 +1,28 @@
+ARG EMAIL_HOST_USER
+ARG EMAIL_HOST_PASSWORD
+ARG state
+ARG SITE_ID
+ARG apikey
+ARG db_password
+ARG db_host
+ARG db_port
+ARG db_name
+ARG SECRET_KEY
+ARG type
+ARG project_id
+ARG private_key_id
+ARG private_key
+ARG client_email
+ARG client_id
+ARG auth_uri
+ARG token_uri
+ARG auth_provider_x509_cert_url
+ARG client_x509_cert_url
+ARG AWS_S3_REGION_NAME
+ARG AWS_ACCESS_KEY_ID
+ARG AWS_SECRET_ACCESS_KEY
+ARG AWS_STORAGE_BUCKET_NAME
+
 FROM ubuntu:latest
 
 RUN apt-get update
