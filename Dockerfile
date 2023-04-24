@@ -49,8 +49,6 @@ ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
 
 
-ARG DockerHOME
-
 ENV DockerHOME=/app/  
 
 RUN mkdir -p $DockerHOME  
