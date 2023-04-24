@@ -59,39 +59,39 @@ INSTALLED_APPS = [
 
 # SITE_ID = int(os.environ.get('SITE_ID'))
 
-cert = {
-    "type": os.environ.get('type'), 
-    "project_id": os.environ.get('project_id'),
-    "private_key_id": os.environ.get('private_key_id'),
-    "private_key": os.environ.get('private_key').replace(r'\n', '\n'),
-    "client_email": os.environ.get('client_email'),
-    "client_id": os.environ.get('client_id'),
-    "auth_uri": os.environ.get('auth_uri'),
-    "token_uri": os.environ.get('token_uri'),
-    "auth_provider_x509_cert_url": os.environ.get('auth_provider_x509_cert_url'),
-    "client_x509_cert_url": os.environ.get('client_x509_cert_url')
-}
-cred = credentials.Certificate(cert)
-FIREBASE_APP = initialize_app(cred)
+# cert = {
+#     "type": os.environ.get('type'), 
+#     "project_id": os.environ.get('project_id'),
+#     "private_key_id": os.environ.get('private_key_id'),
+#     "private_key": os.environ.get('private_key').replace(r'\n', '\n'),
+#     "client_email": os.environ.get('client_email'),
+#     "client_id": os.environ.get('client_id'),
+#     "auth_uri": os.environ.get('auth_uri'),
+#     "token_uri": os.environ.get('token_uri'),
+#     "auth_provider_x509_cert_url": os.environ.get('auth_provider_x509_cert_url'),
+#     "client_x509_cert_url": os.environ.get('client_x509_cert_url')
+# }
+# cred = credentials.Certificate(cert)
+# FIREBASE_APP = initialize_app(cred)
 
-FCM_DJANGO_SETTINGS = {
-     # an instance of firebase_admin.App to be used as default for all fcm-django requests
-     # default: None (the default Firebase app)
-    "DEFAULT_FIREBASE_APP": FIREBASE_APP,
-    "APP_VERBOSE_NAME": "notification",
-     # true if you want to have only one active device per registered user at a time
-     # default: False
-    "ONE_DEVICE_PER_USER": False,
-     # devices to which notifications cannot be sent,
-     # are deleted upon receiving error response from FCM
-     # default: False
-    "DELETE_INACTIVE_DEVICES": False,
-    # Transform create of an existing Device (based on registration id) into
-                # an update. See the section
-    # "Update of device with duplicate registration ID" for more details.
-    # default: False
-    "UPDATE_ON_DUPLICATE_REG_ID": True,
-}
+# FCM_DJANGO_SETTINGS = {
+#      # an instance of firebase_admin.App to be used as default for all fcm-django requests
+#      # default: None (the default Firebase app)
+#     "DEFAULT_FIREBASE_APP": FIREBASE_APP,
+#     "APP_VERBOSE_NAME": "notification",
+#      # true if you want to have only one active device per registered user at a time
+#      # default: False
+#     "ONE_DEVICE_PER_USER": False,
+#      # devices to which notifications cannot be sent,
+#      # are deleted upon receiving error response from FCM
+#      # default: False
+#     "DELETE_INACTIVE_DEVICES": False,
+#     # Transform create of an existing Device (based on registration id) into
+#                 # an update. See the section
+#     # "Update of device with duplicate registration ID" for more details.
+#     # default: False
+#     "UPDATE_ON_DUPLICATE_REG_ID": True,
+# }
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
