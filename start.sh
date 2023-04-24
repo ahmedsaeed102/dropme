@@ -25,7 +25,6 @@ AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME}
 EOL
-cat .env
 
 python3 manage.py makemigrations 
 python3 manage.py migrate
