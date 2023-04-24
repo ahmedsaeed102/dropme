@@ -74,11 +74,11 @@ EXPOSE 80
 RUN chmod +x ./start.sh
 
 # ENTRYPOINT ["./start.sh"]
-ENTRYPOINT ./start.sh ${EMAIL_HOST_USER} ${EMAIL_HOST_PASSWORD} \
- ${state} ${SITE_ID} ${apikey} ${db_password} \
- ${db_host} ${db_port} ${db_name} ${type} \
- ${project_id} ${private_key_id} \
- ${private_key} ${client_email} \
- ${client_id} ${SECRET_KEY}\
- ${auth_uri} ${token_uri} ${auth_provider_x509_cert_url} \
- ${client_x509_cert_url} ${AWS_S3_REGION_NAME} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} ${AWS_STORAGE_BUCKET_NAME} 
+ENTRYPOINT ./start.sh "${EMAIL_HOST_USER}" "${EMAIL_HOST_PASSWORD}" \
+ "${state}" "${SITE_ID}" "${apikey}" "${db_password}" \
+ "${db_host}" "${db_port}" "${db_name}" "${type}" \
+ "${project_id}" "${private_key_id}" \
+ "${private_key}" "${client_email}" \
+ "${client_id} ""${SECRET_KEY}"\
+ "${auth_uri}" "${token_uri}" "${auth_provider_x509_cert_url}" \
+ "${client_x509_cert_url}" "${AWS_S3_REGION_NAME}" "${AWS_ACCESS_KEY_ID}" "${AWS_SECRET_ACCESS_KEY}" "${AWS_STORAGE_BUCKET_NAME}" 
