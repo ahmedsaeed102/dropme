@@ -5,11 +5,9 @@ from firebase_admin import initialize_app
 from firebase_admin import credentials
 
 
-env=environ.Env()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-# environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 MAX_OTP_TRY=3
 AUTH_USER_MODEL='users_api.UserModel'
