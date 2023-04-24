@@ -71,6 +71,17 @@ RUN pip install -r requirements.txt
 
 EXPOSE 80
 
+RUN python3 manage.py makemigrations 
+RUN python3 manage.py migrate
+
+RUN service supervisor start
+RUN supervisorctl
+RUN supervisorctl reread
+RUN supervisorctl update
+RUN nginx
+RUN nginx -s reload
+
 RUN chmod +x ./start.sh
 
-# ENTRYPOINT ["./start.sh"]
+ENTRYPOINT ["./start.sh"]
+# ENTRYPOINT ./start.sh ${SERVICE}
