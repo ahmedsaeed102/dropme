@@ -11,23 +11,13 @@ from rest_framework.response import Response
 from .otp_send_email import send_otp,send_mail_pass
 from users_api.models import UserModel,LocationModel
 
-# from django.contrib.sites.shortcuts import get_current_site
-# from django.urls import reverse
-# from django.contrib.auth.tokens import PasswordResetTokenGenerator
-# from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
-# from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-
 from rest_framework import viewsets, status, generics, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-
 from .serializers import LocationModelserializers,UserSerializer,UserProfileSerializer,SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer
-
-
-
 
 
 class CustomRedirect(HttpResponsePermanentRedirect):

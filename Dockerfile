@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:latest
 
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
@@ -12,7 +12,7 @@ RUN echo $TZ > /etc/timezone && \
     apt-get clean
 
 
-RUN apt-get install -y python3.10 python3-pip locales libpq-dev binutils libproj-dev gdal-bin 
+RUN apt-get install -y python3-pip python3.10 locales libpq-dev binutils libproj-dev gdal-bin nginx supervisor
 
 RUN locale-gen en_GB.UTF-8
 ENV LC_ALL='en_GB.utf8'
@@ -36,10 +36,18 @@ WORKDIR $DockerHOME
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1  
 
-RUN pip install --upgrade pip
+RUN pip install --upgrade pip  
 
-COPY . $DockerHOME  
+COPY . $DockerHOME
+
+COPY supervise.conf /etc/supervisor/conf.d/
+COPY nginx.conf /etc/nginx/nginx.conf
+RUN mkdir /run/daphne/
 
 RUN pip install -r requirements.txt
 
-EXPOSE 7139
+EXPOSE 80
+
+RUN chmod +x ./start.sh
+
+ENTRYPOINT ["./start.sh"]
