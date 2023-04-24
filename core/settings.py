@@ -18,7 +18,7 @@ MIN_PASSWORD_LENGTH=8
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
-
+print(SECRET_KEY)
 if os.environ.get('state') == 'production':
     DEBUG = False
 else:
