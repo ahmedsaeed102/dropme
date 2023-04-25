@@ -82,7 +82,7 @@ ENV SECRET_KEY=${SECRET_KEY}
 ENV type=${type}
 ENV project_id=${project_id}
 ENV private_key_id=${private_key_id}
-ENV private_key=${private_key}
+ENV private_key="$private_key"
 ENV client_email=${client_email}
 ENV client_id=${client_id}
 ENV auth_uri=${auth_uri}
@@ -95,7 +95,7 @@ ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 ENV AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME}
 
 RUN touch .env
-RUN printenv | sed 's/\(^[^=]*\)=\(.*\)/export \1="\2"/' > .env
+RUN printenv  > .env
 
 EXPOSE 80
 
