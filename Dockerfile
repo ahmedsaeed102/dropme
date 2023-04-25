@@ -95,7 +95,7 @@ ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 ENV AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME}
 
 RUN touch .env
-RUN printenv > .env
+RUN printenv | sed -e 's/=/="/' -e 's/$/"/' > .env
 
 EXPOSE 80
 
