@@ -26,7 +26,7 @@ getToken(messaging, { vapidKey: 'BH-Tqv50WY9US7Bkdox-iONNS3TcksPgMVPNsZESc0Sphay
             headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'Content-Type': 'application/json',
-                'authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjgzODE3MjM4LCJpYXQiOjE2ODEyMjUyMzgsImp0aSI6IjM1Y2E3ZGEwY2RiNDQ3OTdiY2JlNDY3ZjEwYzU0MmNkIiwidXNlcl9pZCI6Mn0.hWqarUh8FkOumMVYFGekAVZX7lx44j5rc12ab1dwXk4'
+                'authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjg0OTQ1MTcyLCJpYXQiOjE2ODIzNTMxNzIsImp0aSI6ImRjNmM1YjQ2NGFkNTRhNDI5MzI4NDAxOWYzZTliNDI2IiwidXNlcl9pZCI6MX0.5w1BgaZLO24NBnaqTkLiIkFaRhm432vcTRBeZ1Vom9Y'
             },
             body: JSON.stringify({ "registration_id": currentToken, type: 'web' })
         }).then(res => res.json()).then(res => console.log(res));

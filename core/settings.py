@@ -1,5 +1,6 @@
 import os
 import environ
+import base64
 from pathlib import Path
 from firebase_admin import initialize_app
 from firebase_admin import credentials
@@ -58,12 +59,16 @@ INSTALLED_APPS = [
 ]
 
 # SITE_ID = int(os.environ.get('SITE_ID'))
-print(os.environ.get('private_key').replace(r'\n', '\n'))
+
+private_key = str.encode(os.environ.get('private_key'))
+private_key = base64.b64decode(private_key).decode('utf-8')
+
 cert = {
     "type": os.environ.get('type'), 
     "project_id": os.environ.get('project_id'),
     "private_key_id": os.environ.get('private_key_id'),
-    "private_key": os.environ.get('private_key').replace(r'\n', '\n'),
+    # "private_key": os.environ.get('private_key').replace(r'\n', '\n'),
+    "private_key": private_key.replace(r'\n', '\n'),
     "client_email": os.environ.get('client_email'),
     "client_id": os.environ.get('client_id'),
     "auth_uri": os.environ.get('auth_uri'),
