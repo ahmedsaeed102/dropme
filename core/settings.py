@@ -58,7 +58,7 @@ INSTALLED_APPS = [
 ]
 
 # SITE_ID = int(os.environ.get('SITE_ID'))
-
+print(os.environ.get('private_key').replace(r'\n', '\n'))
 cert = {
     "type": os.environ.get('type'), 
     "project_id": os.environ.get('project_id'),
