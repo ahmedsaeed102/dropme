@@ -1,54 +1,46 @@
-# dropme
-# Dropme Api Project
+# DropMe API Project
 
-<h2>Getting started</h2>
-<h3>Prerequisites</h3>
-<ol>
-<li> download python <a href="https://www.python.org/downloads/">Download</a> </li>
-<li> download virtualenviroment 
+## Getting started
 
-```shell
-pip install virtualenv
-```
-</li>
-<li>go to dropme folder
+### Prerequisites
 
-```shell
-cd dropme
-```
-</li>
-<li>Create virtual environment for windows
+1. Download [Python](https://www.python.org/downloads/)
 
-```shell
-python -m venv venv
-```
-</li>
-<li>Clone repo on your machine
+2. Clone Repo
+    ```shell
+    git clone https://github.com/ahmedsaeed102/dropme.git
+    ```
 
-```shell
-git clone https://github.com/mariamkhaled99/dropme.git
-```
-</li>
+3. Go to dropme folder
+    ```shell
+    cd dropme
+    ```
 
-<li>open your virtual enviroment
-  
-```shell
-venv/bin/activate
-```
-</li>
-<li>Install requirements
+4. Create virtual environment
+    ```shell
+    python -m venv venv
+    ```
 
-```shell
-pip install -r requirements.txt
-```
-</li>
-<li>
-Install GeoDjango
-https://docs.djangoproject.com/en/4.1/ref/contrib/gis/install/
-</li>
-<li>migrate to database
+5. Activate virtual enviroment
+    ```shell
+    venv/bin/activate
+    or
+    ./venv/scripts/activate.ps1
+    ```
 
-```shell
-python manage.py migrate
-```
-</li>
+6. Install requirements
+    ```shell
+    pip install -r requirements.txt
+    ```
+
+7. Install [GeoDjango](https://docs.djangoproject.com/en/4.1/ref/contrib/gis/install/)
+
+8. connect to local database and migrate to database
+    ```shell
+    python manage.py migrate
+    ```
+
+9. Start development server
+    ```shell
+    python manage.py runserver
+    ```

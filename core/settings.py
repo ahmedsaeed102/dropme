@@ -1,11 +1,10 @@
 import os
 import environ
+import base64
 from pathlib import Path
 from firebase_admin import initialize_app
 from firebase_admin import credentials
 
-
-env=environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,19 +14,20 @@ MAX_OTP_TRY=3
 AUTH_USER_MODEL='users_api.UserModel'
 MIN_PASSWORD_LENGTH=8
 
-# os.environ.get('SECRET_KEY')
-SECRET_KEY = "django-insecure-jdcvfnqn0vc3qlbyka-i*$0ya*)nkt&23+&vz%$k$3tqn#+@@c"
+SECRET_KEY = os.environ.get('SECRET_KEY')
+# SECRET_KEY = "django-insecure-jdcvfnqn0vc3qlbyka-i*$0ya*)nkt&23+&vz%$k$3tqn#+@@c"
 
 
 if os.environ.get('state') == 'production':
-    DEBUG = True
+    DEBUG = False
 else:
     DEBUG = True
+    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_URL = '/media/'
 
 
-CSRF_TRUSTED_ORIGINS =['https://*.railway.app','https://127.0.0.1']
+CSRF_TRUSTED_ORIGINS =['https://*.railway.app', 'https://127.0.0.1']
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 INSTALLED_APPS = [
@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "django.contrib.gis",
-    'django.contrib.sites',
+    # 'django.contrib.sites',
 
     # my apps
     'users_api',
@@ -54,19 +54,21 @@ INSTALLED_APPS = [
     "fcm_django",
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
-    # 'emoji',
     "corsheaders",
-
-    # 'whitenoise.runserver_nostatic',
+    'storages',
 ]
 
-SITE_ID = int(os.environ.get('SITE_ID'))
+# SITE_ID = int(os.environ.get('SITE_ID'))
+
+private_key = str.encode(os.environ.get('private_key'))
+private_key = base64.b64decode(private_key).decode('utf-8')
 
 cert = {
     "type": os.environ.get('type'), 
     "project_id": os.environ.get('project_id'),
     "private_key_id": os.environ.get('private_key_id'),
-    "private_key": os.environ.get('private_key'),
+# "private_key": os.environ.get('private_key').replace(r'\n', '\n'),
+    "private_key": private_key.replace(r'\n', '\n'),
     "client_email": os.environ.get('client_email'),
     "client_id": os.environ.get('client_id'),
     "auth_uri": os.environ.get('auth_uri'),
@@ -115,7 +117,6 @@ CHANNEL_LAYERS = {
 }
 
 
-
 from datetime import timedelta
 
 SIMPLE_JWT = {
@@ -161,7 +162,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    #"whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
@@ -196,13 +197,20 @@ ASGI_APPLICATION = "core.asgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-
+    # "default": {
+    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
+    #     "HOST": "localhost",
+    #     "NAME": "postgres",
+    #     "PASSWORD": "admin",
+    #     "PORT": 5433,
+    #     "USER": "postgres",
+    # },
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "HOST": 'localhost',
-        "NAME": 'dropme',
-        "PASSWORD": 'password',
-        "PORT": 5432,
+        "HOST": os.environ.get('db_host'),
+        "NAME": os.environ.get('db_name'),
+        "PASSWORD": os.environ.get('db_password'),
+        "PORT": int(os.environ.get('db_port')),
         "USER": "postgres",
     }
 
@@ -226,6 +234,7 @@ if os.name == 'nt':
     os.environ['PATH'] = OSGEO4W + r"\bin;" + os.environ['PATH']
 
 # GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal306.dll'
+
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -256,17 +265,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
-
-STATIC_URL = '/static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 # sending email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -276,10 +275,16 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
-# for image files
-STATICFILES_DIRS=[BASE_DIR/'static']
-MEDIA_ROOT=os.path.join(BASE_DIR,'static/images')
-MEDIA_URL='/images/'
-# STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage"
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+# STATICFILES_DIRS=[BASE_DIR/'static']
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage"
+# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME')
+AWS_S3_ENDPOINT_URL = f'https://s3.{AWS_S3_REGION_NAME}.backblazeb2.com'
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')

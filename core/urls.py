@@ -1,13 +1,5 @@
 from django.contrib import admin
 from django.urls import path, include
-
-# from django.views.decorators.csrf import csrf_exempt
-# from rest_framework_simplejwt.views import (
-#     TokenObtainPairView,
-# ,PasswordTokenCheckAPI
-# RequestPasswordOtp,
-    # 
-# )
 from users_api.views import LocationList, RequestPasswordOtp,UserViewSet,RequestPasswordResetEmail,SetNewPasswordAPIView,ManageUserProfileView,MyTokenObtainPairView
 
 from rest_framework_simplejwt.views import TokenBlacklistView
@@ -24,8 +16,6 @@ router.register('devices', FCMDeviceAuthorizedViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
-    # path(' ', include('users_api.urls',namespace='users_api')),
     path('list_address/', LocationList.as_view(), name='create_address'),
 
     path('user_register/', include(router.urls)),
@@ -39,12 +29,9 @@ urlpatterns = [
     path('', include('machine_api.urls'), name='machine_api'),
     path('', include('competition_api.urls'), name='competition_api'),
     path('', include('machine_api.routing')),
-
     path('', include('community_api.urls'), name='community_api'),
     path('', include('community_api.routing')),
 
-
-
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-urlpatterns +=static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# urlpatterns +=static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

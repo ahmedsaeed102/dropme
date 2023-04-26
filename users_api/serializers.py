@@ -1,19 +1,13 @@
 import random
-from datetime import datetime ,timedelta
+from datetime import datetime, timedelta
 from django.conf import settings
-from .models import UserModel,LocationModel
-import random
 from rest_framework import  serializers
-from .otp_send_email import send_otp,send_mail_pass
-from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
-from django.utils.http import urlsafe_base64_decode
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.exceptions import AuthenticationFailed
 from django.utils import timezone
+from .models import UserModel, LocationModel
+from .otp_send_email import send_otp,send_mail_pass
 
 
-
-        
 class UserSerializer(serializers.ModelSerializer):
     password1=serializers.CharField(
         write_only=True,
@@ -174,10 +168,3 @@ class LocationModelserializers(serializers.ModelSerializer):
         fields='__all__'
     # queryset=LocationModel.objects.all()
     # serializ
-
-    
-
-    
-
-        
-       

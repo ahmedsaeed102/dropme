@@ -20,9 +20,7 @@ class LocationModel(models.Model):
 def upload_to(instance,filename):
     return 'users_api/{filename}'.format(filename=filename)
 
-# phone_number_regex=RegexValidator(
-#     regex=r"^\d{11}",message="Phone Number must be 10 number only ."
-# )
+
 def validate_phone_number(value):
     if not re.match(r"^01[0125]{1}", value):
         raise ValidationError("Phone number must start with 010 or 011 or 012 or 015")
@@ -63,7 +61,7 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
     registered_at=models.DateTimeField(auto_now_add=True)
 
     profile_photo=models.ImageField(upload_to='upload_to', default='upload_to/default.png')
-    age=models.IntegerField(null=True)
+    age=models.IntegerField(null=True, blank=True)
     GENDER = Choices('male', 'female')
     gender=models.CharField(choices=GENDER,default=GENDER.male, max_length=20) 
 
