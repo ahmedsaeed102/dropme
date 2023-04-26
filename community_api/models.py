@@ -1,25 +1,13 @@
-
-
 from django.db import models
 from users_api.models import UserModel
-# from emoji_picker.widgets import EmojiPickerTextInputAdmin
 
-
-
-
-class ChannelsModel(models.Model):
-    channel_name = models.CharField(max_length=50,default="welcome channels")
-
-    def str(self):
-        return self.channel_name
-    
     
 
 class MessagesModel(models.Model):
 
     user_model = models.ForeignKey(UserModel, related_name='user', on_delete=models.CASCADE)
-    channel_id = models.ForeignKey(ChannelsModel, related_name='channel', on_delete=models.CASCADE)
-    message = models.CharField(max_length=4000)
+    # channel_id = models.ForeignKey(ChannelsModel, related_name='channel', on_delete=models.CASCADE)
+    content = models.CharField(max_length=4000,null=True)
     message_dt = models.DateTimeField(auto_now_add=True)
     emoji=models.ManyToManyField(UserModel, related_name='blog_likes', blank=True)
     img = models.ImageField(upload_to='dropme_img_chat',null=True)
@@ -32,11 +20,28 @@ class MessagesModel(models.Model):
     def str(self):
         return self.user_model.username
     
-    @property
-    def get_messages_num(self):
-        """ return the number of messages inside specific channel"""
-        return MessagesModel.objects.filter(channel_id=self.channel_id).count()
+
+
     
-    def last_10_messages(self):
-        """ return the last recent 10 messages """
-        return self.objects.order_by('-message_dt').all()[:10]
+#     @property
+#     def get_messages_num():
+#         """ return the number of messages inside specific channel"""
+#         return MessagesModel.objects.filter(channel_id=MessagesModel.channel_id).count()
+
+
+class ChannelsModel(models.Model):
+    room_name = models.CharField(max_length=50,default="welcome channels")
+    participants=models.ManyToManyField(UserModel,related_name='chats')
+    messages=models.ManyToManyField(MessagesModel,blank=True)
+
+    @property
+    def messages_num(self):
+        """ return the number of messages inside specific channel"""
+        if  self.messages and self.channel_name:
+            return ChannelsModel.messages.through.objects.count()
+            
+        else :
+            return 0
+        
+    
+

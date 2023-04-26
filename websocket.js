@@ -10,3 +10,6 @@ ws.addEventListener('message', (event) => {
 ws.addEventListener('close', (event) => {
     console.log('The connection has been closed successfully.');
 });
+
+
+

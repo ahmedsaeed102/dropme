@@ -15,8 +15,8 @@ MAX_OTP_TRY=3
 AUTH_USER_MODEL='users_api.UserModel'
 MIN_PASSWORD_LENGTH=8
 
-os.environ.get('SECRET_KEY')
-# SECRET_KEY = "django-insecure-jdcvfnqn0vc3qlbyka-i*$0ya*)nkt&23+&vz%$k$3tqn#+@@c"
+# os.environ.get('SECRET_KEY')
+SECRET_KEY = "django-insecure-jdcvfnqn0vc3qlbyka-i*$0ya*)nkt&23+&vz%$k$3tqn#+@@c"
 
 
 if os.environ.get('state') == 'production':
@@ -66,7 +66,7 @@ cert = {
     "type": os.environ.get('type'), 
     "project_id": os.environ.get('project_id'),
     "private_key_id": os.environ.get('private_key_id'),
-    "private_key": os.environ.get('private_key').replace(r'\n', '\n'),
+    "private_key": os.environ.get('private_key'),
     "client_email": os.environ.get('client_email'),
     "client_id": os.environ.get('client_id'),
     "auth_uri": os.environ.get('auth_uri'),
@@ -205,6 +205,10 @@ DATABASES = {
         "PORT": 5432,
         "USER": "postgres",
     }
+
+
+
+    
 }
 
 if os.name == 'nt':

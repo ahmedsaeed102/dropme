@@ -22,8 +22,8 @@ from .channelsmiddleware import TokenAuthMiddleware
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
     "websocket": TokenAuthMiddleware(
-       URLRouter(machine_api.routing.urlpatterns),
-    #    +community_api.routing.urlpatterns
+       URLRouter(machine_api.routing.urlpatterns+community_api.routing.urlpatterns),
+    #    
       
     ),
 })

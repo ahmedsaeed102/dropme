@@ -41,6 +41,7 @@ urlpatterns = [
     path('', include('machine_api.routing')),
 
     path('', include('community_api.urls'), name='community_api'),
+    path('', include('community_api.routing')),
 
 
 

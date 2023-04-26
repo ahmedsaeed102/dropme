@@ -12,14 +12,24 @@
     {{ room_name|json_script:"room-name" }}
     <script>
         const roomName = JSON.parse(document.getElementById('room-name').textContent);
-
+        let token ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjgyNTEzNjEwLCJpYXQiOjE2Nzk5MjE2MTAsImp0aSI6IjhlYTU0MGRhMDQwYjQ2N2Q5NTczNGNjM2U1ODhhZjY2IiwidXNlcl9pZCI6Mn0.XMfLpsREKvXMRfXI9jndBtcdG2Z0qfA-fw5sH3FS9l4'
+        
+        const endpoint="wss://dropme.up.railway.app/ws/chat/"
         const chatSocket = new WebSocket(
-            'ws://'
-            + window.location.host
-            + '/ws/chat/'
+            // 'ws://'
+            // + window.location.host
+            // + ''
+            endpoint
             + roomName
             + '/'
+            +"?token=" 
+            + token
         );
+//         setInterval(function(){
+//   var object = {"message":"ARandonMessage"};
+//   object = JSON.stringify(object);
+//   chatSocket.send(object);
+// },/*The time, I suggest 40 seconds, so*/ 40000)
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
