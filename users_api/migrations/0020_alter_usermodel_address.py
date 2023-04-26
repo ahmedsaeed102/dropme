@@ -7,7 +7,8 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users_api', '0019_merge_0017_merge_20230411_1640_0018_usermodel_age'),
+        # ('users_api', '0019_merge_0017_merge_20230411_1640_0018_usermodel_age'),
+        ('users_api', '0002_alter_usermodel_age'),
     ]
 
     operations = [
