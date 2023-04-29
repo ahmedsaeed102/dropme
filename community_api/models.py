@@ -37,7 +37,7 @@ class ChannelsModel(models.Model):
     @property
     def messages_num(self):
         """ return the number of messages inside specific channel"""
-        if  self.messages and self.channel_name:
+        if  self.messages and self.room_name:
             return ChannelsModel.messages.through.objects.count()
             
         else :
