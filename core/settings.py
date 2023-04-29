@@ -15,7 +15,6 @@ AUTH_USER_MODEL='users_api.UserModel'
 MIN_PASSWORD_LENGTH=8
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
-# SECRET_KEY = "django-insecure-jdcvfnqn0vc3qlbyka-i*$0ya*)nkt&23+&vz%$k$3tqn#+@@c"
 
 
 if os.environ.get('state') == 'production':
@@ -213,10 +212,6 @@ DATABASES = {
         "PORT": int(os.environ.get('db_port')),
         "USER": "postgres",
     }
-
-
-
-    
 }
 
 if os.name == 'nt':

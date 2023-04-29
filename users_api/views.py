@@ -8,7 +8,7 @@ from django.http import HttpResponsePermanentRedirect
 
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .otp_send_email import send_otp,send_mail_pass
+from .otp_send_email import send_otp,send_mail_pass, send_welcome_email
 from users_api.models import UserModel,LocationModel
 
 from rest_framework import viewsets, status, generics, permissions
@@ -56,6 +56,7 @@ class UserViewSet(viewsets.ModelViewSet):
             instance.max_otp_try=settings.MAX_OTP_TRY
             instance.max_otp_out=None
             instance.save()
+            send_welcome_email(instance.email)
             return Response("Successfully verfied the user .",status=status.HTTP_200_OK)
         return Response("user already verfied or otp is incorrect .",status=status.HTTP_400_BAD_REQUEST)
    

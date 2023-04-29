@@ -55,7 +55,6 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
         )
     
     async def receive_update(self, event):
-        print('here')
         await self.send_json({
             'status': "success",
             'message': f"{event['bottles']} bottles and {event['cans']} cans",

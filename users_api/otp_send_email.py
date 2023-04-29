@@ -50,3 +50,23 @@ def send_mail_pass(email, otp):
         fail_silently=False, 
         html_message=template
     )
+
+
+""" 3) send welcome email to user after sign up """
+def send_welcome_email(email):
+    # user = UserModel.objects.get(email=email)
+    # context = {'username': user.username}
+    # template = get_template('welcome_email.html').render(context)
+    
+    subject = 'Welcome to DropMe'
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = [email]
+
+    send_mail(
+        subject, 
+        "Welcome to dropme", 
+        email_from, 
+        recipient_list, 
+        # fail_silently=False,
+        # html_message=template
+    )
