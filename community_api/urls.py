@@ -19,6 +19,6 @@ urlpatterns = [
     path('community/list/', ChannelsListView.as_view()),
     path('community/create/', ChannelsCreateView.as_view()),
     path('community/<pk>/', ChannelsDetailView.as_view()),
-    path('community/<pk>/update/', ChannelsUpdateView.as_view()),
+#     path('community/<pk>/update/', ChannelsUpdateView.as_view()),
     path('community/<pk>/delete/', ChannelsDeleteView.as_view())
 ]
