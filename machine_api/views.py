@@ -8,7 +8,7 @@ from django.urls import reverse
 from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.contrib.gis.db.models.functions import Distance
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -204,7 +204,7 @@ class SetMachineCoordinates(APIView):
 
 
 class MachineDelete(generics.DestroyAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
     queryset = Machine.objects.all()
     serializer_class = MachineSerializer
 
