@@ -50,6 +50,7 @@ class Competition(models.Model):
     def __str__(self):
         return self.name
 
+
 class CompetitionRanking(models.Model):
     competition = models.ForeignKey(
         Competition,

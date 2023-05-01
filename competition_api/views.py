@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from rest_framework.exceptions import APIException, NotFound
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from users_api.models import UserModel
@@ -13,11 +13,13 @@ from fcm_django.models import FCMDevice
 
 
 class Competitions(generics.ListCreateAPIView):
-    queryset = Competition.objects.all()
+    # queryset = Competition.objects.all()
+    queryset = Competition.objects.filter(end_date__gte=date.today()) # return only ongoing competitions
     serializer_class = CompetitionSerializer
     permission_classes = [IsAuthenticated]
     
     def perform_create(self, serializer):
+        # send notification to all user after a new competition is created
         serializer.save()
         FCMDevice.objects.send_message(
             Message(
@@ -29,7 +31,6 @@ class Competitions(generics.ListCreateAPIView):
         )
 
     
-
 class CompetitionDetail(generics.RetrieveUpdateAPIView):
     queryset = Competition.objects.all()
     serializer_class = CompetitionSerializer
@@ -39,7 +40,7 @@ class CompetitionDetail(generics.RetrieveUpdateAPIView):
 class CompetitionDelete(generics.DestroyAPIView):
     queryset = Competition.objects.all()
     serializer_class = CompetitionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
 
 
 # Global leaderboard
