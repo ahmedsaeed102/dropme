@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from users_api.views import LocationList, RequestPasswordOtp,UserViewSet,RequestPasswordResetEmail,SetNewPasswordAPIView,ManageUserProfileView,MyTokenObtainPairView
+from users_api.views import LocationList,UserViewSet,RequestPasswordResetEmail,SetNewPasswordAPIView,ManageUserProfileView,MyTokenObtainPairView
 
 from rest_framework_simplejwt.views import TokenBlacklistView
 from rest_framework.routers import DefaultRouter

@@ -1,15 +1,6 @@
-# chat/urls.py
 from django.urls import path
+from .views import ChannelsListView, ChannelsDetailView, ChannelsCreateView, ChannelsDeleteView, index, room
 
-from .views import (
-    ChannelsListView,
-    ChannelsDetailView,
-    ChannelsCreateView,
-    ChannelsUpdateView,
-    ChannelsDeleteView,
-    index,
-    room
-)
 
 app_name = 'community_api'
 

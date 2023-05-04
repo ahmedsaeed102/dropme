@@ -20,8 +20,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import LocationModelserializers,UserSerializer,UserProfileSerializer,SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer
 
 
-class CustomRedirect(HttpResponsePermanentRedirect):
-    allowed_schemes = [os.environ.get('APP_SCHEME'), 'http', 'https']
+# class CustomRedirect(HttpResponsePermanentRedirect):
+#     allowed_schemes = [os.environ.get('APP_SCHEME'), 'http', 'https']
 
 
 # custom serializer from rest_framework_simplejwt.serializers

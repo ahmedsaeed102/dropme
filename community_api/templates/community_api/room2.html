@@ -9,15 +9,13 @@
     <textarea id="chat-log" cols="100" rows="20"></textarea><br>
     <input id="chat-message-input" type="text" size="100"><br>
     <input id="chat-message-submit" type="button" value="Send">
-    {{ room_name|json_script:"room-name" }}
     <script>
-        const roomName = JSON.parse(document.getElementById('room-name').textContent);
-        let token ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjg1ODEyMDg3LCJpYXQiOjE2ODMyMjAwODcsImp0aSI6IjdhZjQzMmQ5Zjg2OTRhYjRiNjlmNTkxZmM2MDcyNGRhIiwidXNlcl9pZCI6Mn0.ZVu4_W5vrc6JEhWDZp2fh9csT9d_a6KjLwB5cVSVNRI'
+        let token ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjg1ODE3Mjk3LCJpYXQiOjE2ODMyMjUyOTcsImp0aSI6ImU1NjQyY2QxYTc2ZjRlOWNhNTVlMmQ0MjJlMjllNDZjIiwidXNlcl9pZCI6M30.jpFFYU-meZJWcHZj3vKeDCPYVxgX2vZkyJFrsTE2Otg'
         
         const endpoint="ws://localhost:8000/ws/chat/"
         const chatSocket = new WebSocket(
             endpoint
-            + roomName
+            + 'room1'
             + '/'
             +"?token=" 
             + token

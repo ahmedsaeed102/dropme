@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from community_api.models import ChannelsModel, UserModel,MessagesModel
+from community_api.models import ChannelsModel, MessagesModel
 from users_api.serializers import UserSerializer
 
 # ===============================async part=====================================
@@ -24,6 +24,7 @@ class MessagecontentSerializer(serializers.ModelSerializer):
         user=self.context['request'].user
         return True if user in obj.emoji.all() else False
 
+
 class MessageImgSerializer(serializers.ModelSerializer):
     emoji=UserSerializer(many=True,read_only=True)
     user_model=serializers.SerializerMethodField()
@@ -40,6 +41,7 @@ class MessageImgSerializer(serializers.ModelSerializer):
         user=self.context['request'].user
         return True if user in obj.emoji.all() else False
 
+
 class MessageVideoSerializer(serializers.ModelSerializer):
     emoji=UserSerializer(many=True,read_only=True)
     user_model=serializers.SerializerMethodField()
@@ -55,6 +57,8 @@ class MessageVideoSerializer(serializers.ModelSerializer):
     def get_is_liked(self,obj):
         user=self.context['request'].user
         return True if user in obj.emoji.all() else False
+
+
 # =========================================sync==================================
 class ChannelsSerializer(serializers.ModelSerializer):
     participants = MessageSerializer(many=True)
@@ -62,8 +66,7 @@ class ChannelsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChannelsModel
-        fields='__all__'
-        # fields = ('id', 'messages', 'participants','room_name',)
+        exclude=("messages",)
         read_only = ('id')
     
     def get_messages_num(self,obj):
@@ -73,20 +76,5 @@ class ChannelsSerializer(serializers.ModelSerializer):
 class ChannelsCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChannelsModel
-        fields = ('id','room_name',)
+        fields = ('room_name',)
         read_only = ('id')
-    
-   
-
-    # def create(self, validated_data):
-    #     print(validated_data)
-    #     participants = validated_data.pop('participants')
-    #     chat = ChannelsModel()
-    #     chat.save()
-    #     # for username in participants:
-    #     #     data = get_user_data(username)
-    #     #     chat.participants.add(data)
-    #     # chat.save()
-    #     return chat
-
-
