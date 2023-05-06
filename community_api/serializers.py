@@ -86,12 +86,16 @@ class ChannelsCreateSerializer(serializers.ModelSerializer):
 
 class MessagesSerializer(serializers.ModelSerializer):
     sender=serializers.SerializerMethodField()
+    sender_photo = serializers.SerializerMethodField()
     class Meta:
         model = MessagesModel
-        fields = ('id', 'sender', 'content', 'message_dt', 'img', 'video')
+        fields = ('id', 'sender','sender_photo', 'content', 'message_dt', 'img', 'video')
     
     def get_sender(self,obj):
         return obj.user_model.username
+    
+    def get_sender_photo(self,obj):
+        return obj.user_model.profile_photo.url
 
 
 # validators=[FileExtensionValidator(allowed_extensions=['MOV','avi','mp4','webm','mkv'])]
