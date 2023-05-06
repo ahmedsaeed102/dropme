@@ -1,13 +1,18 @@
 from django.shortcuts import render
-from .models import ChannelsModel
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, DestroyAPIView, UpdateAPIView
-from .serializers import ChannelsCreateSerializer, ChannelsSerializer
+from rest_framework.pagination import PageNumberPagination
+from .models import ChannelsModel
+from .utlis import get_current_chat
+from .serializers import ChannelsCreateSerializer, ChannelsSerializer, MessagesSerializer
 
 
 def room(request, room_name):
     return render(request, "community_api/room.html", {"room_name": room_name})
+
+class MessagesPagination(PageNumberPagination):
+    page_size = 20
 
 
 class ChannelsListView(ListAPIView):
@@ -40,8 +45,15 @@ class ChannelsDeleteView(DestroyAPIView):
 
 
 class ChannelMessages(ListAPIView):
-    pass
+    serializer_class = MessagesSerializer
+    lookup_url_kwarg = "room_name"
+    pagination_class = MessagesPagination
 
+    def get_queryset(self):
+        room = self.kwargs.get(self.lookup_url_kwarg)
+        channel = get_current_chat(room)
+        messages = channel.messages.all()
+        return messages
 
 
 class ImgUpload(APIView):

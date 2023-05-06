@@ -14,6 +14,9 @@ class MessagesModel(models.Model):
     img = models.ImageField(upload_to='community/imgs', null=True, blank=True)
     video = models.FileField(upload_to='community/videos', null=True, blank=True)
     
+    class Meta:
+        ordering = ('-message_dt',)
+
     def str(self):
         return self.user_model.username
     

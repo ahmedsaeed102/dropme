@@ -3,7 +3,7 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from community_api.models import MessagesModel
 from users_api.models import UserModel
-from .utlis import last_10_messages, get_current_chat
+from .utlis import get_current_chat
 
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
@@ -72,16 +72,6 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         # Send message to all users in the room
         await self.send_json(data)
 
-
-
-    # async def fetch_10recent_messages(self,data):
-    #     """ load recent 10 message and send it to you """
-
-    #     messages=last_10_messages(data['channels_id'])
-    #     content={
-    #         'messages':await self.messages_to_json(messages)
-    #     }
-    #     await self.send_messages(content)
 
 # ------------------------------------------message--------------------------------------------------------
     
