@@ -7,6 +7,7 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView,
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser
 from .models import ChannelsModel, MessagesModel
 from .utlis import get_current_chat
 from .serializers import *
@@ -72,8 +73,8 @@ class SendTextMessage(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             # create msg and save it
-            content=serializer.data['content']
-            msg = MessagesModel.objects.create(user_model=request.user, content=content)
+            # content=**serializer.data['content']
+            msg = MessagesModel.objects.create(user_model=request.user, **serializer.data)
             current_chat=get_current_chat(room_name)
             current_chat.messages.add(msg)
             current_chat.save()
@@ -100,13 +101,33 @@ class SendTextMessage(APIView):
 
 
 class SendImgMessage(APIView):
-    serializer_class = ImgUploadSerializer
     permission_classes = (IsAuthenticated,)
-    
+    parser_classes = (MultiPartParser,)
+    serializer_class = ImgUploadSerializer
 
+    def post(self, request, room_name):
+        try:
+            msg = MessagesModel.objects.create(user_model=request.user, img=request.FILES['img'])
+            current_chat=get_current_chat(room_name)
+            current_chat.messages.add(msg)
+            current_chat.save()
 
+            # send msg to all users in room
+            channel_layer = get_channel_layer()
+            msg = MessagesSerializer(msg)
+            async_to_sync(channel_layer.group_send)(room_name,{
+                    "type": "send.messages",
+                    'message_type':'img',
+                    'data':msg.data,
+            })
+
+            # send notification
+
+            return Response('message sent successfully', status=status.HTTP_201_CREATED)
+        
+        except Exception as e:
+                return Response({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SendVideoMessage(APIView):
-    serializer_class = VideoUploadSerializer
     permission_classes = (IsAuthenticated,)
