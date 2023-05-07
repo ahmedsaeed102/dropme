@@ -123,7 +123,7 @@ class SendImgMessage(APIView):
 
             # send notification
 
-            return Response('message sent successfully', status=status.HTTP_201_CREATED)
+            return Response('Image sent successfully', status=status.HTTP_201_CREATED)
         
         except Exception as e:
                 return Response({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -131,3 +131,28 @@ class SendImgMessage(APIView):
 
 class SendVideoMessage(APIView):
     permission_classes = (IsAuthenticated,)
+    parser_classes = (MultiPartParser,)
+    serializer_class = VideoUploadSerializer
+
+    def post(self, request, room_name):
+        try:
+            msg = MessagesModel.objects.create(user_model=request.user, video=request.FILES['video'])
+            current_chat=get_current_chat(room_name)
+            current_chat.messages.add(msg)
+            current_chat.save()
+
+            # send msg to all users in room
+            channel_layer = get_channel_layer()
+            msg = MessagesSerializer(msg)
+            async_to_sync(channel_layer.group_send)(room_name,{
+                    "type": "send.messages",
+                    'message_type':'video',
+                    'data':msg.data,
+            })
+
+            # send notification
+
+            return Response('video sent successfully', status=status.HTTP_201_CREATED)
+        
+        except Exception as e:
+                return Response({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
