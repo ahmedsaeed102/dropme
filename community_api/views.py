@@ -1,15 +1,21 @@
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, DestroyAPIView, UpdateAPIView
 from rest_framework.pagination import PageNumberPagination
-from .models import ChannelsModel
+from rest_framework.response import Response
+from rest_framework import status
+from .models import ChannelsModel, MessagesModel
 from .utlis import get_current_chat
-from .serializers import ChannelsCreateSerializer, ChannelsSerializer, MessagesSerializer
+from .serializers import *
 
 
 def room(request, room_name):
     return render(request, "community_api/room.html", {"room_name": room_name})
+
+#-----------------------CRUD------------------------------
 
 class MessagesPagination(PageNumberPagination):
     page_size = 20
@@ -54,15 +60,53 @@ class ChannelMessages(ListAPIView):
         channel = get_current_chat(room)
         messages = channel.messages.all()
         return messages
+    
+#-----------------------------------------------------------------------------------
 
 
-class ImgUpload(APIView):
-    pass
+class SendTextMessage(APIView):
+    serializer_class = TextMessageSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, room_name):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            # create msg and save it
+            content=serializer.data['content']
+            msg = MessagesModel.objects.create(user_model=request.user, content=content)
+            current_chat=get_current_chat(room_name)
+            current_chat.messages.add(msg)
+            current_chat.save()
+
+            # send msg to all users in room
+            channel_layer = get_channel_layer()
+            msg = MessagesSerializer(msg)
+          
+            try:
+                async_to_sync(channel_layer.group_send)(room_name,{
+                    "type": "send.messages",
+                    'message_type':'text',
+                    'data':msg.data,
+                })
+
+            except Exception as e:
+                return Response({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # send notification
+
+            return Response('message sent successfully', status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class VideoUpload(APIView):
-    pass
+class SendImgMessage(APIView):
+    serializer_class = ImgUploadSerializer
+    permission_classes = (IsAuthenticated,)
+    
 
 
-# class FileUpload(APIView):
-#     pass
+
+
+class SendVideoMessage(APIView):
+    serializer_class = VideoUploadSerializer
+    permission_classes = (IsAuthenticated,)

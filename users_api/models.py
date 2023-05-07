@@ -12,14 +12,8 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 
 
-class LocationModel(models.Model):
-    address=models.CharField(max_length=50, default='Egypt')
-    def __str__(self) :
-        return self.address
-
-def upload_to(instance,filename):
-    return 'users_api/{filename}'.format(filename=filename)
-
+def upload_to(instance, filename):
+    return f'upload_to/{instance.username}/{filename}'
 
 def validate_phone_number(value):
     if not re.match(r"^01[0125]{1}", value):
@@ -27,6 +21,12 @@ def validate_phone_number(value):
 
     if not re.match(r"^\d{11}$", value):
         raise ValidationError("Phone number must be 11 numbers")
+
+
+class LocationModel(models.Model):
+    address=models.CharField(max_length=50, default='Egypt')
+    def __str__(self) :
+        return self.address
 
 
 class UserManager(BaseUserManager):
@@ -61,6 +61,7 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
     registered_at=models.DateTimeField(auto_now_add=True)
 
     profile_photo=models.ImageField(upload_to='upload_to', default='upload_to/default.png')
+
     age=models.IntegerField(null=True, blank=True)
     GENDER = Choices('male', 'female')
     gender=models.CharField(choices=GENDER,default=GENDER.male, max_length=20) 
@@ -90,8 +91,3 @@ class UserModel(AbstractBaseUser,PermissionsMixin):
 
     class Meta:
         ordering = ('-total_points',)
-    
-    
-
-
-
