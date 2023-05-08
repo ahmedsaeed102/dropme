@@ -22,41 +22,6 @@ class MessagecontentSerializer(serializers.ModelSerializer):
         return True if user in obj.emoji.all() else False
 
 
-class MessageImgSerializer(serializers.ModelSerializer):
-    emoji=UserSerializer(many=True,read_only=True)
-    user_model=serializers.SerializerMethodField()
-    emoji_count=serializers.SerializerMethodField()
-    is_liked=serializers.SerializerMethodField()
-    class Meta:
-        model=MessagesModel
-        fields=('id', 'user_model', 'content','message_dt','img','emoji_count','is_liked')
-    def get_sender(self,obj):
-        return obj.user_model.username
-    def get_emoji_count(self,obj):
-        return len(obj.emoji.all())
-    def get_is_liked(self,obj):
-        user=self.context['request'].user
-        return True if user in obj.emoji.all() else False
-
-
-class MessageVideoSerializer(serializers.ModelSerializer):
-    emoji=UserSerializer(many=True,read_only=True)
-    user_model=serializers.SerializerMethodField()
-    emoji_count=serializers.SerializerMethodField()
-    is_liked=serializers.SerializerMethodField()
-    class Meta:
-        model=MessagesModel
-        fields=('id', 'user_model', 'content','message_dt','video','emoji_count','is_liked')
-    def get_sender(self,obj):
-        return obj.user_model.username
-    def get_emoji_count(self,obj):
-        return len(obj.emoji.all())
-    def get_is_liked(self,obj):
-        user=self.context['request'].user
-        return True if user in obj.emoji.all() else False
-
-
-# =========================================sync==================================
 class ChannelsSerializer(serializers.ModelSerializer):
     # participants = MessageSerializer(many=True)
     messages_num = serializers.SerializerMethodField()
@@ -85,14 +50,30 @@ class MessagesSerializer(serializers.ModelSerializer):
     sender_photo = serializers.SerializerMethodField()
     class Meta:
         model = MessagesModel
-        fields = ('id', 'sender', 'sender_photo', 'content', 'message_dt', 'img', 'video')
+        fields = ('id', 'sender', 'sender_photo', 'content', 'message_dt', 'img', 'video', 'reactions')
     
     def get_sender(self,obj):
         return obj.user_model.username
     
     def get_sender_photo(self,obj):
         return obj.user_model.profile_photo.url
-    
+
+
+class ReactionSerializer(serializers.ModelSerializer):
+    msg_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MessagesModel
+        fields = ('msg_id', "reactions")
+
+    def get_msg_id(self, obj):
+        return obj.id
+
+
+class SendReactionSerializer(serializers.Serializer):
+    message_id = serializers.IntegerField()
+    emoji = serializers.CharField(max_length=50)
+
 
 class TextMessageSerializer(serializers.ModelSerializer):
     class Meta:

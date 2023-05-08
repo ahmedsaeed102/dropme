@@ -1,7 +1,7 @@
 import os
 from django.db import models
-from users_api.models import UserModel
 from django.core.validators import FileExtensionValidator
+from users_api.models import UserModel
 
 
 # def upload_to_imgs(instance, filename):
@@ -10,11 +10,16 @@ from django.core.validators import FileExtensionValidator
 # def upload_to_videos(instance, filename):
 #     return f'community/videos/{instance.user_model.username}/{filename}'
 
+# def reactions_default():  
+#     return {"reactions":{}}
+
 
 class MessagesModel(models.Model):
     user_model = models.ForeignKey(UserModel, related_name='messages', on_delete=models.CASCADE)
     content = models.CharField(max_length=4000, null=True, blank=True)
     message_dt = models.DateTimeField(auto_now_add=True)
+
+    reactions = models.JSONField(default=dict)
 
     img = models.ImageField(
         upload_to='community/imgs', 
