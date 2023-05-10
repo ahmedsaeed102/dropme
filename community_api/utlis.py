@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+from firebase_admin.messaging import Message, Notification
+from fcm_django.models import FCMDevice
 from .models import ChannelsModel, UserModel
 
 
@@ -7,13 +9,12 @@ def get_current_chat(room_name):
 
     return get_object_or_404(ChannelsModel, room_name=room_name)
 
-def send_community_notification():
-    pass
-
-
-# def get_user_channel(username):
-#     """ retrive user data inside specific channels"""
-
-#     user=get_object_or_404(UserModel, username)
-#     channels=get_object_or_404(ChannelsModel, participants=user)
-#     return channels
+def send_community_notification(room_name):
+    FCMDevice.objects.send_message(
+        Message(
+            notification=Notification(
+            title="New message", 
+            body=f"You have a new message in '{room_name}' community channel", 
+            )
+        )
+    )

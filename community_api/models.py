@@ -4,14 +4,11 @@ from django.core.validators import FileExtensionValidator
 from users_api.models import UserModel
 
 
-# def upload_to_imgs(instance, filename):
-#     return f'community/imgs/{instance.user_model.username}/{filename}'
+def upload_to_imgs(instance, filename):
+    return f'community/imgs/{instance.user_model.username}/{filename}'
 
-# def upload_to_videos(instance, filename):
-#     return f'community/videos/{instance.user_model.username}/{filename}'
-
-# def reactions_default():  
-#     return {"reactions":{}}
+def upload_to_videos(instance, filename):
+    return f'community/videos/{instance.user_model.username}/{filename}'
 
 
 class MessagesModel(models.Model):
@@ -22,13 +19,16 @@ class MessagesModel(models.Model):
     reactions = models.JSONField(default=dict)
 
     img = models.ImageField(
-        upload_to='community/imgs', 
+        # upload_to='community/imgs', 
+        upload_to=upload_to_imgs, 
         null=True, blank=True, 
         validators=[
             FileExtensionValidator(allowed_extensions=['png', 'jpeg', 'jpg', 'svg']),
-    ])
+        ]
+    )
     video = models.FileField(
-        upload_to='community/videos', 
+        # upload_to='community/videos', 
+        upload_to=upload_to_videos, 
         null=True, blank=True,
         validators=[
             FileExtensionValidator(allowed_extensions=['MOV','avi','mp4','webm','mkv']),

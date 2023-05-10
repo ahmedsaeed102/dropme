@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser
 from drf_spectacular.utils import extend_schema
 from .models import ChannelsModel, MessagesModel
-from .utlis import get_current_chat
+from .utlis import get_current_chat, send_community_notification
 from .serializers import *
 
 
@@ -91,25 +91,14 @@ class SendTextMessage(APIView):
                 return Response({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
             
             # send notification
+            send_community_notification(room_name)
 
             return Response('message sent successfully', status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@extend_schema( 
-    request={
-        'multipart/form-data': {
-            'type': 'object',
-            'properties': {
-                'img': {
-                    'type': 'string',
-                    'format': 'binary'
-                }
-            }
-        }
-    },
-) 
+@extend_schema(request={'multipart/form-data': {'type': 'object','properties': {'img': {'type': 'string','format': 'binary'}}}}) 
 class SendImgMessage(APIView):
     permission_classes = (IsAuthenticated,)
     parser_classes = (MultiPartParser,)
@@ -132,6 +121,7 @@ class SendImgMessage(APIView):
             })
 
             # send notification
+            send_community_notification(room_name)
 
             return Response('Image sent successfully', status=status.HTTP_201_CREATED)
         
@@ -139,19 +129,7 @@ class SendImgMessage(APIView):
                 return Response({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@extend_schema( 
-    request={
-        'multipart/form-data': {
-            'type': 'object',
-            'properties': {
-                'video': {
-                    'type': 'string',
-                    'format': 'binary'
-                }
-            }
-        }
-    },
-) 
+@extend_schema(request={'multipart/form-data': {'type': 'object', 'properties': {'video': {'type': 'string', 'format': 'binary'}}}}) 
 class SendVideoMessage(APIView):
     permission_classes = (IsAuthenticated,)
     parser_classes = (MultiPartParser,)
@@ -174,7 +152,8 @@ class SendVideoMessage(APIView):
             })
 
             # send notification
-
+            send_community_notification(room_name)
+            
             return Response('video sent successfully', status=status.HTTP_201_CREATED)
         
         except Exception as e:
@@ -244,7 +223,7 @@ class RemoveReactionMessage(APIView):
             
             msg.save()
 
-            # send reaction to all users in room
+            # send update to all users in room
             channel_layer = get_channel_layer()
             msg = ReactionSerializer(msg)
           

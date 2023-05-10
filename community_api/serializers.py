@@ -1,25 +1,6 @@
 from rest_framework import serializers
-from .models import ChannelsModel, MessagesModel
 from users_api.serializers import UserSerializer
-
-
-# ===============================async part=====================================
-class MessagecontentSerializer(serializers.ModelSerializer):
-    emoji = UserSerializer(many=True, read_only=True)
-    user_model = serializers.SerializerMethodField()
-    emoji_count = serializers.SerializerMethodField()
-    is_liked = serializers.SerializerMethodField()
-
-    class Meta:
-        model=MessagesModel
-        fields=('id', 'user_model', 'content','message_dt','emoji','emoji_count','is_liked')
-    def get_sender(self,obj):
-        return obj.user_model.username
-    def get_emoji_count(self,obj):
-        return len(obj.emoji.all())
-    def get_is_liked(self,obj):
-        user=self.context['request'].user
-        return True if user in obj.emoji.all() else False
+from .models import ChannelsModel, MessagesModel
 
 
 class ChannelsSerializer(serializers.ModelSerializer):
