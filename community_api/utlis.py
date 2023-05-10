@@ -18,3 +18,13 @@ def send_community_notification(room_name):
             )
         )
     )
+
+def send_new_community_notification(room_name):
+    FCMDevice.objects.send_message(
+        Message(
+            notification=Notification(
+            title="New community channel", 
+            body=f"A new community channel '{room_name}' has been created. check it out!", 
+            )
+        )
+    )

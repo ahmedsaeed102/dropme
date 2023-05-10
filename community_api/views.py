@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser
 from drf_spectacular.utils import extend_schema
 from .models import ChannelsModel, MessagesModel
-from .utlis import get_current_chat, send_community_notification
+from .utlis import *
 from .serializers import *
 
 
@@ -37,6 +37,11 @@ class ChannelsCreateView(CreateAPIView):
     queryset = ChannelsModel.objects.all()
     serializer_class = ChannelsCreateSerializer
     permission_classes = (IsAdminUser,)
+
+    def perform_create(self, serializer):
+        # send notification to all user after a new channel is created
+        serializer.save()
+        send_new_community_notification(serializer.data['room_name'])
 
 
 class ChannelsUpdateView(UpdateAPIView):

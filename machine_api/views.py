@@ -32,6 +32,18 @@ class Machines(generics.ListCreateAPIView):
     queryset = Machine.objects.all()
     serializer_class = MachineSerializer
 
+    def perform_create(self, serializer):
+        # send notification to all user after a new machine is added
+        serializer.save()
+        FCMDevice.objects.send_message(
+            Message(
+            notification=Notification(
+                title="New Machine", 
+                body="New Machine has been added, check it out!", 
+                )
+            )
+        )
+
 
 class GetNearestMachine(APIView):
     '''
