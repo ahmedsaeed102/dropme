@@ -1,15 +1,13 @@
-import os
 import random
 from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.utils import timezone
-from django.http import HttpResponsePermanentRedirect
 
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .otp_send_email import send_otp,send_mail_pass, send_welcome_email
-from users_api.models import UserModel,LocationModel
+from users_api.models import UserModel, LocationModel
+from .otp_send_email import send_otp, send_mail_pass, send_welcome_email
 
 from rest_framework import viewsets, status, generics, permissions
 from rest_framework.decorators import action
@@ -17,7 +15,13 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .serializers import LocationModelserializers,UserSerializer,UserProfileSerializer,SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer
+from .serializers import (
+    LocationModelserializers,
+    UserSerializer,
+    UserProfileSerializer,
+    SetNewPasswordSerializer,
+    ResetPasswordEmailRequestSerializer,
+)
 
 
 # class CustomRedirect(HttpResponsePermanentRedirect):
@@ -26,72 +30,90 @@ from .serializers import LocationModelserializers,UserSerializer,UserProfileSeri
 
 # custom serializer from rest_framework_simplejwt.serializers
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self,attrs):
+    def validate(self, attrs):
         data = super().validate(attrs)
 
         # Add custom claims
-        data['username'] = self.user.username
-        data['email'] = self.user.email
-        data['id']=self.user.id
-        
+        data["username"] = self.user.username
+        data["email"] = self.user.email
+        data["id"] = self.user.id
+
         return data
 
 
 # for login
 class MyTokenObtainPairView(TokenObtainPairView):
-    serializer_class=MyTokenObtainPairSerializer
+    serializer_class = MyTokenObtainPairSerializer
+
 
 # for signup
 class UserViewSet(viewsets.ModelViewSet):
-    queryset=UserModel.objects.all()
-    serializer_class=UserSerializer 
+    queryset = UserModel.objects.all()
+    serializer_class = UserSerializer
 
     """ to check if the user enter the correct otp or if he/she is already verified (is_active=True)"""
-    @action(detail=True,methods=['PATCH'])
-    def verify_otp(self,request,pk=None):
-        instance=self.get_object()
-        if( not instance.is_active and instance.otp_expiration and instance.otp == request.data.get("otp") and timezone.now() < instance.otp_expiration ):
-            instance.is_active=True
-            instance.otp_expiration=None
-            instance.max_otp_try=settings.MAX_OTP_TRY
-            instance.max_otp_out=None
+
+    @action(detail=True, methods=["PATCH"])
+    def verify_otp(self, request, pk=None):
+        instance = self.get_object()
+        if (
+            not instance.is_active
+            and instance.otp_expiration
+            and instance.otp == request.data.get("otp")
+            and timezone.now() < instance.otp_expiration
+        ):
+            instance.is_active = True
+            instance.otp_expiration = None
+            instance.max_otp_try = settings.MAX_OTP_TRY
+            instance.max_otp_out = None
             instance.save()
             send_welcome_email(instance.email)
-            return Response("Successfully verfied the user .",status=status.HTTP_200_OK)
-        return Response("user already verfied or otp is incorrect .",status=status.HTTP_400_BAD_REQUEST)
-   
+            return Response(
+                "Successfully verfied the user .", status=status.HTTP_200_OK
+            )
+        return Response(
+            "user already verfied or otp is incorrect .",
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     """ to regenerate otp until max try """
-    @action(detail=True,methods=['PATCH'])
-    def regenerate_otp(self,request,pk=None):
-        instance=self.get_object()
-        if int( instance.max_otp_try== 0) and timezone.now() < instance.max_otp_out:
-            return Response("Max OTP try reached, try after an hour.", status=status.HTTP_400_BAD_REQUEST)
 
-        otp=random.randint(1000,9999)
-        otp_expiration=datetime.now()+timedelta(minutes=5) 
-        max_otp_try=int(instance.max_otp_try)-1
+    @action(detail=True, methods=["PATCH"])
+    def regenerate_otp(self, request, pk=None):
+        instance = self.get_object()
+        if int(instance.max_otp_try == 0) and timezone.now() < instance.max_otp_out:
+            return Response(
+                "Max OTP try reached, try after an hour.",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        instance.otp=otp
-        instance.otp_expiration=otp_expiration
-        instance.max_otp_try=max_otp_try
+        otp = random.randint(1000, 9999)
+        otp_expiration = datetime.now() + timedelta(minutes=5)
+        max_otp_try = int(instance.max_otp_try) - 1
+
+        instance.otp = otp
+        instance.otp_expiration = otp_expiration
+        instance.max_otp_try = max_otp_try
 
         if max_otp_try == 0:
-            instance.max_otp_out=timezone.now()+datetime.timedelta(hours=1)
+            instance.max_otp_out = timezone.now() + datetime.timedelta(hours=1)
         elif max_otp_try == -1:
-            instance.max_otp_try=max_otp_try
+            instance.max_otp_try = max_otp_try
 
         send_otp(instance.email, otp)
         instance.save()
-        return Response("successfully regenrated the new OTP.",status=status.HTTP_200_OK)
+        return Response(
+            "successfully regenrated the new OTP.", status=status.HTTP_200_OK
+        )
 
-    
+
 # for edit_profile
 class ManageUserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
-    queryset=UserModel.objects.all()
-    lookup_field = 'pk'
-    permission_classes=(permissions.IsAuthenticated,)
-    
+    queryset = UserModel.objects.all()
+    lookup_field = "pk"
+    permission_classes = (permissions.IsAuthenticated,)
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
@@ -102,24 +124,27 @@ class ManageUserProfileView(generics.RetrieveUpdateAPIView):
 
         else:
             return Response({"message": "failed", "details": serializer.errors})
-    
 
 
+class RequestPasswordResetEmail(generics.GenericAPIView):
+    """generate otp for reset password"""
 
-class RequestPasswordResetEmail(generics.GenericAPIView,):
-    """ generate otp for reset password """
     serializer_class = ResetPasswordEmailRequestSerializer
-    def post(self, request,pk=None):
+
+    def post(self, request, pk=None):
         serializer = self.serializer_class(data=request.data)
-        email = request.data.get('email', '')
+        email = request.data.get("email", "")
         user = UserModel.objects.filter(email=email).first()
         if user:
             # send email with otp
-            send_mail_pass(email,user.otp)
-        
-            return Response("Reset password email sent",status=status.HTTP_200_OK)
+            send_mail_pass(email, user.otp)
+
+            return Response("Reset password email sent", status=status.HTTP_200_OK)
         else:
-            return Response("There is no account registered with this email.",status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                "There is no account registered with this email.",
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class SetNewPasswordAPIView(generics.GenericAPIView):
@@ -127,42 +152,48 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
 
     def patch(self, request):
         serializer = self.serializer_class(data=request.data)
-       
-        serializer.is_valid(raise_exception=True)
-        return Response({'success': True, 'message': 'Password reset success'}, status=status.HTTP_200_OK)
 
-    
+        serializer.is_valid(raise_exception=True)
+        return Response(
+            {"success": True, "message": "Password reset success"},
+            status=status.HTTP_200_OK,
+        )
+
 
 class RequestPasswordOtp(generics.GenericAPIView):
-    """ regenerate otp for reset password """
-    serializer_class = ResetPasswordEmailRequestSerializer    
-    def post(self, request,pk=None):
+    """regenerate otp for reset password"""
+
+    serializer_class = ResetPasswordEmailRequestSerializer
+
+    def post(self, request, pk=None):
         serializer = self.serializer_class(data=request.data)
-        email = request.data.get('email', '')
+        email = request.data.get("email", "")
         instance = UserModel.objects.get(email=email)
-        if int( instance.max_otp_try== 0) and timezone.now() < instance.max_otp_out :
-            
-            return Response("Max OTP try reached ,try after an hour.",status=status.HTTP_400_BAD_REQUEST)
+        if int(instance.max_otp_try == 0) and timezone.now() < instance.max_otp_out:
+            return Response(
+                "Max OTP try reached ,try after an hour.",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        otp=random.randint(1000,9999)
-        otp_expiration=datetime.now()+timedelta(minutes=5) 
-        max_otp_try=int(instance.max_otp_try)-1
+        otp = random.randint(1000, 9999)
+        otp_expiration = datetime.now() + timedelta(minutes=5)
+        max_otp_try = int(instance.max_otp_try) - 1
 
-        instance.otp=otp
-        instance.otp_expiration=otp_expiration
-        instance.max_otp_try=max_otp_try
+        instance.otp = otp
+        instance.otp_expiration = otp_expiration
+        instance.max_otp_try = max_otp_try
 
         if max_otp_try == 0:
-            instance.max_otp_out=timezone.now()+datetime.timedelta(hours=1)
+            instance.max_otp_out = timezone.now() + datetime.timedelta(hours=1)
         elif max_otp_try == -1:
-            instance.max_otp_try=max_otp_try
-        send_otp(instance.email,otp)
+            instance.max_otp_try = max_otp_try
+        send_otp(instance.email, otp)
         instance.save()
-        return Response("successfully regenrated the new OTP.",status=status.HTTP_200_OK)
-
+        return Response(
+            "successfully regenrated the new OTP.", status=status.HTTP_200_OK
+        )
 
 
 class LocationList(generics.ListCreateAPIView):
-    queryset=LocationModel.objects.all()
-    serializer_class=LocationModelserializers
-
+    queryset = LocationModel.objects.all()
+    serializer_class = LocationModelserializers
