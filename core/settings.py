@@ -1,6 +1,8 @@
 import os
 import environ
 import base64
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 from pathlib import Path
 from firebase_admin import initialize_app
 from firebase_admin import credentials
@@ -33,6 +35,19 @@ else:
 
 CSRF_TRUSTED_ORIGINS = ["https://*.railway.app", "https://127.0.0.1"]
 ALLOWED_HOSTS = ["*"]
+
+# Sentry for error reporting
+sentry_sdk.init(
+    dsn=os.environ.get("sentry"),
+    integrations=[
+        DjangoIntegration(),
+    ],
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=1.0,
+    send_default_pii=True,
+)
 
 # Application definition
 INSTALLED_APPS = [
