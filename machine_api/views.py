@@ -13,7 +13,13 @@ from django.contrib.gis.db.models.functions import Distance
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .models import Machine, RecycleLog
-from .serializers import MachineSerializer, QRCodeSerializer, UpdateRecycleLog, RecycleLogSerializer, MachineCoordinatesSerializer
+from .serializers import (
+    MachineSerializer,
+    QRCodeSerializer,
+    UpdateRecycleLog,
+    RecycleLogSerializer,
+    MachineCoordinatesSerializer,
+)
 from .utlis import claculate_travel_distance_and_time, get_directions
 from users_api.serializers import UserSerializer
 from users_api.models import UserModel
@@ -24,10 +30,11 @@ from django.core.mail import send_mail
 
 
 class Machines(generics.ListCreateAPIView):
-    '''
+    """
     [GET] return all machines in database
     [Post] add new machine to database
-    '''
+    """
+
     permission_classes = [IsAuthenticated]
     queryset = Machine.objects.all()
     serializer_class = MachineSerializer
@@ -37,20 +44,21 @@ class Machines(generics.ListCreateAPIView):
         serializer.save()
         FCMDevice.objects.send_message(
             Message(
-            notification=Notification(
-                title="New Machine", 
-                body="New Machine has been added, check it out!", 
+                notification=Notification(
+                    title="New Machine",
+                    body="New Machine has been added, check it out!",
                 )
             )
         )
 
 
 class GetNearestMachine(APIView):
-    '''
+    """
     Gives the nearest machine to the user
     Takes the long and lat of the user location
     Returns the machine information
-    '''
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, long, lat):
@@ -60,25 +68,36 @@ class GetNearestMachine(APIView):
         #     status = 'available'
         #     ).annotate(
         #     distance=Distance('location', current_location, spheroid=True)).order_by('distance').first()
-        machine = Machine.objects.annotate(distance=Distance('location', current_location, spheroid=True)).order_by('distance').first()
+        machine = (
+            Machine.objects.annotate(
+                distance=Distance("location", current_location, spheroid=True)
+            )
+            .order_by("distance")
+            .first()
+        )
         if not machine:
-            raise NotFound(detail="Error 404, there is no machine near the user", code=404)
+            raise NotFound(
+                detail="Error 404, there is no machine near the user", code=404
+            )
 
         serializer = MachineSerializer(machine)
         # distance = geodesic(lonlat(*current_location.tuple), lonlat(*machine.location.tuple)).km
-        
-        return Response({
-            'status': 'Success',
-            'message': 'got nearest machine successfully',
-            'data': serializer.data,
-        })
+
+        return Response(
+            {
+                "status": "Success",
+                "message": "got nearest machine successfully",
+                "data": serializer.data,
+            }
+        )
 
 
 class GetTravelInfo(APIView):
-    '''
+    """
     Takes the long and lat of the user location and the machine id
     Returns the machine information, the distance and the time it takes to go there
-    '''
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk, long, lat):
@@ -86,32 +105,36 @@ class GetTravelInfo(APIView):
             machine = Machine.objects.get(id=pk)
         except Machine.DoesNotExist:
             raise NotFound(detail="Error 404, Machine not found", code=404)
-        
-        current_location = Point(float(long), float(lat))
-        
-        serializer = MachineSerializer(machine)
-        data = claculate_travel_distance_and_time(current_location.tuple, machine.location.tuple)
-        
 
-        return Response({
-            'status': 'success',
-            'message': 'got travel info successfully',
-            'data':{
-                'machine': serializer.data,
-                'distance meters': int(data['distance']),
-                'timebyfoot minutes': int(data['timebyfoot']),
-                'timebycar minutes': int(data['timebycar']),
-                'timebybike minutes': int(data['timebybike']),
-            }  
-        })
+        current_location = Point(float(long), float(lat))
+
+        serializer = MachineSerializer(machine)
+        data = claculate_travel_distance_and_time(
+            current_location.tuple, machine.location.tuple
+        )
+
+        return Response(
+            {
+                "status": "success",
+                "message": "got travel info successfully",
+                "data": {
+                    "machine": serializer.data,
+                    "distance meters": int(data["distance"]),
+                    "timebyfoot minutes": int(data["timebyfoot"]),
+                    "timebycar minutes": int(data["timebycar"]),
+                    "timebybike minutes": int(data["timebybike"]),
+                },
+            }
+        )
 
 
 class GetDirections(APIView):
-    '''
+    """
     Get direction for a machine
     Takes the machine id and the user location
     Returns a path to the machine
-    '''
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk, long, lat):
@@ -119,22 +142,25 @@ class GetDirections(APIView):
             machine = Machine.objects.get(id=pk)
         except Machine.DoesNotExist:
             raise NotFound(detail="Error 404, Machine not found", code=404)
-        
+
         current_location = Point(float(long), float(lat))
 
         data = get_directions(current_location.tuple, machine.location.tuple)
 
-        return Response({
-            'status':'success',
-            'message': 'got travel directions successfully',
-            'data': data,
-        })
+        return Response(
+            {
+                "status": "success",
+                "message": "got travel directions successfully",
+                "data": data,
+            }
+        )
 
 
 class MachinesByCity(APIView):
-    '''
+    """
     Returns a all machines in given city
-    '''
+    """
+
     permission_classes = [IsAuthenticated]
     serializer_class = MachineSerializer
 
@@ -146,30 +172,34 @@ class MachinesByCity(APIView):
 
         serializer = MachineSerializer(machines, many=True)
 
-        return Response({
-            'status':'success',
-            'message': 'got machines by city successfully',
-            'data': serializer.data,
-        })
+        return Response(
+            {
+                "status": "success",
+                "message": "got machines by city successfully",
+                "data": serializer.data,
+            }
+        )
 
 
 class MachineDetail(generics.RetrieveUpdateAPIView):
-    '''
+    """
     given an id return machine details
-    '''
+    """
+
     permission_classes = [IsAuthenticated]
     queryset = Machine.objects.all()
     serializer_class = MachineSerializer
 
 
 class SetMachineCoordinates(APIView):
-    '''
+    """
     Assuming the machine has a GPS it should send a request to this endpoint to set its coordinates
         data schema: {
             longitude: float,
             latitdue: float
-        } 
-    '''
+        }
+    """
+
     permission_classes = [IsAuthenticated]
     serializer_class = MachineCoordinatesSerializer
 
@@ -179,15 +209,15 @@ class SetMachineCoordinates(APIView):
         except Machine.DoesNotExist:
             raise NotFound(detail="Error 404, Machine not found", code=404)
 
-        longitude = request.data.get('longitude', 0)
-        latitude = request.data.get('latitude', 0)
-        
+        longitude = request.data.get("longitude", 0)
+        latitude = request.data.get("latitude", 0)
+
         if machine.location:
             FCMDevice.objects.send_message(
                 Message(
                     notification=Notification(
-                    title=f"Machine location changed", 
-                    body=f"A machine moved to a new location check it out!", 
+                        title=f"Machine location changed",
+                        body=f"A machine moved to a new location check it out!",
                     )
                 )
             )
@@ -195,24 +225,25 @@ class SetMachineCoordinates(APIView):
             FCMDevice.objects.send_message(
                 Message(
                     notification=Notification(
-                    title="New Mahcine added", 
-                    body="New recycle machine added check it out!", 
+                        title="New Mahcine added",
+                        body="New recycle machine added check it out!",
                     )
                 )
             )
-        
+
         pnt = Point(float(longitude), float(latitude))
         machine.location = pnt
         machine.save()
 
         serializer = MachineSerializer(machine)
 
-        return Response({
-            'status':'success',
-            'message': 'set machine Coordinates successfully',
-            'data': serializer.data,
-        })
-
+        return Response(
+            {
+                "status": "success",
+                "message": "set machine Coordinates successfully",
+                "data": serializer.data,
+            }
+        )
 
 
 class MachineDelete(generics.DestroyAPIView):
@@ -221,76 +252,11 @@ class MachineDelete(generics.DestroyAPIView):
     serializer_class = MachineSerializer
 
 
-class MachineQRCode(APIView):
-    '''
-    Returns a QR code for the given machine name
-    '''
-    serializer_class = QRCodeSerializer
-
-    def get(self, request, name):
-        try:
-            machine = Machine.objects.get(identification_name=name)
-        except Machine.DoesNotExist:
-            raise NotFound(detail="Error 404, Machine not found", code=404)
-
-        path = request.build_absolute_uri(reverse("start_recycle", kwargs={'name':machine.identification_name}))
-        path = path.replace('http','wss')
-        qrcode_img = qrcode.make(path)
-        fname = f'qr_code-{machine.identification_name}.png'
-        buffer = BytesIO()
-        qrcode_img.save(buffer,'PNG')
-        machine.qr_code.save(fname, File(buffer), save=True)
-
-        return HttpResponse(machine.qr_code, content_type="image/png")
-
-
-class UpdateRecycle(APIView):
-    '''
-    The machine should send a request to this endpoint with the number of items recycled
-    data schema: {
-    bottles: int,
-    cans: int
-    } 
-    '''
-    serializer_class = UpdateRecycleLog
-    def post(self, request, name):
-        bottles = request.data.get('bottles', 0)
-        cans = request.data.get('cans', 0)
-        log = RecycleLog.objects.filter(machine_name=name, in_progess=True).order_by('-created_at').first()
-
-        if not log:
-            raise NotFound(detail="Error 404, log not found", code=404)
-        
-        points = (bottles + cans) * 10
-
-        log.bottles = bottles
-        log.cans = cans
-        log.points = points
-        log.in_progess = False
-        log.is_complete= True
-        log.save()
-        channel_layer = get_channel_layer()
-
-        try:
-            async_to_sync(channel_layer.send)(log.channel_name,{
-                "type": "receive.update",
-                'bottles':log.bottles,
-                'cans': log.cans,
-                'points': log.points
-            })
-
-        except Exception as e:
-            print(e)
-            return Response({'message':'failed!'})
-
-
-        return Response({"message":"success", 'bottles':bottles, 'cans': cans})
-    
-
 class RetrieveRecycleLog(APIView):
-    '''
+    """
     Retrieve the user's recycling logs
-    '''
+    """
+
     permission_classes = [IsAuthenticated]
     serializer_class = RecycleLogSerializer
 
@@ -301,58 +267,148 @@ class RetrieveRecycleLog(APIView):
 
         serializer = RecycleLogSerializer(logs, many=True)
 
-        return Response({
-            'message': 'Success',
-            'data': serializer.data,})
-    
+        return Response(
+            {
+                "message": "Success",
+                "data": serializer.data,
+            }
+        )
+
+
+class MachineQRCode(APIView):
+    """
+    Returns a QR code for the given machine name
+    """
+
+    serializer_class = QRCodeSerializer
+
+    def get(self, request, name):
+        try:
+            machine = Machine.objects.get(identification_name=name)
+        except Machine.DoesNotExist:
+            raise NotFound(detail="Error 404, Machine not found", code=404)
+
+        path = request.build_absolute_uri(
+            reverse("start_recycle", kwargs={"name": machine.identification_name})
+        )
+        path = path.replace("http", "wss")
+        qrcode_img = qrcode.make(path)
+        fname = f"qr_code-{machine.identification_name}.png"
+        buffer = BytesIO()
+        qrcode_img.save(buffer, "PNG")
+        machine.qr_code.save(fname, File(buffer), save=True)
+
+        return HttpResponse(machine.qr_code, content_type="image/png")
+
+
+class UpdateRecycle(APIView):
+    """
+    The machine should send a request to this endpoint with the number of items recycled
+    data schema: {
+    bottles: int,
+    cans: int
+    }
+    """
+
+    serializer_class = UpdateRecycleLog
+
+    def post(self, request, name):
+        bottles = request.data.get("bottles", 0)
+        cans = request.data.get("cans", 0)
+        log = (
+            RecycleLog.objects.filter(machine_name=name, in_progess=True)
+            .order_by("-created_at")
+            .first()
+        )
+
+        if not log:
+            raise NotFound(detail="Error 404, log not found", code=404)
+
+        points = (bottles + cans) * 10
+
+        log.bottles = bottles
+        log.cans = cans
+        log.points = points
+        log.in_progess = False
+        log.is_complete = True
+        log.save()
+        channel_layer = get_channel_layer()
+
+        try:
+            async_to_sync(channel_layer.send)(
+                log.channel_name,
+                {
+                    "type": "receive.update",
+                    "bottles": log.bottles,
+                    "cans": log.cans,
+                    "points": log.points,
+                },
+            )
+
+        except Exception as e:
+            return Response({"message": "Points updated but not sent to user"})
+
+        return Response({"message": "success", "bottles": bottles, "cans": cans})
+
 
 class IsMachineBusy(APIView):
-    '''
+    """
     Tells the machine if the user logedin using the QR Code or not.
-    '''
+    """
 
     def get(self, request, name):
         logs = RecycleLog.objects.filter(machine_name=name, in_progess=True)
         if not logs:
-            return Response({
-            'message': 'no user logged in',
-            'busy': False,
-            })
-        
-        user = UserSerializer(logs[0].user)
+            return Response(
+                {
+                    "message": "no user logged in",
+                    "busy": False,
+                }
+            )
 
-        return Response({
-            'message': 'User logged in',
-            'busy': True,
-            'user': user.data,})
+        user = UserSerializer(logs[0].user)
+        user = user.data
+        user["total_points"] = logs[0].user.total_points
+
+        return Response(
+            {
+                "message": "User logged in",
+                "busy": True,
+                "user": user,
+            }
+        )
 
 
 class MachineIsFull(APIView):
     def get(self, request, name):
         machine = Machine.objects.get(identification_name=name)
-        machine.status = 'breakdown'
-        machine.status_ar = 'لا تعمل'
+        machine.status = "breakdown"
+        machine.status_ar = "لا تعمل"
         machine.save()
 
-        FCMDevice.objects.get(name='admin').send_message(
-             Message(
+        FCMDevice.objects.get(name="admin").send_message(
+            Message(
                 notification=Notification(
-                title="Machine is full", 
-                body=f"{name} machine is full empty it!", 
+                    title="Machine is full",
+                    body=f"{name} machine is full empty it!",
                 )
             )
         )
 
-        subject = 'Machine is full'
+        subject = "Machine is full"
         email_from = settings.EMAIL_HOST_USER
-        to = UserModel.objects.get(username='admin').email
+        to = UserModel.objects.get(username="admin").email
         recipient_list = [to]
 
         send_mail(
-            subject, 
-            f"Machine {name} is full", 
-            email_from, 
-            recipient_list, 
+            subject,
+            f"Machine {name} is full",
+            email_from,
+            recipient_list,
         )
 
-        return Response({'message': 'success',})
+        return Response(
+            {
+                "message": "success",
+            }
+        )

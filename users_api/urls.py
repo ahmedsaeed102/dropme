@@ -17,10 +17,13 @@ router.register("devices", FCMDeviceAuthorizedViewSet)
 
 
 urlpatterns = [
+    # user crud
     path("user_register/", include(router.urls)),
+    # authentication
     path("user_login/", MyTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("logout/", TokenBlacklistView.as_view(), name="token_blacklist"),
+    # reset password
     path(
         "reset_password_emaillink/",
         RequestPasswordResetEmail.as_view(),
@@ -31,8 +34,10 @@ urlpatterns = [
         SetNewPasswordAPIView.as_view(),
         name="password-reset-complete",
     ),
+    # edit profile
     path(
         "<int:pk>/edit_profile/", ManageUserProfileView.as_view(), name="edit_profile"
     ),
+    # address list
     path("list_address/", LocationList.as_view(), name="create_address"),
 ]
