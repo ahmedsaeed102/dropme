@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenBlacklistView, TokenRefreshView
 from rest_framework.routers import DefaultRouter
+from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet
 from .views import (
     LocationList,
     UserViewSet,
@@ -12,6 +13,8 @@ from .views import (
 
 router = DefaultRouter()
 router.register("user_register", UserViewSet, basename="user_register")
+router.register("devices", FCMDeviceAuthorizedViewSet)
+
 
 urlpatterns = [
     path("user_register/", include(router.urls)),
