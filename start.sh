@@ -17,5 +17,8 @@ nginx
 nginx -s reload
 #nginx -g 'daemon off;'
 
+# cron jobs
+# python manage.py installtasks
+
 # print Logs to stdout
 tail -f ./asgi.out.log -f /var/log/nginx/access.log -f /var/log/nginx/error.log
