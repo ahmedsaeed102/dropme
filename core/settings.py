@@ -37,6 +37,7 @@ CSRF_TRUSTED_ORIGINS = ["https://*.railway.app", "https://127.0.0.1"]
 ALLOWED_HOSTS = ["*"]
 
 # Sentry for error reporting
+print(os.environ.get("sentry"))
 sentry_sdk.init(
     dsn=os.environ.get("sentry"),
     integrations=[
