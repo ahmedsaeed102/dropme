@@ -21,7 +21,7 @@ urlpatterns = [
     path("user_register/", include(router.urls)),
     # authentication
     path("user_login/", MyTokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("user_login/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("logout/", TokenBlacklistView.as_view(), name="token_blacklist"),
     # reset password
     path(
