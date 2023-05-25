@@ -291,7 +291,7 @@ class MachineQRCode(APIView):
         path = request.build_absolute_uri(
             reverse("start_recycle", kwargs={"name": machine.identification_name})
         )
-        path = path.replace("http", "wss")
+        path = path.replace("https", "wss")
         qrcode_img = qrcode.make(path)
         fname = f"qr_code-{machine.identification_name}.png"
         buffer = BytesIO()
