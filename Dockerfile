@@ -3,6 +3,7 @@ FROM ubuntu:latest
 ARG EMAIL_HOST_USER
 ARG EMAIL_HOST_PASSWORD
 ARG state
+ARG sentry
 ARG SITE_ID
 ARG apikey
 ARG db_password
@@ -72,6 +73,7 @@ RUN pip install -r requirements.txt
 ENV EMAIL_HOST_USER=${EMAIL_HOST_USER}
 ENV EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
 ENV state=${state}
+ENV sentry=${sentry}
 ENV SITE_ID=${SITE_ID}
 ENV apikey=${apikey}
 ENV db_password=${db_password}
@@ -82,7 +84,6 @@ ENV SECRET_KEY=${SECRET_KEY}
 ENV type=${type}
 ENV project_id=${project_id}
 ENV private_key_id=${private_key_id}
-# ENV private_key="\"$private_key\""
 ENV private_key=$private_key
 ENV client_email=${client_email}
 ENV client_id=${client_id}
