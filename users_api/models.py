@@ -1,4 +1,3 @@
-import re
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import (
@@ -9,19 +8,11 @@ from django.contrib.auth.models import (
 from model_utils import Choices
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
+from core.validators import validate_phone_number
 
 
 def upload_to(instance, filename):
     return f"upload_to/{instance.username}/{filename}"
-
-
-def validate_phone_number(value):
-    if not re.match(r"^01[0125]{1}", value):
-        raise ValidationError("Phone number must start with 010 or 011 or 012 or 015")
-
-    if not re.match(r"^\d{11}$", value):
-        raise ValidationError("Phone number must be 11 numbers")
 
 
 class LocationModel(models.Model):
