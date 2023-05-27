@@ -1,20 +1,17 @@
 import random
 from datetime import datetime, timedelta
-
 from django.conf import settings
 from django.utils import timezone
-
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from users_api.models import UserModel, LocationModel
-from .otp_send_email import send_otp, send_mail_pass, send_welcome_email
-
 from rest_framework import viewsets, status, generics, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-
+from users_api.models import UserModel, LocationModel
+from machine_api.models import PhoneNumber, RecycleLog
+from .otp_send_email import send_otp, send_mail_pass, send_welcome_email
 from .serializers import (
     LocationModelserializers,
     UserSerializer,
@@ -66,11 +63,23 @@ class UserViewSet(viewsets.ModelViewSet):
             instance.otp_expiration = None
             instance.max_otp_try = settings.MAX_OTP_TRY
             instance.max_otp_out = None
-            instance.save()
+
+            # send welcome email
             send_welcome_email(instance.email)
-            return Response(
-                "Successfully verfied the user .", status=status.HTTP_200_OK
-            )
+
+            # check if user phone number was used to recycle before and add the points to user account
+            phone = PhoneNumber.objects.filter(
+                phone_number=instance.phone_number
+            ).first()
+
+            if phone:
+                instance.total_points += phone.points
+                RecycleLog.objects.filter(phone=phone).update(user=instance)
+
+            instance.save()
+
+            return Response("Successfully verfied the user.", status=status.HTTP_200_OK)
+
         return Response(
             "user already verfied or otp is incorrect .",
             status=status.HTTP_400_BAD_REQUEST,

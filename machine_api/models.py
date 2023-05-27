@@ -88,9 +88,6 @@ class RecycleLog(models.Model):
     in_progess = models.BooleanField(default=False)
     is_complete = models.BooleanField(default=False)
 
-    def __str__(self):
-        return self.user.username
-
 
 # for using the machine without creating account
 class PhoneNumber(models.Model):
@@ -101,3 +98,6 @@ class PhoneNumber(models.Model):
     )
 
     points = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return self.phone_number

@@ -10,6 +10,8 @@ from channels.layers import get_channel_layer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
+
+# from rest_framework_api_key.permissions import HasAPIKey
 from firebase_admin.messaging import Message, Notification
 from fcm_django.models import FCMDevice
 from users_api.models import UserModel
@@ -169,17 +171,19 @@ class RecycleWithPhoneNumber(APIView):
         bottles = request.data.get("bottles", 0)
         cans = request.data.get("cans", 0)
 
-        log = ...
-        phone = ...
-
-        if not phone:
-            raise NotFound(detail="Error 404, log not found", code=404)
+        phone, created = PhoneNumber.objects.get_or_create(phone_number=phone_number)
 
         points = (bottles + cans) * 10
 
-        log.bottles = bottles
-        log.cans = cans
-        log.points = points
-        log.save()
+        RecycleLog.objects.create(
+            machine_name=name,
+            phone=phone,
+            bottles=bottles,
+            cans=cans,
+            points=points,
+        )
+
+        phone.points += points
+        phone.save()
 
         return Response({"message": "success"})
