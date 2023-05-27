@@ -10,8 +10,8 @@ from channels.layers import get_channel_layer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
-
-# from rest_framework_api_key.permissions import HasAPIKey
+from rest_framework.permissions import IsAdminUser
+from rest_framework_api_key.permissions import HasAPIKey
 from firebase_admin.messaging import Message, Notification
 from fcm_django.models import FCMDevice
 from users_api.models import UserModel
@@ -25,6 +25,7 @@ class MachineQRCode(APIView):
     Returns a QR code for the given machine name
     """
 
+    permission_classes = [HasAPIKey | IsAdminUser]
     serializer_class = QRCodeSerializer
 
     def get(self, request, name):
@@ -51,6 +52,8 @@ class IsMachineBusy(APIView):
     Tells the machine if the user logedin using the QR Code or not.
     """
 
+    permission_classes = [HasAPIKey]
+
     def get(self, request, name):
         logs = RecycleLog.objects.filter(machine_name=name, in_progess=True)
         if not logs:
@@ -75,6 +78,8 @@ class IsMachineBusy(APIView):
 
 
 class MachineIsFull(APIView):
+    permission_classes = [HasAPIKey]
+
     def get(self, request, name):
         machine = Machine.objects.get(identification_name=name)
         machine.status = "breakdown"
@@ -118,6 +123,7 @@ class UpdateRecycle(APIView):
     }
     """
 
+    permission_classes = [HasAPIKey]
     serializer_class = UpdateRecycleLog
 
     def post(self, request, name):
@@ -165,6 +171,7 @@ class RecycleWithPhoneNumber(APIView):
     The machine sends phone number and the number of items recycled
     """
 
+    permission_classes = [HasAPIKey]
     serializer_class = UpdateRecycleLog
 
     def post(self, request, name, phone_number):

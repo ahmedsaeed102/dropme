@@ -49,7 +49,6 @@ sentry_sdk.init(
     send_default_pii=True,
 )
 
-# Application definition
 INSTALLED_APPS = [
     "daphne",
     "django.contrib.admin",
@@ -62,6 +61,7 @@ INSTALLED_APPS = [
     # Third party app
     "rest_framework",
     "rest_framework.authtoken",
+    "rest_framework_api_key",
     "channels",
     "fcm_django",
     "rest_framework_simplejwt.token_blacklist",
