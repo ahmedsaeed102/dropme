@@ -1,0 +1,29 @@
+<html>
+
+<body>
+    <p>Hi {{username}},</p>
+
+    {% if logs %}
+    <p>Here is your weekly recycle summary:</p>
+    <ul>
+        {% for log in logs %}
+        <li>
+            machine used: {{log.machine_name}} &nbsp; At: {{log.created_at}}
+        </li>
+        {% endfor %}
+    </ul>
+
+    <p>
+        You have recycled a total of {{ items }} can and bottle
+    </p>
+    <p>
+        You have gained a total of {{ total_points }} points this week!
+    </p>
+    {% else %}
+    <p>You haven't done any recycling this week 😢</p>
+    {% endif %}
+
+    <i>DropMe Team</i>
+</body>
+
+</html>

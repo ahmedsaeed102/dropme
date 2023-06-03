@@ -67,17 +67,23 @@ class Machine(models.Model):
 
 class RecycleLog(models.Model):
     machine_name = models.CharField(max_length=200)
-    user = models.ForeignKey(UserModel, null=True, blank=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        UserModel,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="user_logs",
+    )
 
     phone = models.ForeignKey(
         "PhoneNumber", null=True, blank=True, on_delete=models.CASCADE
     )
 
-    bottles = models.PositiveSmallIntegerField(
+    bottles = models.IntegerField(
         default=0,
         blank=True,
     )
-    cans = models.PositiveSmallIntegerField(
+    cans = models.IntegerField(
         default=0,
         blank=True,
     )
