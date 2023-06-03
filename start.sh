@@ -4,8 +4,9 @@
 python3 manage.py makemigrations 
 python3 manage.py migrate
 
-# Starting supervisor 
+# Starting supervisor  and cron
 service supervisor start
+service cron start
 supervisorctl
 
 # reloading supervisor to read the new config file
@@ -18,7 +19,6 @@ nginx -s reload
 #nginx -g 'daemon off;'
 
 # cron jobs
-service cron start
 python3 manage.py installtasks
 crontab -l
 
