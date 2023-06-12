@@ -66,10 +66,11 @@ INSTALLED_APPS = [
     "fcm_django",
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
+    "drf_spectacular_sidecar",
     "corsheaders",
     "storages",
     "kronos",
-    # my apps
+    # Internal apps
     "users_api",
     "community_api",
     "machine_api",
@@ -127,6 +128,8 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "Dropme Project api",
     "VERSION": "1.0.0",
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
 }
 
 CHANNEL_LAYERS = {

@@ -10,7 +10,7 @@ from channels.layers import get_channel_layer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_api_key.permissions import HasAPIKey
 from firebase_admin.messaging import Message, Notification
 from fcm_django.models import FCMDevice
@@ -18,6 +18,7 @@ from users_api.models import UserModel
 from users_api.serializers import UserSerializer
 from .serializers import QRCodeSerializer, UpdateRecycleLog
 from .models import Machine, RecycleLog, PhoneNumber
+from .utlis import update_user_points
 
 
 class MachineQRCode(APIView):
@@ -25,7 +26,7 @@ class MachineQRCode(APIView):
     Returns a QR code for the given machine name
     """
 
-    permission_classes = [HasAPIKey | IsAdminUser]
+    permission_classes = [HasAPIKey | IsAuthenticated]
     serializer_class = QRCodeSerializer
 
     def get(self, request, name):
@@ -107,11 +108,7 @@ class MachineIsFull(APIView):
             recipient_list,
         )
 
-        return Response(
-            {
-                "message": "Admin notified successfully",
-            }
-        )
+        return Response({"message": "Admin notified successfully"})
 
 
 class UpdateRecycle(APIView):
@@ -148,6 +145,8 @@ class UpdateRecycle(APIView):
         log.save()
         channel_layer = get_channel_layer()
 
+        update_user_points(log.user.id, points)
+
         try:
             async_to_sync(channel_layer.send)(
                 log.channel_name,
@@ -160,9 +159,9 @@ class UpdateRecycle(APIView):
             )
 
         except Exception as e:
-            return Response({"message": "Points updated but user logged out"})
+            return Response({"message": "error in sending update to user mobile phone"})
 
-        return Response({"message": "success"})
+        return Response({"message": "success", "points": points})
 
 
 class RecycleWithPhoneNumber(APIView):
@@ -182,15 +181,25 @@ class RecycleWithPhoneNumber(APIView):
 
         points = (bottles + cans) * 10
 
-        RecycleLog.objects.create(
-            machine_name=name,
-            phone=phone,
-            bottles=bottles,
-            cans=cans,
-            points=points,
-        )
+        user = UserModel.objects.filter(phone_number=phone).first()
+        if user:
+            update_user_points(user.id, points)
+            RecycleLog.objects.create(
+                machine_name=name,
+                user=user,
+                bottles=bottles,
+                cans=cans,
+                points=points,
+            )
+        else:
+            RecycleLog.objects.create(
+                machine_name=name,
+                phone=phone,
+                bottles=bottles,
+                cans=cans,
+                points=points,
+            )
+            phone.points += points
+            phone.save()
 
-        phone.points += points
-        phone.save()
-
-        return Response({"message": "success"})
+        return Response({"message": "success", "points": points})

@@ -77,6 +77,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 RecycleLog.objects.filter(phone=phone).update(user=instance)
 
             instance.save()
+            phone.delete()
 
             return Response("Successfully verfied the user.", status=status.HTTP_200_OK)
 

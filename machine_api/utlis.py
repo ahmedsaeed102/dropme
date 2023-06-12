@@ -4,13 +4,11 @@ from datetime import timedelta, datetime
 from django.db.models import Sum, F
 from django.utils.timezone import make_aware
 from django.utils import timezone
-from channels.db import database_sync_to_async
 from rest_framework.exceptions import APIException
 from users_api.models import UserModel
 from .models import RecycleLog
 
 
-@database_sync_to_async
 def update_user_points(user_pk, points):
     user = UserModel.objects.get(pk=user_pk)
     user.total_points += points
