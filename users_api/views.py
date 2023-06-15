@@ -75,14 +75,14 @@ class UserViewSet(viewsets.ModelViewSet):
             if phone:
                 instance.total_points += phone.points
                 RecycleLog.objects.filter(phone=phone).update(user=instance)
+                phone.delete()
 
             instance.save()
-            phone.delete()
 
             return Response("Successfully verfied the user.", status=status.HTTP_200_OK)
 
         return Response(
-            "user already verfied or otp is incorrect .",
+            "User already verfied or otp is incorrect.",
             status=status.HTTP_400_BAD_REQUEST,
         )
 
