@@ -8,17 +8,18 @@ from .utlis import get_user_weekly_logs
 
 @kronos.register("0 8 * * 5")
 def send_weekly_recycle_summary_email():
-    subject = "Weekly Recycle Summary"
     from_email = settings.EMAIL_HOST_USER
 
     for user in UserModel.objects.all():
-        logs, total_points, items = get_user_weekly_logs(user.id)
-        context = {
-            "username": user.username,
-            "logs": logs,
-            "total_points": total_points["points__sum"],
-            "items": items,
-        }
+        subject = "Weekly Recycle Summary - Your Impact with Drop Me!"
+        data = get_user_weekly_logs(user.id)
+
+        if not data["recycled"]:
+            subject = "Weekly Recycling Update - Join the Recycling Revolution"
+
+        context = {"username": user.username}
+        context.update(data)
+
         template = get_template("recylce_weekly_summary_template.html").render(context)
 
         send_mail(

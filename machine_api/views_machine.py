@@ -18,7 +18,7 @@ from users_api.models import UserModel
 from users_api.serializers import UserSerializer
 from .serializers import QRCodeSerializer, UpdateRecycleLog
 from .models import Machine, RecycleLog, PhoneNumber
-from .utlis import update_user_points
+from .utlis import update_user_points, calculate_points
 
 
 class MachineQRCode(APIView):
@@ -135,17 +135,17 @@ class UpdateRecycle(APIView):
         if not log:
             raise NotFound(detail="Error 404, log not found", code=404)
 
-        points = (bottles + cans) * 10
+        _, _, total_points = calculate_points(bottles, cans)
 
         log.bottles = bottles
         log.cans = cans
-        log.points = points
+        log.points = total_points
         log.in_progess = False
         log.is_complete = True
         log.save()
         channel_layer = get_channel_layer()
 
-        update_user_points(log.user.id, points)
+        update_user_points(log.user.id, total_points)
 
         try:
             async_to_sync(channel_layer.send)(
@@ -161,7 +161,7 @@ class UpdateRecycle(APIView):
         except Exception as e:
             return Response({"message": "error in sending update to user mobile phone"})
 
-        return Response({"message": "success", "points": points})
+        return Response({"message": "success", "points": total_points})
 
 
 class RecycleWithPhoneNumber(APIView):
@@ -179,17 +179,17 @@ class RecycleWithPhoneNumber(APIView):
 
         phone, created = PhoneNumber.objects.get_or_create(phone_number=phone_number)
 
-        points = (bottles + cans) * 10
+        _, _, total_points = calculate_points(bottles, cans)
 
         user = UserModel.objects.filter(phone_number=phone).first()
         if user:
-            update_user_points(user.id, points)
+            update_user_points(user.id, total_points)
             RecycleLog.objects.create(
                 machine_name=name,
                 user=user,
                 bottles=bottles,
                 cans=cans,
-                points=points,
+                points=total_points,
             )
         else:
             RecycleLog.objects.create(
@@ -197,9 +197,9 @@ class RecycleWithPhoneNumber(APIView):
                 phone=phone,
                 bottles=bottles,
                 cans=cans,
-                points=points,
+                points=total_points,
             )
-            phone.points += points
+            phone.points += total_points
             phone.save()
 
-        return Response({"message": "success", "points": points})
+        return Response({"message": "success", "points": total_points})

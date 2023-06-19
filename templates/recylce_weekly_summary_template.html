@@ -1,29 +1,99 @@
 <html>
 
 <body>
-    <p>Hi {{username}},</p>
+    <p>Dear <i>{{username}}</i>,</p>
 
-    {% if logs %}
-    <p>Here is your weekly recycle summary:</p>
-    <ul>
-        {% for log in logs %}
-        <li>
-            machine used: {{log.machine_name}} &nbsp; At: {{log.created_at}}
-        </li>
-        {% endfor %}
-    </ul>
+    {% if recycled %}
+    <p>
+        Thank you for being a part of the Drop Me community and for your commitment to recycling.
+        We appreciate your efforts in helping us create a greener and more sustainable future.
+    </p>
+
+    <p>Here's your weekly recycle summary, highlighting the impact you've made:</p>
+
+    <h4>Plastic Bottles:</h4>
+
+    <p>Total plastic bottles recycled: {{bottles_number}}</p>
+    <p>Equivalent CO2 emissions reduced: {{bottles_co2}} kg</p>
+    <p>Energy saved: {{bottles_energy}} KWh</p>
+    <p>Total points earned: {{ bottles_points }} points</p>
+
+    <h4>Aluminum Cans:</h4>
+
+    <p>Total Aluminum Cans recycled: {{cans_number}}</p>
+    <p>Equivalent CO2 emissions reduced: {{cans_co2}} kg</p>
+    <p>Energy saved: {{cans_energy}} KWh</p>
+    <p>Total points earned: {{ cans_points }} points</p>
 
     <p>
-        You have recycled a total of {{ items }} can and bottle
+        Overall, your recycling efforts have made a significant impact on reducing carbon emissions and conserving
+        valuable resources.
+        Your contributions have earned you a total of <b>{{ total_points }} points</b>, which can be redeemed for
+        exclusive
+        rewards and discounts.
     </p>
+
+    <p>We encourage you to continue recycling and spreading the word about Drop Me.</p>
+
+    <p>Remember, every small action counts, and together, we can make a big difference.</p>
+
+    <p>If you have any questions, suggestions, or feedback, please don't hesitate to reach out to us. We value your
+        input and are constantly working to improve our services.</p>
+
     <p>
-        You have gained a total of {{ total_points }} points this week!
+        Thank you once again for your dedication to recycling.
+        We look forward to updating you on your continued impactnext week.
     </p>
+
     {% else %}
-    <p>You haven't done any recycling this week 😢</p>
+    <p>
+        Thank you for being part of the Drop Me community and showing interest in making a positive impact through
+        recycling.
+    </p>
+
+    <p>
+        While we understand that you haven't had a chance to recycle yet, we encourage you to join the recycling
+        revolution and start making a difference.
+    </p>
+
+    <p>Here's your weekly recycling update:</p>
+
+    <h4>Recycling Categories:</h4>
+
+    <p>Plastic Bottles: No plastic bottles recycled yet.</p>
+    <p>Aluminum Cans: No aluminum cans recycled yet.</p>
+
+    <p>
+        We know that everyone has their own pace when it comes to adopting new habits.
+        That's why we're here to support and motivate you on your recycling journey.
+        When you're ready, Drop Me is here to provide convenient recycling options and a seamless experience.
+    </p>
+
+    <p>
+        Recycling not only helps protect the environment but also conserves resources, reduces waste, and minimizes the
+        carbon footprint.
+        By recycling with Drop Me, you can earn points for your contributions and unlock exclusive rewards.
+    </p>
+
+    <p>
+        To get started, simply download the Drop Me app and explore the available recycling locations near you.
+        You'll find detailed instructions on how to recycle each material and contribute to a cleaner and greener world.
+    </p>
+
+    <p>
+        If you have any questions, need assistance, or want to learn more about the benefits of recycling, our team is
+        always here to help.
+        Feel free to reach out to us, and we'll be glad to guide you.
+    </p>
+
+    <p>
+        Let's work together to make a positive impact on our planet.
+        Start recycling with Drop Me today and be part of the change!
+    </p>
     {% endif %}
 
-    <i>DropMe Team</i>
+    <p>Best regards,</p>
+    <i>Drop Me Team</i>
 </body>
 
 </html>
