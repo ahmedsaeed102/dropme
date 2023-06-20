@@ -53,8 +53,8 @@ def get_directions(userlocation, machinelocation):
     data = requests.get(
         f"https://api.openrouteservice.org/v2/directions/driving-car?api_key={key}&start={userlocation[0]},{userlocation[1]}&end={machinelocation[0]},{machinelocation[1]}"
     ).json()
-    del data["metadata"]
-    del data["type"]
+    # del data["metadata"]
+    # del data["type"]
     return data
 
 
