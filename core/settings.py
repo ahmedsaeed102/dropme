@@ -3,6 +3,7 @@ import environ
 import base64
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from datetime import timedelta
 from pathlib import Path
 from firebase_admin import initialize_app
 from firebase_admin import credentials
@@ -17,7 +18,6 @@ AUTH_USER_MODEL = "users_api.UserModel"
 MIN_PASSWORD_LENGTH = 8
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
-
 
 if os.environ.get("state") == "production":
     DEBUG = False
@@ -85,7 +85,6 @@ cert = {
     "type": os.environ.get("type"),
     "project_id": os.environ.get("project_id"),
     "private_key_id": os.environ.get("private_key_id"),
-    # "private_key": os.environ.get('private_key').replace(r'\n', '\n'),
     "private_key": private_key.replace(r"\n", "\n"),
     "client_email": os.environ.get("client_email"),
     "client_id": os.environ.get("client_id"),
@@ -138,8 +137,6 @@ CHANNEL_LAYERS = {
     },
 }
 
-
-from datetime import timedelta
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=7),

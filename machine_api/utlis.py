@@ -53,8 +53,7 @@ def get_directions(userlocation, machinelocation):
     data = requests.get(
         f"https://api.openrouteservice.org/v2/directions/driving-car?api_key={key}&start={userlocation[0]},{userlocation[1]}&end={machinelocation[0]},{machinelocation[1]}"
     ).json()
-    # del data["metadata"]
-    # del data["type"]
+
     return data
 
 
@@ -96,7 +95,9 @@ def get_user_weekly_logs(userid: int) -> dict:
         user=userid, created_at__gte=make_aware(friday_last_week)
     )
 
-    recycled = True if logs else False
+    if not logs:
+        recycled = False
+        return {"recycled": recycled}
 
     total_bottles = logs.aggregate(Sum("bottles"))["bottles__sum"]
     total_cans = logs.aggregate(Sum("cans"))["cans__sum"]
