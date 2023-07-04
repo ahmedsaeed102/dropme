@@ -3,10 +3,10 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.utils import timezone
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, APIException
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import UserModel, LocationModel
-from .otp_send_email import send_otp, send_reset_password_email
+from .otp_send_email import send_otp
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -135,7 +135,8 @@ class SetNewPasswordSerializer(serializers.Serializer):
             return super().validate(data)
 
         except Exception as e:
-            raise AuthenticationFailed("Server Error", 500)
+            print(str(e))
+            raise APIException("Server Error", 500)
 
 
 class LocationModelserializers(serializers.ModelSerializer):
