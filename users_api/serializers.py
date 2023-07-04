@@ -1,11 +1,12 @@
 import random
 from datetime import datetime, timedelta
 from django.conf import settings
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
-from django.utils import timezone
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import UserModel, LocationModel
-from .otp_send_email import send_otp, send_mail_pass
+from .otp_send_email import send_otp, send_reset_password_email
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -88,8 +89,6 @@ class UserProfileSerializer(UserSerializer):
             "address",
         ]
 
-    # def create(self, val_data):
-    #     return UserModel.objects.create_user(**val_data)
     def update(self, instance, val_data):
         """update profile for User"""
         password = val_data.pop("password1", None)
@@ -101,58 +100,42 @@ class UserProfileSerializer(UserSerializer):
 
 
 class ResetPasswordEmailRequestSerializer(serializers.Serializer):
-    email = serializers.EmailField(min_length=2)
+    email = serializers.EmailField()
 
     class Meta:
         fields = ["email"]
 
-        def update(self):
-            otp = random.randint(1000, 9999)
-            otp_expiration = datetime.now() + timedelta(minutes=5)
-
-            user = UserModel(
-                otp=otp,
-                otp_expiration=otp_expiration,
-                max_otp_try=settings.MAX_OTP_TRY,
-            )
-
-            user.save()
-            send_mail_pass(self.email, otp)
-
-            return user
-
 
 class SetNewPasswordSerializer(serializers.Serializer):
-    password = serializers.CharField(min_length=6, max_length=68, write_only=True)
+    password = serializers.CharField(
+        min_length=settings.MIN_PASSWORD_LENGTH, max_length=68, write_only=True
+    )
     otp = serializers.CharField(max_length=4, write_only=True)
-    email = serializers.EmailField(min_length=2)
+    email = serializers.EmailField()
 
     class Meta:
         fields = ["password", "otp", "email"]
 
     def validate(self, data):
         try:
-            password = data.get("password")
-            otp = data.get("otp")
-            email = data.get("email")
+            password = data["password"]
+            otp = data["otp"]
+            email = data["email"]
 
-            user = UserModel.objects.get(email=data["email"])
+            user = UserModel.objects.filter(email=email)[0]
 
-            if UserModel.objects.filter(email=email).exists():
-                if (
-                    user.otp_expiration
-                    and user.otp == otp
-                    and timezone.now() < user.otp_expiration
-                ):
-                    user.otp_expiration = None
-                    user.max_otp_try = settings.MAX_OTP_TRY
-                    user.max_otp_out = None
-            user.set_password(password)
-            user.save()
-            # return (user)
+            if user:
+                if user.otp == otp and timezone.now() < user.otp_expiration:
+                    user.otp = ""
+                    user.set_password(password)
+                    user.save()
+                else:
+                    raise AuthenticationFailed("Invalid OTP", 401)
+
             return super().validate(data)
+
         except Exception as e:
-            raise AuthenticationFailed("The reset otp is invalid", 401)
+            raise AuthenticationFailed("Server Error", 500)
 
 
 class LocationModelserializers(serializers.ModelSerializer):
@@ -160,5 +143,15 @@ class LocationModelserializers(serializers.ModelSerializer):
         model = LocationModel
         fields = "__all__"
 
-    # queryset=LocationModel.objects.all()
-    # serializ
+
+# custom serializer from rest_framework_simplejwt.serializers
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # Add custom claims
+        data["username"] = self.user.username
+        data["email"] = self.user.email
+        data["id"] = self.user.id
+
+        return data

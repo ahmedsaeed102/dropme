@@ -29,10 +29,9 @@ def send_otp(email, otp):
     )
 
 
-""" 2) reset password using otp """
+def send_reset_password_email(email, otp):
+    """send reset password email with otp"""
 
-
-def send_mail_pass(email, otp):
     user = UserModel.objects.get(email=email)
     user.otp = otp
     user.save()
@@ -54,10 +53,9 @@ def send_mail_pass(email, otp):
     )
 
 
-""" 3) send welcome email to user after sign up """
-
-
 def send_welcome_email(email):
+    """send welcome email to user after sign up"""
+
     # user = UserModel.objects.get(email=email)
     # context = {'username': user.username}
     # template = get_template('welcome_email.html').render(context)

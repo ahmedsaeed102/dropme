@@ -1,5 +1,9 @@
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenBlacklistView, TokenRefreshView
+from rest_framework_simplejwt.views import (
+    TokenBlacklistView,
+    TokenRefreshView,
+    TokenObtainPairView,
+)
 from rest_framework.routers import DefaultRouter
 from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet
 from .views import (
@@ -8,7 +12,6 @@ from .views import (
     RequestPasswordResetEmail,
     SetNewPasswordAPIView,
     ManageUserProfileView,
-    MyTokenObtainPairView,
 )
 
 router = DefaultRouter()
@@ -20,7 +23,7 @@ urlpatterns = [
     # user crud
     path("user_register/", include(router.urls)),
     # authentication
-    path("user_login/", MyTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("user_login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("user_login/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("logout/", TokenBlacklistView.as_view(), name="token_blacklist"),
     # reset password

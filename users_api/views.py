@@ -7,11 +7,9 @@ from rest_framework.response import Response
 from rest_framework import viewsets, status, generics, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
 from users_api.models import UserModel, LocationModel
 from machine_api.models import PhoneNumber, RecycleLog
-from .otp_send_email import send_otp, send_mail_pass, send_welcome_email
+from .otp_send_email import send_otp, send_reset_password_email, send_welcome_email
 from .serializers import (
     LocationModelserializers,
     UserSerializer,
@@ -19,28 +17,6 @@ from .serializers import (
     SetNewPasswordSerializer,
     ResetPasswordEmailRequestSerializer,
 )
-
-
-# class CustomRedirect(HttpResponsePermanentRedirect):
-#     allowed_schemes = [os.environ.get('APP_SCHEME'), 'http', 'https']
-
-
-# custom serializer from rest_framework_simplejwt.serializers
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-
-        # Add custom claims
-        data["username"] = self.user.username
-        data["email"] = self.user.email
-        data["id"] = self.user.id
-
-        return data
-
-
-# for login
-class MyTokenObtainPairView(TokenObtainPairView):
-    serializer_class = MyTokenObtainPairSerializer
 
 
 # for signup
@@ -142,12 +118,19 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
     serializer_class = ResetPasswordEmailRequestSerializer
 
     def post(self, request, pk=None):
-        serializer = self.serializer_class(data=request.data)
         email = request.data.get("email", "")
         user = UserModel.objects.filter(email=email).first()
         if user:
+            otp = random.randint(1000, 9999)
+            otp_expiration = datetime.now() + timedelta(minutes=5)
+
+            user.otp = otp
+            user.otp_expiration = otp_expiration
+            user.max_otp_try = settings.MAX_OTP_TRY
+            user.save()
+
             # send email with otp
-            send_mail_pass(email, user.otp)
+            send_reset_password_email(email, user.otp)
 
             return Response("Reset password email sent", status=status.HTTP_200_OK)
         else:
@@ -170,38 +153,48 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
         )
 
 
-class RequestPasswordOtp(generics.GenericAPIView):
+class RegenerateResetPasswordOTP(generics.GenericAPIView):
     """regenerate otp for reset password"""
 
     serializer_class = ResetPasswordEmailRequestSerializer
 
-    def post(self, request, pk=None):
-        serializer = self.serializer_class(data=request.data)
+    def post(self, request):
         email = request.data.get("email", "")
-        instance = UserModel.objects.get(email=email)
-        if int(instance.max_otp_try == 0) and timezone.now() < instance.max_otp_out:
+        user = UserModel.objects.filter(email=email).first()
+
+        if user:
+            if int(user.max_otp_try == 0) and timezone.now() < user.max_otp_out:
+                return Response(
+                    "Max OTP tries reached, try again after an hour.",
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            max_otp_try = int(user.max_otp_try) - 1
+            otp = random.randint(1000, 9999)
+            otp_expiration = datetime.now() + timedelta(minutes=5)
+
+            user.otp = otp
+            user.otp_expiration = otp_expiration
+            user.max_otp_try = max_otp_try
+
+            if max_otp_try == 0:
+                user.max_otp_out = timezone.now() + datetime.timedelta(hours=1)
+            elif max_otp_try == -1:
+                user.max_otp_try = max_otp_try
+
+            user.save()
+
+            send_reset_password_email(email, otp)
+
             return Response(
-                "Max OTP try reached ,try after an hour.",
-                status=status.HTTP_400_BAD_REQUEST,
+                "successfully regenrated the new OTP.", status=status.HTTP_200_OK
             )
 
-        otp = random.randint(1000, 9999)
-        otp_expiration = datetime.now() + timedelta(minutes=5)
-        max_otp_try = int(instance.max_otp_try) - 1
-
-        instance.otp = otp
-        instance.otp_expiration = otp_expiration
-        instance.max_otp_try = max_otp_try
-
-        if max_otp_try == 0:
-            instance.max_otp_out = timezone.now() + datetime.timedelta(hours=1)
-        elif max_otp_try == -1:
-            instance.max_otp_try = max_otp_try
-        send_otp(instance.email, otp)
-        instance.save()
-        return Response(
-            "successfully regenrated the new OTP.", status=status.HTTP_200_OK
-        )
+        else:
+            return Response(
+                "There is no account registered with this email.",
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class LocationList(generics.ListCreateAPIView):

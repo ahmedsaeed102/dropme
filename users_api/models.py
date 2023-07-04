@@ -89,9 +89,6 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
-    # def get_image_url(self):
-    #     return f"/media/{self.profile_photo}"
-
     @property
     def ranking(self):
         count = UserModel.objects.filter(total_points__gt=self.total_points).count()
