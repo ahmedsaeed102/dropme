@@ -110,33 +110,31 @@ class SetNewPasswordSerializer(serializers.Serializer):
     password = serializers.CharField(
         min_length=settings.MIN_PASSWORD_LENGTH, max_length=68, write_only=True
     )
-    otp = serializers.CharField(max_length=4, write_only=True)
+    otp = serializers.CharField(min_length=4, max_length=4, write_only=True)
     email = serializers.EmailField()
 
     class Meta:
         fields = ["password", "otp", "email"]
 
     def validate(self, data):
-        try:
-            password = data["password"]
-            otp = data["otp"]
-            email = data["email"]
+        password = data.get("password", "")
+        otp = data.get("otp", "")
+        email = data.get("email", "")
 
-            user = UserModel.objects.filter(email=email)[0]
+        user = UserModel.objects.filter(email=email).first()
 
-            if user:
-                if user.otp == otp and timezone.now() < user.otp_expiration:
-                    user.otp = ""
-                    user.set_password(password)
-                    user.save()
-                else:
-                    raise AuthenticationFailed("Invalid OTP", 401)
+        if user:
+            if user.otp == otp and timezone.now() < user.otp_expiration:
+                user.otp = ""
+                user.set_password(password)
+                user.save()
+            else:
+                raise AuthenticationFailed("Invalid OTP", 401)
 
-            return super().validate(data)
+        else:
+            raise AuthenticationFailed("Invalid Email", 401)
 
-        except Exception as e:
-            print(str(e))
-            raise APIException("Server Error", 500)
+        return data
 
 
 class LocationModelserializers(serializers.ModelSerializer):
