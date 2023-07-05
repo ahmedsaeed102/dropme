@@ -96,8 +96,7 @@ def get_user_weekly_logs(userid: int) -> dict:
     )
 
     if not logs:
-        recycled = False
-        return {"recycled": recycled}
+        return {"recycled": False}
 
     total_bottles = logs.aggregate(Sum("bottles"))["bottles__sum"]
     total_cans = logs.aggregate(Sum("cans"))["cans__sum"]
@@ -109,7 +108,7 @@ def get_user_weekly_logs(userid: int) -> dict:
     co2_energy = calculate_co2_energy(total_bottles, total_cans)
 
     data = {
-        "recycled": recycled,
+        "recycled": True,
         "bottles_number": total_bottles,
         "bottles_points": bottles_points,
         "cans_number": total_cans,
