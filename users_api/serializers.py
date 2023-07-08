@@ -52,7 +52,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
         user.set_password(val_data["password1"])
         user.save()
-        send_otp(val_data["email"], otp)
+        send_otp(user)
         return user
 
 
@@ -147,6 +147,16 @@ class LocationModelserializers(serializers.ModelSerializer):
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
+
+        if not self.user.is_active:
+            otp = random.randint(1000, 9999)
+            otp_expiration = datetime.now() + timedelta(minutes=5)
+            self.user.otp = otp
+            self.user.otp_expiration = otp_expiration
+            self.user.save()
+
+            send_otp(self.user)
+            return {"is_verified": False}
 
         # Add custom claims
         data["username"] = self.user.username

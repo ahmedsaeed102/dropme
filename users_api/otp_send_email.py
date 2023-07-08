@@ -4,20 +4,17 @@ from django.template.loader import get_template
 from .models import UserModel
 
 
-def send_otp(email, otp):
+def send_otp(user: UserModel):
     """
     this function handle sending email to user in case of activating account after sign up
     """
-    user = UserModel.objects.get(email=email)
-    user.otp = otp
-    user.save()
 
-    context = {"username": user.username, "otp": otp}
+    context = {"username": user.username, "otp": user.otp}
     template = get_template("otp_email.html").render(context)
 
     subject = "Your One-Time Password (OTP) for DropMe"
     email_from = settings.EMAIL_HOST_USER
-    recipient_list = [email]
+    recipient_list = [user.email]
 
     send_mail(
         subject,

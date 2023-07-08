@@ -115,6 +115,8 @@ FCM_DJANGO_SETTINGS = {
     "UPDATE_ON_DUPLICATE_REG_ID": True,
 }
 
+AUTHENTICATION_BACKENDS = ["core.backends.AuthBackend"]
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -146,13 +148,13 @@ SIMPLE_JWT = {
     "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
     "TOKEN_VERIFY_SERIALIZER": "rest_framework_simplejwt.serializers.TokenVerifySerializer",
     "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
+    "USER_AUTHENTICATION_RULE": "core.backends.simple_jwt_authentication_rule",
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -187,22 +189,22 @@ ASGI_APPLICATION = "core.asgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
-    #     "HOST": "localhost",
-    #     "NAME": "postgres",
-    #     "PASSWORD": "admin",
-    #     "PORT": 5433,
-    #     "USER": "postgres",
-    # },
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "HOST": os.environ.get("db_host"),
-        "NAME": os.environ.get("db_name"),
-        "PASSWORD": os.environ.get("db_password"),
-        "PORT": int(os.environ.get("db_port")),
+        "HOST": "localhost",
+        "NAME": "postgres",
+        "PASSWORD": "admin",
+        "PORT": 5433,
         "USER": "postgres",
-    }
+    },
+    # "default": {
+    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
+    #     "HOST": os.environ.get("db_host"),
+    #     "NAME": os.environ.get("db_name"),
+    #     "PASSWORD": os.environ.get("db_password"),
+    #     "PORT": int(os.environ.get("db_port")),
+    #     "USER": "postgres",
+    # }
 }
 
 if os.name == "nt":
