@@ -16,6 +16,7 @@ from .serializers import (
     UserProfileSerializer,
     SetNewPasswordSerializer,
     ResetPasswordEmailRequestSerializer,
+    OTPSerializer,
 )
 
 
@@ -138,6 +139,26 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
                 "There is no account registered with this email.",
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+
+class VerifyPasswordResetOTP(generics.GenericAPIView):
+    serializer_class = OTPSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception as e:
+            print(str(e))
+            return Response(
+                {"valid": False},
+                status=status.HTTP_200_OK,
+            )
+        return Response(
+            {"valid": True},
+            status=status.HTTP_200_OK,
+        )
 
 
 class SetNewPasswordAPIView(generics.GenericAPIView):

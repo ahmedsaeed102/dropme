@@ -12,6 +12,7 @@ from .views import (
     RequestPasswordResetEmail,
     SetNewPasswordAPIView,
     ManageUserProfileView,
+    VerifyPasswordResetOTP,
 )
 
 router = DefaultRouter()
@@ -36,6 +37,11 @@ urlpatterns = [
         "password-reset/",
         SetNewPasswordAPIView.as_view(),
         name="password-reset-complete",
+    ),
+    path(
+        "password-reset/verify-otp/",
+        VerifyPasswordResetOTP.as_view(),
+        name="password-reset-verify-otp",
     ),
     # edit profile
     path(

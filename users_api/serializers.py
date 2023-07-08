@@ -106,6 +106,29 @@ class ResetPasswordEmailRequestSerializer(serializers.Serializer):
         fields = ["email"]
 
 
+class OTPSerializer(serializers.Serializer):
+    otp = serializers.CharField(min_length=4, max_length=4, write_only=True)
+    email = serializers.EmailField()
+
+    class Meta:
+        fields = ["email", "otp"]
+
+    def validate(self, data):
+        otp = data.get("otp", "")
+        email = data.get("email", "")
+
+        user = UserModel.objects.filter(email=email).first()
+
+        if user:
+            if user.otp == otp and timezone.now() < user.otp_expiration:
+                return data
+            else:
+                raise AuthenticationFailed("Invalid OTP", 401)
+
+        else:
+            raise AuthenticationFailed("Invalid Email", 401)
+
+
 class SetNewPasswordSerializer(serializers.Serializer):
     password = serializers.CharField(
         min_length=settings.MIN_PASSWORD_LENGTH, max_length=68, write_only=True
