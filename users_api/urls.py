@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import (
     TokenBlacklistView,
     TokenRefreshView,
+    TokenVerifyView,
     TokenObtainPairView,
 )
 from rest_framework.routers import DefaultRouter
@@ -32,6 +33,7 @@ urlpatterns = [
     # authentication
     path("user_login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("user_login/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("user_login/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("logout/", TokenBlacklistView.as_view(), name="token_blacklist"),
     # reset password
     path(
