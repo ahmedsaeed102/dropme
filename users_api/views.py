@@ -221,3 +221,12 @@ class RegenerateResetPasswordOTP(generics.GenericAPIView):
 class LocationList(generics.ListCreateAPIView):
     queryset = LocationModel.objects.all()
     serializer_class = LocationModelserializers
+
+
+class CurrentUserTotalPointsView(generics.GenericAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        return Response(
+            {"total_points": request.user.total_points}, status=status.HTTP_200_OK
+        )

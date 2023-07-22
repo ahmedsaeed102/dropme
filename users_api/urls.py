@@ -13,6 +13,7 @@ from .views import (
     SetNewPasswordAPIView,
     ManageUserProfileView,
     VerifyPasswordResetOTP,
+    CurrentUserTotalPointsView,
 )
 
 router = DefaultRouter()
@@ -23,6 +24,11 @@ router.register("devices", FCMDeviceAuthorizedViewSet)
 urlpatterns = [
     # user crud
     path("user_register/", include(router.urls)),
+    path(
+        "current_user/points/",
+        CurrentUserTotalPointsView.as_view(),
+        name="current_user_points",
+    ),
     # authentication
     path("user_login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("user_login/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),

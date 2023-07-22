@@ -1,8 +1,7 @@
 from rest_framework import generics
-from rest_framework.views import APIView
+from rest_framework.views import APIView, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework.exceptions import NotFound
 from firebase_admin.messaging import Message, Notification
 from fcm_django.models import FCMDevice
 from .serializers import MachineSerializer, RecycleLogSerializer
@@ -59,7 +58,7 @@ class RetrieveRecycleLog(APIView):
     def get(self, request, pk):
         logs = RecycleLog.objects.filter(user=pk, is_complete=True)
         if not logs:
-            raise NotFound(detail="Error 404, no logs for current user", code=404)
+            return Response({"message": "No Data", "data": []})
 
         serializer = RecycleLogSerializer(logs, many=True)
 
