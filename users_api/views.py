@@ -2,8 +2,6 @@ import random
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.utils import timezone
-from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework import viewsets, status, generics, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -17,6 +15,7 @@ from .serializers import (
     SetNewPasswordSerializer,
     ResetPasswordEmailRequestSerializer,
     OTPSerializer,
+    OTPOnlySerializer,
 )
 
 
@@ -25,10 +24,9 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = UserModel.objects.all()
     serializer_class = UserSerializer
 
-    """ to check if the user enter the correct otp or if he/she is already verified (is_active=True)"""
-
-    @action(detail=True, methods=["PATCH"])
+    @action(detail=True, methods=["PATCH"], serializer_class=OTPOnlySerializer)
     def verify_otp(self, request, pk=None):
+        """to check if the user entered the correct otp or if he/she is already verified (is_active=True)"""
         instance = self.get_object()
         if (
             not instance.is_active
@@ -63,19 +61,20 @@ class UserViewSet(viewsets.ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    """ to regenerate otp until max try """
-
-    @action(detail=True, methods=["PATCH"])
+    @action(detail=True, methods=["GET"])
     def regenerate_otp(self, request, pk=None):
+        """to regenerate otp until max try"""
         instance = self.get_object()
-        if int(instance.max_otp_try == 0) and timezone.now() < instance.max_otp_out:
+        if timezone.now() < instance.max_otp_out:
+            waiting_time = instance.max_otp_out - timezone.now()
+            print(type(waiting_time))
             return Response(
-                "Max OTP try reached, try after an hour.",
+                f"Max OTP try reached, try after: {waiting_time.seconds // 60} minute.",
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         otp = random.randint(1000, 9999)
-        otp_expiration = datetime.now() + timedelta(minutes=5)
+        otp_expiration = timezone.now() + timedelta(minutes=5)
         max_otp_try = int(instance.max_otp_try) - 1
 
         instance.otp = otp
@@ -83,12 +82,13 @@ class UserViewSet(viewsets.ModelViewSet):
         instance.max_otp_try = max_otp_try
 
         if max_otp_try == 0:
-            instance.max_otp_out = timezone.now() + datetime.timedelta(hours=1)
-        elif max_otp_try == -1:
-            instance.max_otp_try = max_otp_try
+            instance.max_otp_out = timezone.now() + timedelta(hours=1)
+            instance.max_otp_try = settings.MAX_OTP_TRY
 
-        send_otp(instance.email, otp)
+        send_otp(instance)
+
         instance.save()
+
         return Response(
             "successfully regenrated the new OTP.", status=status.HTTP_200_OK
         )

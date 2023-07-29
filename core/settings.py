@@ -188,22 +188,22 @@ ASGI_APPLICATION = "core.asgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
-    #     "HOST": "localhost",
-    #     "NAME": "postgres",
-    #     "PASSWORD": "admin",
-    #     "PORT": 5433,
-    #     "USER": "postgres",
-    # },
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "HOST": os.environ.get("db_host"),
-        "NAME": os.environ.get("db_name"),
-        "PASSWORD": os.environ.get("db_password"),
-        "PORT": int(os.environ.get("db_port")),
+        "HOST": "localhost",
+        "NAME": "postgres",
+        "PASSWORD": "admin",
+        "PORT": 5433,
         "USER": "postgres",
-    }
+    },
+    # "default": {
+    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
+    #     "HOST": os.environ.get("db_host"),
+    #     "NAME": os.environ.get("db_name"),
+    #     "PASSWORD": os.environ.get("db_password"),
+    #     "PORT": int(os.environ.get("db_port")),
+    #     "USER": "postgres",
+    # }
 }
 
 if os.name == "nt":

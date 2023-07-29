@@ -106,6 +106,13 @@ class ResetPasswordEmailRequestSerializer(serializers.Serializer):
         fields = ["email"]
 
 
+class OTPOnlySerializer(serializers.Serializer):
+    otp = serializers.CharField(min_length=4, max_length=4, write_only=True)
+
+    class Meta:
+        fields = ["otp"]
+
+
 class OTPSerializer(serializers.Serializer):
     otp = serializers.CharField(min_length=4, max_length=4, write_only=True)
     email = serializers.EmailField()
