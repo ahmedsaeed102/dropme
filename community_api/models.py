@@ -36,14 +36,14 @@ class MessagesModel(models.Model):
         validators=[
             FileExtensionValidator(
                 allowed_extensions=["MOV", "avi", "mp4", "webm", "mkv"]
-            ),
+            )
         ],
     )
 
     class Meta:
         ordering = ("-message_dt",)
 
-    def str(self):
+    def __str__(self):
         return self.user_model.username
 
 

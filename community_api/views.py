@@ -31,6 +31,7 @@ class MessagesPagination(PageNumberPagination):
 class ChannelsListView(ListAPIView):
     queryset = ChannelsModel.objects.all()
     serializer_class = ChannelsSerializer
+    permission_classes = (IsAuthenticated,)
 
 
 class ChannelsDetailView(RetrieveAPIView):
