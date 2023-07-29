@@ -15,8 +15,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_spectacular.utils import extend_schema
+from notification.services import notification_send_all
 from .models import ChannelsModel, MessagesModel, ReportModel
-from .utlis import *
+from .utlis import get_current_chat
 from .serializers import *
 
 
@@ -48,7 +49,10 @@ class ChannelsCreateView(CreateAPIView):
     def perform_create(self, serializer):
         # send notification to all user after a new channel is created
         serializer.save()
-        send_new_community_notification(serializer.data["room_name"])
+        notification_send_all(
+            title="New community channel",
+            body=f"""A new community channel '{serializer.data["room_name"]}' has been created. check it out!""",
+        )
 
 
 class ChannelsUpdateView(UpdateAPIView):
@@ -126,7 +130,10 @@ class SendMessage(APIView):
                 return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
             # send notification
-            send_community_notification(room_name)
+            notification_send_all(
+                title="New message",
+                body=f"""You have a new message in '{room_name}' community channel""",
+            )
 
             return Response("message sent successfully", status=status.HTTP_201_CREATED)
 

@@ -17,6 +17,7 @@ urlpatterns = [
     path("", include("machine_api.routing")),
     path("", include("community_api.urls"), name="community_api"),
     path("", include("community_api.routing")),
+    path("", include("notification.urls")),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

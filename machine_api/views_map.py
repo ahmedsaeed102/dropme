@@ -4,8 +4,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from firebase_admin.messaging import Message, Notification
-from fcm_django.models import FCMDevice
+from notification.services import notification_send_all
 from .utlis import claculate_travel_distance_and_time, get_directions
 from .serializers import MachineSerializer, MachineCoordinatesSerializer
 from .models import Machine
@@ -33,22 +32,14 @@ class SetMachineCoordinates(APIView):
         latitude = request.data.get("latitude", 0)
 
         if machine.location:
-            FCMDevice.objects.send_message(
-                Message(
-                    notification=Notification(
-                        title=f"Machine location changed",
-                        body=f"A machine moved to a new location check it out!",
-                    )
-                )
+            notification_send_all(
+                title="Machine location changed",
+                body="A machine moved to a new location check it out!",
             )
         else:
-            FCMDevice.objects.send_message(
-                Message(
-                    notification=Notification(
-                        title="New Mahcine added",
-                        body="New recycle machine added check it out!",
-                    )
-                )
+            notification_send_all(
+                title="Machine location changed",
+                body="New recycle machine added check it out!",
             )
 
         pnt = Point(float(longitude), float(latitude))

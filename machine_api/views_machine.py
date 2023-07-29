@@ -12,10 +12,9 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_api_key.permissions import HasAPIKey
-from firebase_admin.messaging import Message, Notification
-from fcm_django.models import FCMDevice
 from users_api.models import UserModel
 from users_api.serializers import UserSerializer
+from notification.services import notification_send_by_name
 from .serializers import QRCodeSerializer, UpdateRecycleLog
 from .models import Machine, RecycleLog, PhoneNumber
 from .utlis import update_user_points, calculate_points
@@ -87,13 +86,10 @@ class MachineIsFull(APIView):
         machine.status_ar = "لا تعمل"
         machine.save()
 
-        FCMDevice.objects.get(name="admin").send_message(
-            Message(
-                notification=Notification(
-                    title="Machine is full",
-                    body=f"{name} machine is full empty it!",
-                )
-            )
+        notification_send_by_name(
+            name="admin",
+            title="Machine is full",
+            body=f"{name} machine is full empty it!",
         )
 
         subject = "Machine is full"

@@ -1,9 +1,8 @@
 from rest_framework import generics
-from rest_framework.views import APIView, status
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from firebase_admin.messaging import Message, Notification
-from fcm_django.models import FCMDevice
+from notification.services import notification_send_all
 from .serializers import MachineSerializer, RecycleLogSerializer
 from .models import Machine, RecycleLog
 
@@ -21,14 +20,7 @@ class Machines(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         # send notification to all user after a new machine is added
         serializer.save()
-        FCMDevice.objects.send_message(
-            Message(
-                notification=Notification(
-                    title="New Machine",
-                    body="New Machine has been added, check it out!",
-                )
-            )
-        )
+        notification_send_all(title="New Machine", body="New Machine has been added")
 
 
 class MachineDetail(generics.RetrieveUpdateAPIView):

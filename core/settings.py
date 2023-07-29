@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     "community_api",
     "machine_api",
     "competition_api",
+    "notification",
 ]
 
 
