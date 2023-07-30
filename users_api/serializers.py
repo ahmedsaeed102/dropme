@@ -3,10 +3,10 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.utils import timezone
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed, APIException
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import UserModel, LocationModel
-from .otp_send_email import send_otp
+from .services import send_otp
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -155,8 +155,8 @@ class SetNewPasswordSerializer(serializers.Serializer):
 
         if user:
             if user.otp == otp and timezone.now() < user.otp_expiration:
-                user.otp = ""
                 user.set_password(password)
+                user.max_otp_try = settings.MAX_OTP_TRY
                 user.save()
             else:
                 raise AuthenticationFailed("Invalid OTP", 401)
@@ -186,7 +186,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             self.user.save()
 
             send_otp(self.user)
-            return {"is_verified": False}
+            return {"is_verified": False, "id": self.user.id}
 
         # Add custom claims
         data["username"] = self.user.username

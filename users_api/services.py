@@ -1,12 +1,15 @@
+import random
+from datetime import timedelta, datetime
+from django.utils import timezone
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from .models import UserModel
 
 
-def send_otp(user: UserModel):
+def send_otp(user: UserModel) -> None:
     """
-    this function handle sending email to user in case of activating account after sign up
+    Function to send OTP email to user
     """
 
     context = {"username": user.username, "otp": user.otp}
@@ -27,7 +30,7 @@ def send_otp(user: UserModel):
 
 
 def send_reset_password_email(email, otp):
-    """send reset password email with otp"""
+    """Function to send reset password email with OTP"""
 
     user = UserModel.objects.get(email=email)
     user.otp = otp
@@ -51,7 +54,7 @@ def send_reset_password_email(email, otp):
 
 
 def send_welcome_email(email):
-    """send welcome email to user after sign up"""
+    """Function to send welcome email to user after account verification"""
 
     # user = UserModel.objects.get(email=email)
     # context = {'username': user.username}
@@ -69,3 +72,32 @@ def send_welcome_email(email):
         # fail_silently=False,
         # html_message=template
     )
+
+
+def otp_generate() -> tuple[str, datetime]:
+    """
+    Generates a one-time password (OTP) and its expiration time.
+
+    Returns:
+        A tuple containing the OTP and its expiration time.
+    """
+    otp = random.randint(1000, 9999)
+    otp_expiration = timezone.now() + timedelta(minutes=5)
+
+    return otp, otp_expiration
+
+
+def otp_set(*, user: UserModel) -> UserModel:
+    otp, otp_expiration = otp_generate()
+
+    user.otp = otp
+    user.otp_expiration = otp_expiration
+    user.max_otp_try = int(user.max_otp_try) - 1
+
+    if user.max_otp_try == 0:
+        user.max_otp_out = timezone.now() + timedelta(hours=1)
+        user.max_otp_try = settings.MAX_OTP_TRY
+
+    user.save()
+
+    return user

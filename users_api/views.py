@@ -1,13 +1,17 @@
-import random
-from datetime import datetime, timedelta
 from django.conf import settings
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 from rest_framework import viewsets, status, generics, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from users_api.models import UserModel, LocationModel
 from machine_api.models import PhoneNumber, RecycleLog
-from .otp_send_email import send_otp, send_reset_password_email, send_welcome_email
+from .models import LocationModel
+from .services import (
+    send_otp,
+    send_reset_password_email,
+    send_welcome_email,
+    otp_set,
+)
 from .serializers import (
     LocationModelserializers,
     UserSerializer,
@@ -18,10 +22,12 @@ from .serializers import (
     OTPOnlySerializer,
 )
 
+User = get_user_model()
+
 
 # for signup
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = UserModel.objects.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
 
     @action(detail=True, methods=["PATCH"], serializer_class=OTPOnlySerializer)
@@ -73,21 +79,9 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        otp = random.randint(1000, 9999)
-        otp_expiration = timezone.now() + timedelta(minutes=5)
-        max_otp_try = int(instance.max_otp_try) - 1
-
-        instance.otp = otp
-        instance.otp_expiration = otp_expiration
-        instance.max_otp_try = max_otp_try
-
-        if max_otp_try == 0:
-            instance.max_otp_out = timezone.now() + timedelta(hours=1)
-            instance.max_otp_try = settings.MAX_OTP_TRY
+        instance = otp_set(user=instance)
 
         send_otp(instance)
-
-        instance.save()
 
         return Response(
             "Successfully regenrated the new OTP.", status=status.HTTP_200_OK
@@ -97,7 +91,7 @@ class UserViewSet(viewsets.ModelViewSet):
 # for edit_profile
 class ManageUserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
-    queryset = UserModel.objects.all()
+    queryset = User.objects.all()
     lookup_field = "pk"
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -114,26 +108,31 @@ class ManageUserProfileView(generics.RetrieveUpdateAPIView):
 
 
 class RequestPasswordResetEmail(generics.GenericAPIView):
-    """generate otp for reset password"""
+    """Send password reset email"""
 
     serializer_class = ResetPasswordEmailRequestSerializer
 
-    def post(self, request, pk=None):
+    def post(self, request):
         email = request.data.get("email", "")
-        user = UserModel.objects.filter(email=email).first()
-        if user:
-            otp = random.randint(1000, 9999)
-            otp_expiration = timezone.now() + timedelta(minutes=5)
+        user = User.objects.filter(email=email).first()
 
-            user.otp = otp
-            user.otp_expiration = otp_expiration
-            user.max_otp_try = settings.MAX_OTP_TRY
-            user.save()
+        if user:
+            if user.max_otp_out and timezone.now() < user.max_otp_out:
+                waiting_time = user.max_otp_out - timezone.now()
+                return Response(
+                    f"Max OTP try reached, try after: {waiting_time.seconds // 60} minute.",
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            user = otp_set(user=user)
 
             # send email with otp
             send_reset_password_email(email, user.otp)
 
-            return Response("Reset password email sent", status=status.HTTP_200_OK)
+            return Response(
+                "Reset password email sent",
+                status=status.HTTP_200_OK,
+            )
         else:
             return Response(
                 "There is no account registered with this email.",
@@ -167,7 +166,15 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
     def patch(self, request):
         serializer = self.serializer_class(data=request.data)
 
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception as e:
+            print(str(e))
+            return Response(
+                {"success": False},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
         return Response(
             {"success": True, "message": "Password reset success"},
             status=status.HTTP_200_OK,

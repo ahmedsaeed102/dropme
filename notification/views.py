@@ -18,6 +18,7 @@ class Notifications(ListAPIView):
 
 class DeleteNotification(DestroyAPIView):
     queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
     permission_classes = (IsAuthenticated,)
 
     def destroy(self, request, *args, **kwargs):
