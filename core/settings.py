@@ -20,23 +20,11 @@ AUTH_USER_MODEL = "users_api.UserModel"
 MIN_PASSWORD_LENGTH = 8
 
 SECRET_KEY = env("SECRET_KEY")
-
-if env("state") == "production":
-    DEBUG = False
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME")
-    AWS_S3_ENDPOINT_URL = f"https://s3.{AWS_S3_REGION_NAME}.backblazeb2.com"
-    AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
-    AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
-else:
-    DEBUG = True
-    MEDIA_ROOT = BASE_DIR / "media"
-    MEDIA_URL = "/media/"
-
+DEBUG = int(env("DEBUG"))
 
 CSRF_TRUSTED_ORIGINS = ["https://*.railway.app", "https://127.0.0.1"]
 ALLOWED_HOSTS = ["*"]
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Sentry for error reporting
 sentry_sdk.init(
@@ -152,7 +140,6 @@ SIMPLE_JWT = {
     "USER_AUTHENTICATION_RULE": "core.backends.simple_jwt_authentication_rule",
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -190,14 +177,6 @@ ASGI_APPLICATION = "core.asgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.contrib.gis.db.backends.postgis",
-    #     "HOST": "localhost",
-    #     "NAME": "postgres",
-    #     "PASSWORD": "admin",
-    #     "PORT": 5433,
-    #     "USER": "postgres",
-    # },
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
         "HOST": env("db_host"),
@@ -262,3 +241,25 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+if DEBUG:
+    env.read_env(BASE_DIR / ".env.local")
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.contrib.gis.db.backends.postgis",
+            "HOST": env("local_db_host"),
+            "NAME": env("local_db_name"),
+            "PASSWORD": env("local_db_password"),
+            "PORT": int(env("local_db_port")),
+            "USER": env("local_db_user"),
+        },
+    }
+    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_URL = "/media/"
+else:
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME")
+    AWS_S3_ENDPOINT_URL = f"https://s3.{AWS_S3_REGION_NAME}.backblazeb2.com"
+    AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")

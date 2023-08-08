@@ -2,7 +2,7 @@ FROM ubuntu:latest
 
 ARG EMAIL_HOST_USER
 ARG EMAIL_HOST_PASSWORD
-ARG state
+ARG DEBUG
 ARG sentry
 ARG SITE_ID
 ARG apikey
@@ -72,7 +72,7 @@ RUN pip install -r requirements.txt
 
 ENV EMAIL_HOST_USER=${EMAIL_HOST_USER}
 ENV EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
-ENV state=${state}
+ENV DEBUG=${DEBUG}
 ENV sentry=${sentry}
 ENV SITE_ID=${SITE_ID}
 ENV apikey=${apikey}
