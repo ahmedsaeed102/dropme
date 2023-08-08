@@ -16,7 +16,6 @@ from .models import Competition
 
 
 class Competitions(generics.ListCreateAPIView):
-    # queryset = Competition.objects.all()
     queryset = Competition.objects.filter(
         end_date__gte=date.today()
     )  # return only ongoing competitions
@@ -24,9 +23,9 @@ class Competitions(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        # send notification to all user after a new competition is created
-        serializer.save()
+        """send notification to all user after a new competition is created"""
 
+        serializer.save()
         notification_send_all(
             title="New Competition", body="New competition created check it out!"
         )
@@ -44,8 +43,9 @@ class CompetitionDelete(generics.DestroyAPIView):
     permission_classes = [IsAdminUser]
 
 
-# Global leaderboard
 class Leaderboard(APIView):
+    """Global leaderboard"""
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

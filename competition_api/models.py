@@ -6,73 +6,76 @@ from users_api.models import UserModel
 
 class Competition(models.Model):
     name = models.CharField(
-        max_length=100,
-        help_text = _('Format: required, max-length:100')
+        max_length=100, help_text=_("Format: required, max-length:100")
     )
     name_ar = models.CharField(
         max_length=100,
         blank=True,
         null=True,
-        help_text = _('arabic translation for name field')
+        help_text=_("arabic translation for name field"),
     )
 
     description = models.TextField(
         max_length=500,
-        null = True,
-        blank = True,
-        help_text = _('Format: optional, max-length:500')
+        null=True,
+        blank=True,
+        help_text=_("Format: optional, max-length:500"),
     )
     description_ar = models.TextField(
         max_length=500,
-        null = True,
-        blank = True,
-        help_text = _('arabic translation for description')
+        null=True,
+        blank=True,
+        help_text=_("arabic translation for description"),
     )
 
     target = models.PositiveIntegerField(
-        default = 0,
-        help_text = _('Competition target points'),
+        default=0,
+        help_text=_("Competition target points"),
     )
     created_at = models.DateTimeField(auto_now_add=True)
     start_date = models.DateField(
-        help_text = _('Competition start date'),
+        help_text=_("Competition start date"),
     )
     end_date = models.DateField(
-        help_text = _('Competition end date'),
+        help_text=_("Competition end date"),
     )
 
-    users = models.ManyToManyField(UserModel, through="CompetitionRanking", related_name="comp_user")
+    users = models.ManyToManyField(
+        UserModel, through="CompetitionRanking", related_name="comp_user"
+    )
 
     @property
-    def is_ongoing(self):
+    def is_ongoing(self) -> bool:
         return self.end_date > date.today()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
 class CompetitionRanking(models.Model):
     competition = models.ForeignKey(
         Competition,
-        on_delete = models.CASCADE,
+        on_delete=models.CASCADE,
     )
     user = models.ForeignKey(
         UserModel,
-        on_delete = models.CASCADE,
+        on_delete=models.CASCADE,
     )
     points = models.PositiveIntegerField(
-        default = 0,
-        blank = True,
-        help_text = _('user points in competition'),
+        default=0,
+        blank=True,
+        help_text=_("user points in competition"),
     )
 
     @property
-    def ranking(self):
-        count = CompetitionRanking.objects.filter(competition=self.competition.pk, points__gt=self.points).count()
+    def ranking(self) -> int:
+        count = CompetitionRanking.objects.filter(
+            competition=self.competition.pk, points__gt=self.points
+        ).count()
         return count + 1
 
     class Meta:
-        ordering = ('-points',)
+        ordering = ("-points",)
 
-    def __str__(self):
-        return f'{self.competition.name} | {self.user.username}'
+    def __str__(self) -> str:
+        return f"{self.competition.name} | {self.user.username}"

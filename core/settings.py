@@ -1,6 +1,6 @@
 import os
-import environ
 import base64
+import environ
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from datetime import timedelta
@@ -11,22 +11,24 @@ from firebase_admin import credentials
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+
+env = environ.Env()
+env.read_env(BASE_DIR / ".env")
 
 MAX_OTP_TRY = 3
 AUTH_USER_MODEL = "users_api.UserModel"
 MIN_PASSWORD_LENGTH = 8
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = env("SECRET_KEY")
 
-if os.environ.get("state") == "production":
+if env("state") == "production":
     DEBUG = False
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
+    AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME")
     AWS_S3_ENDPOINT_URL = f"https://s3.{AWS_S3_REGION_NAME}.backblazeb2.com"
-    AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-    AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+    AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
 else:
     DEBUG = True
     MEDIA_ROOT = BASE_DIR / "media"
@@ -38,7 +40,7 @@ ALLOWED_HOSTS = ["*"]
 
 # Sentry for error reporting
 sentry_sdk.init(
-    dsn=os.environ.get("sentry"),
+    dsn=env("sentry"),
     integrations=[
         DjangoIntegration(),
     ],
@@ -79,20 +81,20 @@ INSTALLED_APPS = [
 ]
 
 
-private_key = str.encode(os.environ.get("private_key"))
+private_key = str.encode(env("private_key"))
 private_key = base64.b64decode(private_key).decode("utf-8")
 
 cert = {
-    "type": os.environ.get("type"),
-    "project_id": os.environ.get("project_id"),
-    "private_key_id": os.environ.get("private_key_id"),
+    "type": env("type"),
+    "project_id": env("project_id"),
+    "private_key_id": env("private_key_id"),
     "private_key": private_key.replace(r"\n", "\n"),
-    "client_email": os.environ.get("client_email"),
-    "client_id": os.environ.get("client_id"),
-    "auth_uri": os.environ.get("auth_uri"),
-    "token_uri": os.environ.get("token_uri"),
-    "auth_provider_x509_cert_url": os.environ.get("auth_provider_x509_cert_url"),
-    "client_x509_cert_url": os.environ.get("client_x509_cert_url"),
+    "client_email": env("client_email"),
+    "client_id": env("client_id"),
+    "auth_uri": env("auth_uri"),
+    "token_uri": env("token_uri"),
+    "auth_provider_x509_cert_url": env("auth_provider_x509_cert_url"),
+    "client_x509_cert_url": env("client_x509_cert_url"),
 }
 cred = credentials.Certificate(cert)
 FIREBASE_APP = initialize_app(cred)
@@ -139,7 +141,6 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
 }
-
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
@@ -199,10 +200,10 @@ DATABASES = {
     # },
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "HOST": os.environ.get("db_host"),
-        "NAME": os.environ.get("db_name"),
-        "PASSWORD": os.environ.get("db_password"),
-        "PORT": int(os.environ.get("db_port")),
+        "HOST": env("db_host"),
+        "NAME": env("db_name"),
+        "PASSWORD": env("db_password"),
+        "PORT": int(env("db_port")),
         "USER": "postgres",
     }
 }
@@ -224,8 +225,6 @@ if os.name == "nt":
 
 # GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal306.dll'
 
-# Password validation
-# https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -243,9 +242,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/4.1/topics/i18n/
-
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "UTC"
@@ -261,8 +257,8 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"

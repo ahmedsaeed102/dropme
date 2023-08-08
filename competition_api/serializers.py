@@ -23,7 +23,7 @@ class CompetitionSerializer(serializers.ModelSerializer):
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
-    # custom serializer for global leaderboard
+    """custom serializer for global leaderboard"""
 
     rank = serializers.ReadOnlyField(source="ranking")
 
@@ -48,7 +48,7 @@ class CompetitionRankingSerializer(serializers.ModelSerializer):
 
 
 class CustomCompetitionSerializer(serializers.ModelSerializer):
-    # custom competition serializer for returning competition rankings
+    """custom competition serializer for returning competition rankings"""
 
     top_ten = serializers.SerializerMethodField()
 
