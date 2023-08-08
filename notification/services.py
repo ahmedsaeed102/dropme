@@ -26,7 +26,9 @@ def notification_send_all(*, title: str, body: str) -> None:
 
 
 def notification_send_by_name(*, name: str, title: str, body: str) -> None:
-    FCMDevice.objects.get(name=name).send_message(
+    device = FCMDevice.objects.get(name=name)
+
+    device.send_message(
         Message(
             notification=Notification(
                 title=title,
@@ -34,3 +36,5 @@ def notification_send_by_name(*, name: str, title: str, body: str) -> None:
             )
         )
     )
+
+    notification_create(devices=[device], title=title, body=body)
