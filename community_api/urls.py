@@ -9,6 +9,16 @@ urlpatterns = [
     path("community/<pk>/", ChannelsDetailView.as_view()),
     path("community/<pk>/delete/", ChannelsDeleteView.as_view()),
     # path('community/<pk>/update/', ChannelsUpdateView.as_view()),
+    # join, leave channel and add people
+    path("community/<str:room_name>/join/", JoinChannel.as_view(), name="join_channel"),
+    path(
+        "community/<str:room_name>/leave/", LeaveChannel.as_view(), name="leave_channel"
+    ),
+    path(
+        "community/<str:room_name>/add/",
+        InvitePeopleToChannel.as_view(),
+        name="invite_channel",
+    ),
     # room messages
     path(
         "community/<str:room_name>/messages/",

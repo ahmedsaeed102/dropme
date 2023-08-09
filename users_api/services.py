@@ -7,6 +7,36 @@ from django.template.loader import get_template
 from .models import UserModel
 
 
+def send_email(
+    *,
+    subject: str,
+    to: list,
+    body: str = None,
+    context: dict = None,
+    template=None,
+) -> None:
+    email_from = settings.EMAIL_HOST_USER
+
+    if template:
+        template = get_template("otp_email.html").render(context)
+
+        send_mail(
+            subject,
+            None,
+            email_from,
+            to,
+            fail_silently=False,
+            html_message=template,
+        )
+    else:
+        send_mail(
+            subject,
+            body,
+            email_from,
+            to,
+        )
+
+
 def send_otp(user: UserModel) -> None:
     """
     Function to send OTP email to user

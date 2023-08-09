@@ -49,9 +49,21 @@ class MessagesModel(models.Model):
 
 class ChannelsModel(models.Model):
     room_name = models.CharField(max_length=50)
-    messages = models.ManyToManyField(MessagesModel, blank=True)
+    room_name_ar = models.CharField(max_length=50, null=True, blank=True)
 
-    # participants=models.ManyToManyField(UserModel, related_name='chats')
+    description = models.TextField(null=True, blank=True)
+    description_ar = models.TextField(null=True, blank=True)
+
+    channel_type = models.CharField(
+        max_length=20,
+        choices=[("public", "Public"), ("private", "Private")],
+        default="public",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    messages = models.ManyToManyField(MessagesModel, blank=True)
+    users = models.ManyToManyField(UserModel, related_name="user_channels", blank=True)
 
     @property
     def messages_num(self):
@@ -71,6 +83,9 @@ class ChannelsModel(models.Model):
                 return f"ws://localhost:8000/ws/chat/{self.room_name}/?token="
         else:
             return ""
+
+    def __str__(self):
+        return self.room_name
 
 
 class ReportModel(models.Model):

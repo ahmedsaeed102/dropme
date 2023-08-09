@@ -1,6 +1,17 @@
 from firebase_admin.messaging import Message, Notification
-from fcm_django.models import FCMDevice
+from fcm_django.models import FCMDevice, FCMDeviceQuerySet
 from .models import Notification as NotificaitonModel
+
+
+def fcmdevice_get(**kwargs) -> FCMDeviceQuerySet:
+    return FCMDevice.objects.filter(**kwargs)
+
+
+def fcmdevice_get_all(*, exclude: int = None) -> FCMDeviceQuerySet:
+    if exclude:
+        return FCMDevice.objects.all().exclude(user=exclude)
+    else:
+        return FCMDevice.objects.all()
 
 
 def notification_create(*, devices: list[FCMDevice], title: str, body: str) -> None:
@@ -23,6 +34,19 @@ def notification_send_all(*, title: str, body: str) -> None:
     )
 
     notification_create(devices=FCMDevice.objects.all(), title=title, body=body)
+
+
+def notification_send(*, devices: list[FCMDevice], title: str, body: str) -> None:
+    devices.send_message(
+        Message(
+            notification=Notification(
+                title=title,
+                body=body,
+            )
+        )
+    )
+
+    notification_create(devices=devices, title=title, body=body)
 
 
 def notification_send_by_name(*, name: str, title: str, body: str) -> None:

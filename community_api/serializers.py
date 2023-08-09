@@ -4,13 +4,12 @@ from .models import ChannelsModel, MessagesModel
 
 
 class ChannelsSerializer(serializers.ModelSerializer):
-    # participants = MessageSerializer(many=True)
     messages_num = serializers.SerializerMethodField()
     websocket_url = serializers.SerializerMethodField()
 
     class Meta:
         model = ChannelsModel
-        exclude = ("messages",)
+        exclude = ("messages", "users")
         read_only = "id"
 
     def get_messages_num(self, obj):

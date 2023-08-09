@@ -1,6 +1,7 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.shortcuts import render
+from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.generics import (
@@ -15,10 +16,18 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_spectacular.utils import extend_schema
-from notification.services import notification_send_all
+from notification.services import (
+    notification_send_all,
+    notification_send,
+    fcmdevice_get,
+    fcmdevice_get_all,
+)
+from users_api.services import send_email
 from .models import ChannelsModel, MessagesModel, ReportModel
 from .utlis import get_current_chat
 from .serializers import *
+
+User = get_user_model()
 
 
 def room(request, room_name):
@@ -109,9 +118,9 @@ class SendMessage(APIView):
                 img=request.FILES.get("img", None),
                 video=request.FILES.get("video", None),
             )
-            current_chat = get_current_chat(room_name)
-            current_chat.messages.add(msg)
-            current_chat.save()
+            room = get_current_chat(room_name)
+            room.messages.add(msg)
+            room.save()
 
             # send msg to all users in room
             channel_layer = get_channel_layer()
@@ -130,10 +139,20 @@ class SendMessage(APIView):
                 return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
             # send notification
-            notification_send_all(
-                title="New message",
-                body=f"""You have a new message in '{room_name}' community channel""",
-            )
+            if room.channel_type == "public":
+                devices = fcmdevice_get_all(exclude=request.user.pk)
+                notification_send(
+                    devices=devices,
+                    title="New message",
+                    body=f"""You have a new message in '{room_name}' community channel""",
+                )
+            else:
+                devices = fcmdevice_get(user__user_channels__room_name=room_name)
+                notification_send(
+                    devices=devices,
+                    title="New Message",
+                    body=f"""You have a new message in '{room_name}' community channel""",
+                )
 
             return Response("message sent successfully", status=status.HTTP_201_CREATED)
 
@@ -253,3 +272,107 @@ class SendReport(APIView):
         return Response(
             {"message": "report sent successfully"}, status=status.HTTP_201_CREATED
         )
+
+
+class EditMessage(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def patch(self, request, message_id):
+        pass
+
+
+class DeleteMessage(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def delete(self, request, message_id):
+        pass
+
+
+class JoinChannel(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, room_name):
+        try:
+            room = ChannelsModel.objects.get(room_name=room_name)
+        except ChannelsModel.DoesNotExist:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.user in room.users.all() or room.channel_type == "public":
+            return Response(
+                {"detail": "You already joined this channel"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        room.users.add(request.user.pk)
+
+        return Response("Successfully joined", status=status.HTTP_200_OK)
+
+
+class LeaveChannel(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, room_name):
+        try:
+            room = ChannelsModel.objects.get(room_name=room_name)
+        except ChannelsModel.DoesNotExist:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if room.channel_type == "public":
+            return Response(
+                {"detail": "You cannot leave a public channel"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if request.user not in room.users.all():
+            return Response(
+                {"detail": "You are not in this channel"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        room.users.remove(request.user.pk)
+
+        return Response("Successfully left channel", status=status.HTTP_200_OK)
+
+
+class InvitePeopleToChannel(APIView):
+    class InputSerializer(serializers.Serializer):
+        email = serializers.EmailField()
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = InputSerializer
+
+    def post(self, request, room_name):
+        try:
+            room = ChannelsModel.objects.get(room_name=room_name)
+        except ChannelsModel.DoesNotExist:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            email = serializer.data["email"]
+            try:
+                user = User.objects.get(email=email)
+                if user in room.users.all():
+                    return Response(
+                        {"detail": "User already joined channel"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                else:
+                    room.users.add(user.pk)
+                    return Response(
+                        "Successfully added user", status=status.HTTP_200_OK
+                    )
+
+            except User.DoesNotExist:
+                send_email(
+                    subject="Invite to Drop Me",
+                    to=[email],
+                    body=f"""User {request.user.username} invited you to join Drop Me community channel. Download the app now and join the recycling revolution!
+                    """,
+                )
+                return Response(
+                    "User not registered, Sent Email Invitaion",
+                    status=status.HTTP_200_OK,
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
