@@ -111,6 +111,14 @@ class SendMessage(APIView):
             if not request.data:
                 return Response("message is empty", status=status.HTTP_400_BAD_REQUEST)
 
+            room = get_current_chat(room_name)
+
+            if room.channel_type == "private" and request.user not in room.users.all():
+                return Response(
+                    "you are not in this room to send messages",
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             # create msg and save it
             msg = MessagesModel.objects.create(
                 user_model=request.user,
@@ -118,7 +126,7 @@ class SendMessage(APIView):
                 img=request.FILES.get("img", None),
                 video=request.FILES.get("video", None),
             )
-            room = get_current_chat(room_name)
+
             room.messages.add(msg)
             room.save()
 
