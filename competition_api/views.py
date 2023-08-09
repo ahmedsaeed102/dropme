@@ -1,7 +1,7 @@
 from datetime import date
 from django.shortcuts import redirect
 from rest_framework.exceptions import APIException, NotFound
-from rest_framework import generics
+from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -9,7 +9,6 @@ from notification.services import notification_send_all
 from users_api.models import UserModel
 from .serializers import (
     CompetitionSerializer,
-    CustomUserSerializer,
     CustomCompetitionSerializer,
 )
 from .models import Competition
@@ -48,9 +47,18 @@ class Leaderboard(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    class OutputSerializer(serializers.ModelSerializer):
+        """custom serializer for global leaderboard"""
+
+        rank = serializers.ReadOnlyField(source="ranking")
+
+        class Meta:
+            model = UserModel
+            fields = ["username", "profile_photo", "total_points", "rank"]
+
     def get(self, request):
         users = UserModel.objects.all()[:10]
-        serializer = CustomUserSerializer(
+        serializer = self.OutputSerializer(
             users, many=True, context={"request": request}
         )
         current_user = {
@@ -78,11 +86,11 @@ class JoinCompetition(APIView):
             raise NotFound(detail="Error 404, competition not found", code=404)
 
         if competition.end_date < date.today():
-            raise APIException(detail="Error 400, competition is over", code=400)
+            return Response({"detail": "Error 400, competition is over"}, status=400)
 
         if request.user in competition.users.all():
-            raise APIException(
-                detail="User Can't join same competition twice!", code=400
+            return Response(
+                {"detail": "You already joined this competition"}, status=400
             )
 
         competition.users.add(request.user.pk)

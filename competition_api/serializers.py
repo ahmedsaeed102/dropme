@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from users_api.models import UserModel
 from .models import Competition, CompetitionRanking
 
 
@@ -20,16 +19,6 @@ class CompetitionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Target points can't be negative")
 
         return data
-
-
-class CustomUserSerializer(serializers.ModelSerializer):
-    """custom serializer for global leaderboard"""
-
-    rank = serializers.ReadOnlyField(source="ranking")
-
-    class Meta:
-        model = UserModel
-        fields = ["username", "profile_photo", "total_points", "rank"]
 
 
 class CompetitionRankingSerializer(serializers.ModelSerializer):

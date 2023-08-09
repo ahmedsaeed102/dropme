@@ -78,8 +78,8 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
         LocationModel,
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         related_name="address_name",
-        default=1,
     )
 
     objects = UserManager()
