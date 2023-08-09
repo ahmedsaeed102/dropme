@@ -1,10 +1,8 @@
-# DropMe API Project
+# Drop Me API Project
 
-## Getting started
+## Quick Start
 
-### Prerequisites
-
-1. Download [Python](https://www.python.org/downloads/)
+1. Download [Python](https://www.python.org/downloads/). Minimum version 3.10
 
 2. Clone Repo
     ```shell
@@ -28,17 +26,14 @@
     ./venv/scripts/activate.ps1
     ```
 
-6. Install requirements
+6. Install dev requirements
     ```shell
-    pip install -r requirements.txt
+    pip install -r requirements_dev.txt
     ```
 
 7. Install [GeoDjango](https://docs.djangoproject.com/en/4.1/ref/contrib/gis/install/)
 
-8. connect to local database and migrate to database
-    ```shell
-    python manage.py migrate
-    ```
+8. Connect to local database and create `.env.local` file with your database credentials using following env variables: `local_db_host`, `local_db_name`, `local_db_user`, `local_db_password`, `local_db_port`.  
 
 9. Start development server
     ```shell
