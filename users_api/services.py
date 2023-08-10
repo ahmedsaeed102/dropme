@@ -7,12 +7,12 @@ from django.template.loader import get_template
 from .models import UserModel
 
 
-def send_email(
+def email_send(
     *,
     subject: str,
     to: list,
     body: str = None,
-    context: dict = None,
+    context: dict = {},
     template=None,
 ) -> None:
     email_from = settings.EMAIL_HOST_USER

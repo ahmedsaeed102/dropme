@@ -22,7 +22,7 @@ class ChannelsSerializer(serializers.ModelSerializer):
 class ChannelsCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChannelsModel
-        fields = ("room_name",)
+        exclude = ("created_at", "messages", "users")
 
 
 class MessagesSerializer(serializers.ModelSerializer):

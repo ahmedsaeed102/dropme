@@ -20,11 +20,10 @@ from notification.services import (
     notification_send_all,
     notification_send,
     fcmdevice_get,
-    fcmdevice_get_all,
 )
-from users_api.services import send_email
+from users_api.services import email_send
 from .models import ChannelsModel, MessagesModel, ReportModel
-from .utlis import get_current_chat
+from .services import community_get, NewMessage, message_get
 from .serializers import *
 
 User = get_user_model()
@@ -67,7 +66,7 @@ class ChannelsCreateView(CreateAPIView):
 class ChannelsUpdateView(UpdateAPIView):
     queryset = ChannelsModel.objects.all()
     serializer_class = ChannelsSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
 
 
 class ChannelsDeleteView(DestroyAPIView):
@@ -82,8 +81,8 @@ class ChannelMessages(ListAPIView):
     pagination_class = MessagesPagination
 
     def get_queryset(self):
-        room = self.kwargs.get(self.lookup_url_kwarg)
-        channel = get_current_chat(room)
+        room_name = self.kwargs.get(self.lookup_url_kwarg)
+        channel = community_get(room_name=room_name)
         messages = channel.messages.all()
         return messages
 
@@ -106,61 +105,36 @@ class SendMessage(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, room_name):
+        if not request.data:
+            return Response("message is empty", status=status.HTTP_400_BAD_REQUEST)
+
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            if not request.data:
-                return Response("message is empty", status=status.HTTP_400_BAD_REQUEST)
-
-            room = get_current_chat(room_name)
-
+            room = community_get(room_name=room_name)
             if room.channel_type == "private" and request.user not in room.users.all():
                 return Response(
                     "you are not in this room to send messages",
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # create msg and save it
-            msg = MessagesModel.objects.create(
-                user_model=request.user,
-                content=serializer.data["content"],
-                img=request.FILES.get("img", None),
-                video=request.FILES.get("video", None),
+            # create new msg
+            new_message = NewMessage.new_message_create(
+                request=request, room=room, message_content=serializer.data["content"]
             )
 
-            room.messages.add(msg)
-            room.save()
-
             # send msg to all users in room
-            channel_layer = get_channel_layer()
-            msg = MessagesSerializer(msg)
-
+            new_message = MessagesSerializer(new_message).data
             try:
-                async_to_sync(channel_layer.group_send)(
-                    room_name,
-                    {
-                        "type": "send.messages",
-                        "data": msg.data,
-                    },
+                NewMessage.new_message_send(
+                    room_name=room_name, message=new_message, message_type="message"
                 )
-
             except Exception as e:
                 return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
             # send notification
-            if room.channel_type == "public":
-                devices = fcmdevice_get_all(exclude=request.user.pk)
-                notification_send(
-                    devices=devices,
-                    title="New message",
-                    body=f"""You have a new message in '{room_name}' community channel""",
-                )
-            else:
-                devices = fcmdevice_get(user__user_channels__room_name=room_name)
-                notification_send(
-                    devices=devices,
-                    title="New Message",
-                    body=f"""You have a new message in '{room_name}' community channel""",
-                )
+            NewMessage.new_message_notification_send(
+                request=request, room_type=room.channel_type, room_name=room_name
+            )
 
             return Response("message sent successfully", status=status.HTTP_201_CREATED)
 
@@ -174,38 +148,35 @@ class SendReactionMessage(APIView):
     def patch(self, request, room_name):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            # get msg and update it
-            msg = MessagesModel.objects.get(id=serializer.data["message_id"])
-
             emoji = serializer.data["emoji"]
+            message_id = serializer.data["message_id"]
+            user_id = request.user.id
+
+            # get msg and update it
+            msg = message_get(message_id=message_id)
+
             if emoji not in msg.reactions:
-                msg.reactions[emoji] = {"count": 1, "users": [request.user.id]}
+                return Response("emoji not found", status=status.HTTP_400_BAD_REQUEST)
             else:
-                if request.user.id not in msg.reactions[emoji]["users"]:
+                if user_id not in msg.reactions[emoji]["users_ids"]:
                     msg.reactions[emoji]["count"] += 1
-                    msg.reactions[emoji]["users"].append(request.user.id)
+                    msg.reactions[emoji]["users_ids"].append(user_id)
+                    msg.reactions[emoji]["users"].append(
+                        {"id": user_id, "reaction": emoji}
+                    )
+                    msg.save()
                 else:
                     return Response(
-                        "you already reacted to this message",
+                        "You already reacted to this message",
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
-            msg.save()
-
             # send reaction to all users in room
-            channel_layer = get_channel_layer()
-            msg = ReactionSerializer(msg)
-
+            msg = ReactionSerializer(msg).data
             try:
-                async_to_sync(channel_layer.group_send)(
-                    room_name,
-                    {
-                        "type": "send.messages",
-                        "message_type": "reaction",
-                        "data": msg.data,
-                    },
+                NewMessage.new_message_send(
+                    room_name=room_name, message=msg, message_type="reaction"
                 )
-
             except Exception as e:
                 return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -223,40 +194,39 @@ class RemoveReactionMessage(APIView):
     def patch(self, request, room_name):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            # get msg and update it
-            msg = MessagesModel.objects.get(id=serializer.data["message_id"])
-
             emoji = serializer.data["emoji"]
+            message_id = serializer.data["message_id"]
+            user_id = request.user.id
+
+            # get msg and update it
+            msg = message_get(message_id=message_id)
+
             if emoji not in msg.reactions:
                 return Response(
                     "reaction does not exist", status=status.HTTP_400_BAD_REQUEST
                 )
             else:
-                if request.user.id in msg.reactions[emoji]["users"]:
+                if user_id in msg.reactions[emoji]["users_ids"]:
                     msg.reactions[emoji]["count"] -= 1
-                    msg.reactions[emoji]["users"].remove(request.user.id)
+                    msg.reactions[emoji]["users_ids"].remove(user_id)
+                    msg.reactions[emoji]["users"] = [
+                        dictionary
+                        for dictionary in msg.reactions[emoji]["users"]
+                        if dictionary.get("id") != user_id
+                    ]
+                    msg.save()
                 else:
                     return Response(
                         "this user did not react to this message",
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
-            msg.save()
-
             # send update to all users in room
-            channel_layer = get_channel_layer()
-            msg = ReactionSerializer(msg)
-
+            msg = ReactionSerializer(msg).data
             try:
-                async_to_sync(channel_layer.group_send)(
-                    room_name,
-                    {
-                        "type": "send.messages",
-                        "message_type": "reaction",
-                        "data": msg.data,
-                    },
+                NewMessage.new_message_send(
+                    room_name=room_name, message=msg, message_type="reaction"
                 )
-
             except Exception as e:
                 return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -282,28 +252,44 @@ class SendReport(APIView):
         )
 
 
-class EditMessage(APIView):
+@extend_schema(methods=["PATCH"], exclude=True)
+class EditMessage(UpdateAPIView):
+    class EditSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = MessagesModel
+            fields = ["content"]
+
+    permission_classes = (IsAuthenticated,)
+    queryset = MessagesModel.objects.all()
+    serializer_class = EditSerializer
+
+    def put(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not instance.user_model == request.user or not instance.content:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        return self.update(request, *args, **kwargs)
+
+
+class DeleteMessage(DestroyAPIView):
+    queryset = MessagesModel.objects.all()
+    serializer_class = MessagesSerializer
     permission_classes = (IsAuthenticated,)
 
-    def patch(self, request, message_id):
-        pass
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not instance.user_model == request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
-
-class DeleteMessage(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def delete(self, request, message_id):
-        pass
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class JoinChannel(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, room_name):
-        try:
-            room = ChannelsModel.objects.get(room_name=room_name)
-        except ChannelsModel.DoesNotExist:
-            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        room = community_get(room_name=room_name)
 
         if request.user in room.users.all() or room.channel_type == "public":
             return Response(
@@ -320,10 +306,7 @@ class LeaveChannel(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, room_name):
-        try:
-            room = ChannelsModel.objects.get(room_name=room_name)
-        except ChannelsModel.DoesNotExist:
-            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        room = community_get(room_name=room_name)
 
         if room.channel_type == "public":
             return Response(
@@ -350,29 +333,35 @@ class InvitePeopleToChannel(APIView):
     serializer_class = InputSerializer
 
     def post(self, request, room_name):
-        try:
-            room = ChannelsModel.objects.get(room_name=room_name)
-        except ChannelsModel.DoesNotExist:
-            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        room = community_get(room_name=room_name)
 
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             email = serializer.data["email"]
             try:
                 user = User.objects.get(email=email)
-                if user in room.users.all():
+                if user in room.users.all() or room.channel_type == "public":
                     return Response(
                         {"detail": "User already joined channel"},
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 else:
                     room.users.add(user.pk)
+
+                    # send notification
+                    device = fcmdevice_get(user=user)
+                    notification_send(
+                        devices=device,
+                        title="Community Invitation",
+                        body=f"user {request.user.username} added you in {room_name} channel",
+                    )
+
                     return Response(
                         "Successfully added user", status=status.HTTP_200_OK
                     )
 
             except User.DoesNotExist:
-                send_email(
+                email_send(
                     subject="Invite to Drop Me",
                     to=[email],
                     body=f"""User {request.user.username} invited you to join Drop Me community channel. Download the app now and join the recycling revolution!

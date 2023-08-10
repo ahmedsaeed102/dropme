@@ -37,6 +37,17 @@ urlpatterns = [
         SendMessage.as_view(),
         name="send_message",
     ),
+    # update & delete message
+    path(
+        "community/messages/<int:pk>/update/",
+        EditMessage.as_view(),
+        name="edit_message",
+    ),
+    path(
+        "community/messages/<int:pk>/delete/",
+        DeleteMessage.as_view(),
+        name="delete_message",
+    ),
     # send reaction
     path(
         "community/<str:room_name>/send/reaction/",

@@ -12,6 +12,17 @@ def upload_to_videos(instance, filename):
     return f"community/videos/{instance.user_model.username}/{filename}"
 
 
+def get_default():
+    return {
+        "Sad": {"count": 0, "users_ids": [], "users": []},
+        "Wow": {"count": 0, "users_ids": [], "users": []},
+        "Haha": {"count": 0, "users_ids": [], "users": []},
+        "Like": {"count": 0, "users_ids": [], "users": []},
+        "Love": {"count": 0, "users_ids": [], "users": []},
+        "Angry": {"count": 0, "users_ids": [], "users": []},
+    }
+
+
 class MessagesModel(models.Model):
     user_model = models.ForeignKey(
         UserModel, related_name="messages", on_delete=models.CASCADE
@@ -19,7 +30,7 @@ class MessagesModel(models.Model):
     content = models.CharField(max_length=4000, null=True, blank=True)
     message_dt = models.DateTimeField(auto_now_add=True)
 
-    reactions = models.JSONField(default=dict)
+    reactions = models.JSONField(default=get_default)
 
     img = models.ImageField(
         upload_to=upload_to_imgs,
