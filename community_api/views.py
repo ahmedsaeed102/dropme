@@ -1,5 +1,3 @@
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
@@ -22,8 +20,8 @@ from notification.services import (
     fcmdevice_get,
 )
 from users_api.services import email_send
-from .models import ChannelsModel, MessagesModel, ReportModel
-from .services import community_get, NewMessage, message_get
+from .models import ChannelsModel, MessagesModel
+from .services import community_get, Message, message_get, report_create
 from .serializers import *
 
 User = get_user_model()
@@ -118,21 +116,18 @@ class SendMessage(APIView):
                 )
 
             # create new msg
-            new_message = NewMessage.new_message_create(
+            new_message = Message.new_message_create(
                 request=request, room=room, message_content=serializer.data["content"]
             )
 
             # send msg to all users in room
             new_message = MessagesSerializer(new_message).data
-            try:
-                NewMessage.new_message_send(
-                    room_name=room_name, message=new_message, message_type="message"
-                )
-            except Exception as e:
-                return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            Message.new_message_send(
+                room_name=room_name, message=new_message, message_type="message"
+            )
 
             # send notification
-            NewMessage.new_message_notification_send(
+            Message.new_message_notification_send(
                 request=request, room_type=room.channel_type, room_name=room_name
             )
 
@@ -152,37 +147,56 @@ class SendReactionMessage(APIView):
             message_id = serializer.data["message_id"]
             user_id = request.user.id
 
-            # get msg and update it
-            msg = message_get(message_id=message_id)
-
-            if emoji not in msg.reactions:
-                return Response("emoji not found", status=status.HTTP_400_BAD_REQUEST)
-            else:
-                if user_id not in msg.reactions[emoji]["users_ids"]:
-                    msg.reactions[emoji]["count"] += 1
-                    msg.reactions[emoji]["users_ids"].append(user_id)
-                    msg.reactions[emoji]["users"].append(
-                        {"id": user_id, "reaction": emoji}
-                    )
-                    msg.save()
-                else:
-                    return Response(
-                        "You already reacted to this message",
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
+            # get msg and add reaction to it
+            message = message_get(message_id=message_id)
+            message = Message.message_reaction_add(
+                emoji=emoji, message=message, user_id=user_id
+            )
 
             # send reaction to all users in room
-            msg = ReactionSerializer(msg).data
-            try:
-                NewMessage.new_message_send(
-                    room_name=room_name, message=msg, message_type="reaction"
-                )
-            except Exception as e:
-                return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-            return Response(
-                "reaction sent successfully", status=status.HTTP_201_CREATED
+            message = ReactionSerializer(message).data
+            Message.new_message_send(
+                room_name=room_name, message=message, message_type="reaction"
             )
+
+            return Response("Reaction added successfully", status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangeReaction(APIView):
+    class InputSerializer(serializers.Serializer):
+        message_id = serializers.IntegerField()
+        old_emoji = serializers.CharField(max_length=50)
+        new_emoji = serializers.CharField(max_length=50)
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = InputSerializer
+
+    def patch(self, request, room_name):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            old_emoji = serializer.data["old_emoji"]
+            new_emoji = serializer.data["new_emoji"]
+            message_id = serializer.data["message_id"]
+            user_id = request.user.id
+
+            # get msg and change emoji
+            message = message_get(message_id=message_id)
+            message = Message.message_reaction_change(
+                old_emoji=old_emoji,
+                new_emoji=new_emoji,
+                message=message,
+                user_id=user_id,
+            )
+
+            # send update to all users in room
+            message = ReactionSerializer(message).data
+            Message.new_message_send(
+                room_name=room_name, message=message, message_type="reaction"
+            )
+
+            return Response("Reaction changed successfully", status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -198,41 +212,19 @@ class RemoveReactionMessage(APIView):
             message_id = serializer.data["message_id"]
             user_id = request.user.id
 
-            # get msg and update it
-            msg = message_get(message_id=message_id)
-
-            if emoji not in msg.reactions:
-                return Response(
-                    "reaction does not exist", status=status.HTTP_400_BAD_REQUEST
-                )
-            else:
-                if user_id in msg.reactions[emoji]["users_ids"]:
-                    msg.reactions[emoji]["count"] -= 1
-                    msg.reactions[emoji]["users_ids"].remove(user_id)
-                    msg.reactions[emoji]["users"] = [
-                        dictionary
-                        for dictionary in msg.reactions[emoji]["users"]
-                        if dictionary.get("id") != user_id
-                    ]
-                    msg.save()
-                else:
-                    return Response(
-                        "this user did not react to this message",
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
+            # get msg and remove reaction from it
+            message = message_get(message_id=message_id)
+            Message.message_reaction_remove(
+                emoji=emoji, message=message, user_id=user_id
+            )
 
             # send update to all users in room
-            msg = ReactionSerializer(msg).data
-            try:
-                NewMessage.new_message_send(
-                    room_name=room_name, message=msg, message_type="reaction"
-                )
-            except Exception as e:
-                return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-            return Response(
-                "reaction removed successfully", status=status.HTTP_201_CREATED
+            message = ReactionSerializer(message).data
+            Message.new_message_send(
+                room_name=room_name, message=message, message_type="reaction"
             )
+
+            return Response("Reaction removed successfully", status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -241,14 +233,10 @@ class SendReport(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, message_id):
-        try:
-            msg = MessagesModel.objects.get(id=message_id)
-            ReportModel.objects.create(reporter=request.user, reported_message=msg)
-        except Exception as e:
-            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        report_create(request=request, message_id=message_id)
 
         return Response(
-            {"message": "report sent successfully"}, status=status.HTTP_201_CREATED
+            {"message": "Report sent successfully"}, status=status.HTTP_201_CREATED
         )
 
 

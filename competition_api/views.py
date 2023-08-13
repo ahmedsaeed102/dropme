@@ -1,6 +1,6 @@
 from datetime import date
 from django.shortcuts import redirect
-from rest_framework.exceptions import APIException, NotFound
+from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
@@ -86,7 +86,7 @@ class JoinCompetition(APIView):
             raise NotFound(detail="Error 404, competition not found", code=404)
 
         if competition.end_date < date.today():
-            return Response({"detail": "Error 400, competition is over"}, status=400)
+            raise ValidationError("Error 400, competition is over")
 
         if request.user in competition.users.all():
             return Response(

@@ -50,13 +50,18 @@ urlpatterns = [
     ),
     # send reaction
     path(
-        "community/<str:room_name>/send/reaction/",
+        "community/<str:room_name>/reaction/add/",
         SendReactionMessage.as_view(),
         name="send_reaction",
     ),
     path(
-        "community/<str:room_name>/remove/reaction/",
+        "community/<str:room_name>/reaction/remove/",
         RemoveReactionMessage.as_view(),
         name="Remove_reaction",
+    ),
+    path(
+        "community/<str:room_name>/reaction/change/",
+        ChangeReaction.as_view(),
+        name="change_reaction",
     ),
 ]
