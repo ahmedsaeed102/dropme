@@ -27,12 +27,14 @@ class ChannelsCreateSerializer(serializers.ModelSerializer):
 
 class MessagesSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField()
+    sender_id = serializers.SerializerMethodField()
     sender_photo = serializers.SerializerMethodField()
 
     class Meta:
         model = MessagesModel
         fields = (
             "id",
+            "sender_id",
             "sender",
             "sender_photo",
             "content",
@@ -47,6 +49,9 @@ class MessagesSerializer(serializers.ModelSerializer):
 
     def get_sender_photo(self, obj):
         return obj.user_model.profile_photo.url
+
+    def get_sender_id(self, obj):
+        return obj.user_model.id
 
 
 class ReactionSerializer(serializers.ModelSerializer):
