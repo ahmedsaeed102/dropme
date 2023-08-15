@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.core.validators import FileExtensionValidator
+from .services import user_reaction_get
 from .models import ChannelsModel, MessagesModel
 
 
@@ -30,6 +31,8 @@ class MessagesSerializer(serializers.ModelSerializer):
     sender_id = serializers.SerializerMethodField()
     sender_photo = serializers.SerializerMethodField()
 
+    current_user_reaction = serializers.SerializerMethodField()
+
     class Meta:
         model = MessagesModel
         fields = (
@@ -37,6 +40,7 @@ class MessagesSerializer(serializers.ModelSerializer):
             "sender_id",
             "sender",
             "sender_photo",
+            "current_user_reaction",
             "content",
             "message_dt",
             "img",
@@ -52,6 +56,14 @@ class MessagesSerializer(serializers.ModelSerializer):
 
     def get_sender_id(self, obj):
         return obj.user_model.id
+
+    def get_current_user_reaction(self, obj):
+        request = self.context.get("request")
+        if request:
+            reaction = user_reaction_get(message=obj, user_id=request.user.id)
+            return reaction
+
+        return ""
 
 
 class ReactionSerializer(serializers.ModelSerializer):

@@ -14,7 +14,7 @@
     {{ room_name|json_script:"room-name" }}
     <script>
         const roomName = JSON.parse(document.getElementById('room-name').textContent);
-        let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjkxOTU1MjQ1LCJpYXQiOjE2OTE5NTQ2NDUsImp0aSI6IjcyZjQyMGJmN2FiMTQzOWVhOTEzY2Q3ZjI4MTkyYTBjIiwidXNlcl9pZCI6Mn0.dVDPQHPR4IMshJvad7Btrl03IaQ9OH9s3pSBMW0gNGg'
+        let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjkyMTExODg4LCJpYXQiOjE2OTIxMTEyODgsImp0aSI6ImJjNTY4YjZmYzk1ZDQ5OTdhMzg2MDE1YjViMTZkZTcyIiwidXNlcl9pZCI6NX0.1zxPEu83cVxLsvsf9MBMc5KG49KRPGr95XLCp-S297c'
 
         const endpoint = "ws://localhost:8000/ws/chat/"
         const chatSocket = new WebSocket(

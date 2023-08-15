@@ -3,16 +3,8 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import RecycleLog
 
-# from .utlis import update_user_points
-
 
 class StartRecycle(AsyncJsonWebsocketConsumer):
-    """
-    this class should open a socket connection between server and mobile app until recycling is done
-    it should also claculate the points and add it to user total points, and if
-    there is an ongoing competion, it should add it to user competition points
-    """
-
     async def connect(self):
         await self.accept()
 

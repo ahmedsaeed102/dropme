@@ -11,6 +11,7 @@ from rest_framework.generics import (
 )
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_spectacular.utils import extend_schema
@@ -104,16 +105,14 @@ class SendMessage(APIView):
 
     def post(self, request, room_name):
         if not request.data:
-            return Response("message is empty", status=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError({"detail": "message is empty"})
 
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             room = community_get(room_name=room_name)
-            if room.channel_type == "private" and request.user not in room.users.all():
-                return Response(
-                    "you are not in this room to send messages",
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+
+            # check if user joined channel in case of private channels
+            Message.is_a_participant(room=room, user=request.user)
 
             # create new msg
             new_message = Message.new_message_create(
@@ -141,6 +140,11 @@ class SendReactionMessage(APIView):
     serializer_class = SendReactionSerializer
 
     def patch(self, request, room_name):
+        room = community_get(room_name=room_name)
+
+        # check if user joined channel in case of private channels
+        Message.is_a_participant(room=room, user=request.user)
+
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             emoji = serializer.data["emoji"]

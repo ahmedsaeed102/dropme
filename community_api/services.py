@@ -1,11 +1,15 @@
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from asgiref.sync import async_to_sync
+from django.contrib.auth import get_user_model
 from rest_framework.exceptions import APIException, NotFound, ValidationError
 from channels.layers import get_channel_layer
 from notification.services import notification_send, fcmdevice_get, fcmdevice_get_all
 from .models import ChannelsModel, MessagesModel, ReportModel
 from .utlis import check_if_user_reacted_to_message
+
+
+User = get_user_model()
 
 
 def community_get(*, room_name: str) -> ChannelsModel:
@@ -16,7 +20,25 @@ def message_get(*, message_id: int) -> MessagesModel:
     return get_object_or_404(MessagesModel, pk=message_id)
 
 
+def user_reaction_get(*, message: MessagesModel, user_id: int) -> str:
+    reactions = message.reactions
+    for reaction, value in reactions.items():
+        if user_id in value["users_ids"]:
+            return reaction
+
+    return ""
+
+
 class Message:
+    @staticmethod
+    def is_a_participant(room: ChannelsModel, user: User) -> bool:
+        if room.channel_type == "private" and user not in room.users.all():
+            raise ValidationError(
+                {"detail": "You are not a participant in this channel"}
+            )
+
+        return True
+
     @transaction.atomic
     @staticmethod
     def new_message_create(
