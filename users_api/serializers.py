@@ -1,11 +1,11 @@
 import random
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.conf import settings
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import UserModel, LocationModel
+from .models import UserModel, LocationModel, Feedback
 from .services import send_otp
 
 
@@ -40,7 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
     # create and return user with encrybted password
     def create(self, val_data):
         otp = random.randint(1000, 9999)
-        otp_expiration = datetime.now() + timedelta(minutes=5)
+        otp_expiration = timezone.now() + timedelta(minutes=5)
 
         user = UserModel(
             username=val_data["username"],
@@ -74,7 +74,6 @@ class UserProfileSerializer(UserSerializer):
     email = serializers.EmailField()
     username = serializers.CharField(max_length=80)
 
-    # address_name = serializers.StringRelatedField()
     class Meta:
         model = UserModel
         fields = [
@@ -180,7 +179,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         if not self.user.is_active:
             otp = random.randint(1000, 9999)
-            otp_expiration = datetime.now() + timedelta(minutes=5)
+            otp_expiration = timezone.now() + timedelta(minutes=5)
             self.user.otp = otp
             self.user.otp_expiration = otp_expiration
             self.user.save()
@@ -194,3 +193,20 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["id"] = self.user.id
 
         return data
+
+
+class FeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Feedback
+        fields = "__all__"
+        read_only_fields = ("user",)
+
+    def create(self, val_data):
+        user = self.context["request"].user
+
+        feedback = Feedback.objects.create(
+            title=val_data["title"],
+            description=val_data["description"],
+            user=user,
+        )
+        return feedback

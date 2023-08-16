@@ -2,7 +2,12 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 from asgiref.sync import async_to_sync
 from django.contrib.auth import get_user_model
-from rest_framework.exceptions import APIException, NotFound, ValidationError
+from rest_framework.exceptions import (
+    APIException,
+    NotFound,
+    ValidationError,
+    PermissionDenied,
+)
 from channels.layers import get_channel_layer
 from notification.services import notification_send, fcmdevice_get, fcmdevice_get_all
 from .models import ChannelsModel, MessagesModel, ReportModel
@@ -33,7 +38,7 @@ class Message:
     @staticmethod
     def is_a_participant(room: ChannelsModel, user: User) -> bool:
         if room.channel_type == "private" and user not in room.users.all():
-            raise ValidationError(
+            raise PermissionDenied(
                 {"detail": "You are not a participant in this channel"}
             )
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserModel, LocationModel
+from .models import UserModel, LocationModel, Feedback
 
 
 @admin.register(UserModel)
@@ -16,3 +16,4 @@ class Admin_dropMe(admin.ModelAdmin):
 
 
 admin.site.register(LocationModel)
+admin.site.register(Feedback)

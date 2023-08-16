@@ -34,6 +34,15 @@ class CompetitionDetail(generics.RetrieveUpdateAPIView):
     queryset = Competition.objects.all()
     serializer_class = CompetitionSerializer
     permission_classes = [IsAuthenticated]
+    http_method_names = ["head", "get", "put"]
+
+    def get_permissions(self):
+        self.action = self.request.method
+
+        if self.action.lower() == "put":
+            return [IsAdminUser()]
+
+        return [IsAuthenticated()]
 
 
 class CompetitionDelete(generics.DestroyAPIView):

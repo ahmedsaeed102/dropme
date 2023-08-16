@@ -1,11 +1,11 @@
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-from rest_framework import viewsets, status, generics, permissions
+from rest_framework import viewsets, status, generics, permissions, exceptions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from machine_api.models import PhoneNumber, RecycleLog
-from .models import LocationModel
+from .models import LocationModel, Feedback
 from .services import (
     send_otp,
     send_reset_password_email,
@@ -20,6 +20,7 @@ from .serializers import (
     ResetPasswordEmailRequestSerializer,
     OTPSerializer,
     OTPOnlySerializer,
+    FeedbackSerializer,
 )
 
 User = get_user_model()
@@ -63,7 +64,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response("Successfully verfied the user.", status=status.HTTP_200_OK)
 
         return Response(
-            "User already verfied or otp is incorrect.",
+            "User already verfied or OTP is incorrect.",
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -94,22 +95,30 @@ class ManageUserProfileView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     lookup_field = "pk"
     permission_classes = (permissions.IsAuthenticated,)
+    http_method_names = ["head", "get", "put"]
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
+
+        if self.request.user.id != instance.id:
+            raise exceptions.PermissionDenied()
+
         serializer = self.get_serializer(instance, data=request.data, partial=True)
 
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "user profile updated successfully"})
+        serializer.is_valid(raise_exception=True)
 
-        else:
-            return Response({"message": "failed", "details": serializer.errors})
+        serializer.save()
+
+        return Response({"message": "user profile updated successfully"})
+
+    def get(self, request, pk):
+        if request.user.id != pk:
+            raise exceptions.PermissionDenied()
+
+        return super().get(request, pk)
 
 
 class RequestPasswordResetEmail(generics.GenericAPIView):
-    """Send password reset email"""
-
     serializer_class = ResetPasswordEmailRequestSerializer
 
     def post(self, request):
@@ -134,9 +143,8 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
                 status=status.HTTP_200_OK,
             )
         else:
-            return Response(
+            raise exceptions.NotFound(
                 "There is no account registered with this email.",
-                status=status.HTTP_404_NOT_FOUND,
             )
 
 
@@ -146,14 +154,8 @@ class VerifyPasswordResetOTP(generics.GenericAPIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
 
-        try:
-            serializer.is_valid(raise_exception=True)
-        except Exception as e:
-            print(str(e))
-            return Response(
-                {"valid": False},
-                status=status.HTTP_200_OK,
-            )
+        serializer.is_valid(raise_exception=True)
+
         return Response(
             {"valid": True},
             status=status.HTTP_200_OK,
@@ -166,14 +168,7 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
     def patch(self, request):
         serializer = self.serializer_class(data=request.data)
 
-        try:
-            serializer.is_valid(raise_exception=True)
-        except Exception as e:
-            print(str(e))
-            return Response(
-                {"success": False},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        serializer.is_valid(raise_exception=True)
 
         return Response(
             {"success": True, "message": "Password reset success"},
@@ -184,6 +179,7 @@ class SetNewPasswordAPIView(generics.GenericAPIView):
 class LocationList(generics.ListCreateAPIView):
     queryset = LocationModel.objects.all()
     serializer_class = LocationModelserializers
+    permission_classes = (permissions.IsAuthenticated,)
 
 
 class CurrentUserTotalPointsView(generics.GenericAPIView):
@@ -193,3 +189,15 @@ class CurrentUserTotalPointsView(generics.GenericAPIView):
         return Response(
             {"total_points": request.user.total_points}, status=status.HTTP_200_OK
         )
+
+
+class FeedbacksList(generics.ListAPIView):
+    queryset = Feedback.objects.all()
+    serializer_class = FeedbackSerializer
+    permission_classes = (permissions.IsAdminUser,)
+
+
+class FeedbackCreate(generics.CreateAPIView):
+    queryset = Feedback.objects.all()
+    serializer_class = FeedbackSerializer
+    permission_classes = (permissions.IsAuthenticated,)

@@ -7,18 +7,10 @@ from rest_framework_simplejwt.views import (
 )
 from rest_framework.routers import DefaultRouter
 from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet
-from .views import (
-    LocationList,
-    UserViewSet,
-    RequestPasswordResetEmail,
-    SetNewPasswordAPIView,
-    ManageUserProfileView,
-    VerifyPasswordResetOTP,
-    CurrentUserTotalPointsView,
-)
+from . import views
 
 router = DefaultRouter()
-router.register("user_register", UserViewSet, basename="user_register")
+router.register("user_register", views.UserViewSet, basename="user_register")
 router.register("devices", FCMDeviceAuthorizedViewSet)
 
 
@@ -27,7 +19,7 @@ urlpatterns = [
     path("user_register/", include(router.urls)),
     path(
         "current_user/points/",
-        CurrentUserTotalPointsView.as_view(),
+        views.CurrentUserTotalPointsView.as_view(),
         name="current_user_points",
     ),
     # authentication
@@ -38,23 +30,28 @@ urlpatterns = [
     # reset password
     path(
         "reset_password_emaillink/",
-        RequestPasswordResetEmail.as_view(),
+        views.RequestPasswordResetEmail.as_view(),
         name="send_email_password",
     ),
     path(
         "password-reset/",
-        SetNewPasswordAPIView.as_view(),
+        views.SetNewPasswordAPIView.as_view(),
         name="password-reset-complete",
     ),
     path(
         "password-reset/verify-otp/",
-        VerifyPasswordResetOTP.as_view(),
+        views.VerifyPasswordResetOTP.as_view(),
         name="password-reset-verify-otp",
     ),
     # edit profile
     path(
-        "<int:pk>/edit_profile/", ManageUserProfileView.as_view(), name="edit_profile"
+        "<int:pk>/edit_profile/",
+        views.ManageUserProfileView.as_view(),
+        name="edit_profile",
     ),
     # address list
-    path("list_address/", LocationList.as_view(), name="create_address"),
+    path("list_address/", views.LocationList.as_view(), name="create_address"),
+    # user feedback
+    path("feedbacks/list/", views.FeedbacksList.as_view(), name="list_feedback"),
+    path("feedbacks/create/", views.FeedbackCreate.as_view(), name="create_feedback"),
 ]
