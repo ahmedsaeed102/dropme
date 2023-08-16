@@ -1,12 +1,14 @@
 from datetime import date
 from django.shortcuts import redirect
-from rest_framework.exceptions import ValidationError, NotFound
+from rest_framework.exceptions import ValidationError
 from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from core.mixins import GetPermissionsMixin
 from notification.services import notification_send_all
 from users_api.models import UserModel
+from .services import competition_get
 from .serializers import (
     CompetitionSerializer,
     CustomCompetitionSerializer,
@@ -14,12 +16,11 @@ from .serializers import (
 from .models import Competition
 
 
-class Competitions(generics.ListCreateAPIView):
+class Competitions(GetPermissionsMixin, generics.ListCreateAPIView):
     queryset = Competition.objects.filter(
         end_date__gte=date.today()
     )  # return only ongoing competitions
     serializer_class = CompetitionSerializer
-    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         """send notification to all user after a new competition is created"""
@@ -30,19 +31,10 @@ class Competitions(generics.ListCreateAPIView):
         )
 
 
-class CompetitionDetail(generics.RetrieveUpdateAPIView):
+class CompetitionDetail(GetPermissionsMixin, generics.RetrieveUpdateAPIView):
     queryset = Competition.objects.all()
     serializer_class = CompetitionSerializer
-    permission_classes = [IsAuthenticated]
     http_method_names = ["head", "get", "put"]
-
-    def get_permissions(self):
-        self.action = self.request.method
-
-        if self.action.lower() == "put":
-            return [IsAdminUser()]
-
-        return [IsAuthenticated()]
 
 
 class CompetitionDelete(generics.DestroyAPIView):
@@ -76,26 +68,24 @@ class Leaderboard(APIView):
             "total_points": request.user.total_points,
             "rank": request.user.ranking,
         }
-        data = {
-            "status": "success",
-            "message": "got leaderboard successfully",
-            "data": {"current_user": current_user, "ranking": serializer.data},
-        }
 
-        return Response(data)
+        return Response(
+            {
+                "status": "success",
+                "message": "got leaderboard successfully",
+                "data": {"current_user": current_user, "ranking": serializer.data},
+            }
+        )
 
 
 class JoinCompetition(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-        try:
-            competition = Competition.objects.get(pk=pk)
-        except Competition.DoesNotExist:
-            raise NotFound(detail="Error 404, competition not found", code=404)
+        competition = competition_get(pk=pk)
 
         if competition.end_date < date.today():
-            raise ValidationError("Error 400, competition is over")
+            raise ValidationError({"detail": "Error 400, competition is over"})
 
         if request.user in competition.users.all():
             return Response(
@@ -111,10 +101,7 @@ class CompetitionRanking(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-        try:
-            competition = Competition.objects.get(pk=pk)
-        except Competition.DoesNotExist:
-            raise NotFound(detail="Error 404, competition not found", code=404)
+        competition = competition_get(pk=pk)
 
         serializer = CustomCompetitionSerializer(
             competition, context={"request": request}
@@ -138,13 +125,13 @@ class CompetitionRanking(APIView):
                 "joined": False,
             }
 
-        data = {
-            "status": "success",
-            "message": "got competition ranking successfully",
-            "data": {
-                "current_user": current_user,
-                "ranking": serializer.data["top_ten"],
-            },
-        }
-
-        return Response(data)
+        return Response(
+            {
+                "status": "success",
+                "message": "got competition ranking successfully",
+                "data": {
+                    "current_user": current_user,
+                    "ranking": serializer.data["top_ten"],
+                },
+            }
+        )
