@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "machine_api",
     "competition_api",
     "notification",
+    "marketplace",
 ]
 
 

@@ -13,7 +13,7 @@ from .serializers import (
     CompetitionSerializer,
     CustomCompetitionSerializer,
 )
-from .models import Competition
+from .models import Competition, Resource
 
 
 class Competitions(GetPermissionsMixin, generics.ListCreateAPIView):
@@ -135,3 +135,16 @@ class CompetitionRanking(APIView):
                 },
             }
         )
+
+
+class AdsList(generics.ListAPIView):
+    """For Home page slider"""
+
+    class ResourcesSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Resource
+            fields = "__all__"
+
+    queryset = Resource.objects.filter(resource_type="ad")
+    serializer_class = ResourcesSerializer
+    permission_classes = [IsAuthenticated]

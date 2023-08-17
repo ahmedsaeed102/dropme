@@ -79,3 +79,13 @@ class CompetitionRanking(models.Model):
 
     def __str__(self) -> str:
         return f"{self.competition.name} | {self.user.username}"
+
+
+class Resource(models.Model):
+    name = models.CharField(max_length=100)
+    img = models.ImageField(upload_to="resource", blank=True, null=True)
+    link = models.URLField(blank=True, null=True)
+    resource_type = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.name} | {self.resource_type}"
