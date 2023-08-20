@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.core.validators import FileExtensionValidator
+from users_api.models import UserModel
 from .services import user_reaction_get
 from .models import ChannelsModel, MessagesModel
 
@@ -101,3 +102,18 @@ class SendMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = MessagesModel
         fields = ("content", "img", "video")
+
+
+class UserInviteSerializer(serializers.ModelSerializer):
+    joined = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserModel
+        fields = ["id", "username", "email", "profile_photo", "joined"]
+
+    def get_joined(self, obj):
+        room = self.context["room"]
+        if obj in room.users.all() or room.channel_type == "public":
+            return True
+
+        return False

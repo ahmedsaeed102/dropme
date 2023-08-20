@@ -1,4 +1,5 @@
 import random
+import django_filters
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.conf import settings
@@ -131,3 +132,19 @@ def otp_set(*, user: UserModel) -> UserModel:
     user.save()
 
     return user
+
+
+class UserFilter(django_filters.FilterSet):
+    email = django_filters.CharFilter(lookup_expr="icontains")
+
+    class Meta:
+        model = UserModel
+        fields = ["email"]
+
+
+def user_list(*, filters=None) -> list[UserModel]:
+    filters = filters or {}
+
+    qs = UserModel.objects.all()
+
+    return UserFilter(filters, qs).qs

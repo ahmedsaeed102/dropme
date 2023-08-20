@@ -111,3 +111,13 @@ class ReportModel(models.Model):
 
     def __str__(self):
         return self.reporter.username + f" reported message: {self.reported_message.id}"
+
+
+class Invitations(models.Model):
+    user = models.ForeignKey(
+        UserModel, on_delete=models.CASCADE, related_name="user_invitations"
+    )
+    invited = models.ForeignKey(UserModel, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f"{self.user.username} -invited-> {self.invited.username}"

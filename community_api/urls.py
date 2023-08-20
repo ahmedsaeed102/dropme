@@ -14,10 +14,28 @@ urlpatterns = [
     path(
         "community/<str:room_name>/leave/", LeaveChannel.as_view(), name="leave_channel"
     ),
+    # add people
     path(
         "community/<str:room_name>/add/",
-        InvitePeopleToChannel.as_view(),
+        AddPeopleToChannel.as_view(),
         name="invite_channel",
+    ),
+    # send email invitation
+    path(
+        "users/email_invitation/",
+        SendEmailInvite.as_view(),
+        name="send_email_invitation",
+    ),
+    # user search
+    path(
+        "community/<str:room_name>/users/search/",
+        UsersSearch.as_view(),
+        name="user_search",
+    ),
+    # previously invited
+    path(
+        "community/<str:room_name>/previously_invited/",
+        PrevioulyInvited.as_view(),
     ),
     # room messages
     path(

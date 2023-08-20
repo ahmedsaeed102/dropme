@@ -55,7 +55,7 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
             {
                 "status": "success",
                 "message": f"{event['bottles']} bottles and {event['cans']} cans",
-                "message_ar": f"{event['bottles']} زجاجة and {event['cans']} علبة",
+                "message_ar": f"{event['bottles']} زجاجة و{event['cans']} علبة",
                 "points": event["points"],
             }
         )

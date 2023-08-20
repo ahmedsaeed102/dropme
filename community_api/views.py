@@ -14,14 +14,14 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from notification.services import (
     notification_send_all,
     notification_send,
     fcmdevice_get,
 )
-from users_api.services import email_send
-from .models import ChannelsModel, MessagesModel
+from users_api.services import email_send, user_list
+from .models import ChannelsModel, MessagesModel, Invitations
 from .services import community_get, Message, message_get, report_create
 from .serializers import *
 
@@ -317,51 +317,149 @@ class LeaveChannel(APIView):
         return Response("Successfully left channel", status=status.HTTP_200_OK)
 
 
-class InvitePeopleToChannel(APIView):
+class PrevioulyInvited(ListAPIView):
+    class OutputSerializer(serializers.ModelSerializer):
+        invited = UserInviteSerializer()
+
+        class Meta:
+            model = Invitations
+            fields = ["invited"]
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields["invited"].context.update(self.context)
+
+        def to_representation(self, obj):
+            """flatten the serializer"""
+            representation = super().to_representation(obj)
+            invited_representation = representation.pop("invited")
+            for key in invited_representation:
+                representation[key] = invited_representation[key]
+
+            return representation
+
+    serializer_class = OutputSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        return Invitations.objects.filter(user=user)
+
+    def get(self, request, room_name):
+        self.room_name = room_name
+        return super().get(request, room_name)
+
+    def get_serializer_context(self):
+        context = super(PrevioulyInvited, self).get_serializer_context()
+        room = community_get(room_name=self.room_name)
+        context.update({"room": room})
+        return context
+
+
+class AddPeopleToChannel(APIView):
+    class AddInputSerializer(serializers.Serializer):
+        emails = serializers.ListSerializer(child=serializers.EmailField())
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = AddInputSerializer
+
+    def post(self, request, room_name):
+        room = community_get(room_name=room_name)
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        emails = serializer.validated_data["emails"]
+        users = User.objects.filter(email__in=emails).exclude(
+            user_channels__room_name=room_name
+        )
+        if not users:
+            return Response("No users found", status=status.HTTP_400_BAD_REQUEST)
+
+        notification_list = []
+        for user in users:
+            if not (user in room.users.all() or room.channel_type == "public"):
+                room.users.add(user.pk)
+                Invitations.objects.get_or_create(user=request.user, invited=user)
+                notification_list.append(user)
+
+        if not notification_list:
+            return Response(
+                {"detail": "Users already added"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        # send notification
+        devices = fcmdevice_get(user__in=notification_list)
+        notification_send(
+            devices=devices,
+            title="Community Invitation",
+            body=f"user {request.user.username} added you in {room_name} channel",
+        )
+
+        return Response("Successfully added users")
+
+
+class SendEmailInvite(APIView):
     class InputSerializer(serializers.Serializer):
         email = serializers.EmailField()
 
     permission_classes = (IsAuthenticated,)
     serializer_class = InputSerializer
 
-    def post(self, request, room_name):
-        room = community_get(room_name=room_name)
-
+    def post(self, request):
         serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            email = serializer.data["email"]
-            try:
-                user = User.objects.get(email=email)
-                if user in room.users.all() or room.channel_type == "public":
-                    return Response(
-                        {"detail": "User already joined channel"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                else:
-                    room.users.add(user.pk)
+        serializer.is_valid(raise_exception=True)
 
-                    # send notification
-                    device = fcmdevice_get(user=user)
-                    notification_send(
-                        devices=device,
-                        title="Community Invitation",
-                        body=f"user {request.user.username} added you in {room_name} channel",
-                    )
+        email = serializer.validated_data["email"]
+        if User.objects.filter(email=email).exists():
+            return Response(
+                {"detail": "User already registered"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-                    return Response(
-                        "Successfully added user", status=status.HTTP_200_OK
-                    )
+        email_send(
+            subject="Invite to Drop Me",
+            to=[email],
+            body=f"""User {request.user.username} invited you to join Drop Me community channel. Download the app now and join the recycling revolution!
+                """,
+        )
+        return Response(
+            "user not registered, Sent Email Invitaion",
+        )
 
-            except User.DoesNotExist:
-                email_send(
-                    subject="Invite to Drop Me",
-                    to=[email],
-                    body=f"""User {request.user.username} invited you to join Drop Me community channel. Download the app now and join the recycling revolution!
-                    """,
-                )
-                return Response(
-                    "User not registered, Sent Email Invitaion",
-                    status=status.HTTP_200_OK,
-                )
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UsersSearch(ListAPIView):
+    class FilterSerializer(serializers.Serializer):
+        email = serializers.EmailField()
+
+    queryset = User.objects.all()
+    serializer_class = UserInviteSerializer
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="email",
+                location=OpenApiParameter.QUERY,
+                description="User Email",
+                required=True,
+                type=str,
+            ),
+        ],
+    )
+    def get(self, request, room_name):
+        self.room_name = room_name
+        return super().get(request, room_name)
+
+    def get_queryset(self):
+        filters_serializer = self.FilterSerializer(data=self.request.query_params)
+        filters_serializer.is_valid(raise_exception=True)
+
+        users = user_list(filters=filters_serializer.validated_data)
+
+        return users
+
+    def get_serializer_context(self):
+        context = super(UsersSearch, self).get_serializer_context()
+        room = community_get(room_name=self.room_name)
+        context.update({"room": room})
+        return context

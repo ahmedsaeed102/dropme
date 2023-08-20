@@ -1,7 +1,13 @@
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-from rest_framework import viewsets, status, generics, permissions, exceptions
+from rest_framework import (
+    viewsets,
+    status,
+    generics,
+    permissions,
+    exceptions,
+)
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from machine_api.models import PhoneNumber, RecycleLog
@@ -11,6 +17,7 @@ from .services import (
     send_reset_password_email,
     send_welcome_email,
     otp_set,
+    user_list,
 )
 from .serializers import (
     LocationModelserializers,
@@ -30,6 +37,18 @@ User = get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    def list(self, request, *args, **kwargs):
+        if request.user.is_staff:
+            return super().list(request, *args, **kwargs)
+
+        return Response("Not allowed", status=status.HTTP_403_FORBIDDEN)
+
+    def destroy(self, request, *args, **kwargs):
+        if self.get_object().id != request.user.id:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        return super().destroy(request, *args, **kwargs)
 
     @action(detail=True, methods=["PATCH"], serializer_class=OTPOnlySerializer)
     def verify_otp(self, request, pk=None):

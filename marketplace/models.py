@@ -15,7 +15,7 @@
 #     link = models.URLField()
 
 #     price_points = models.PositiveIntegerField(default=0)
-#     price_eg = models.DecimalField(default=0.00, max_digits=10, decimal_places=2)
+#     price_eg = models.FloatField(default=0.00)
 #     discount = models.IntegerField(default=0, validators=PERCENTAGE_VALIDATOR)
 
 #     created_at = models.DateTimeField(auto_now_add=True)
