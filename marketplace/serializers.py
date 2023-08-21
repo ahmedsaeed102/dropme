@@ -1,34 +1,51 @@
 from rest_framework import serializers
-from .models import SpecialOffer, Product, Cart, Entry
+from .models import Product, Cart, Entry
 
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = "__all__"
+        read_only_fields = ["id", "created_at", "updated_at"]
 
 
-class OfferSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SpecialOffer
-        fields = "__all__"
-
-
-class EntrySerializer(serializers.ModelField):
-    product_data = ProductSerializer(read_only=True)
+class OutputEntrySerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    entry_id = serializers.IntegerField(source="id")
 
     class Meta:
         model = Entry
-        fields = ("product", "product_data", "quantity")
+        fields = ("entry_id", "product", "quantity")
+
+
+class InputEntrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Entry
+        fields = ("product", "quantity")
+
+
+class EditEntrySerializer(serializers.Serializer):
+    entry_id = serializers.IntegerField()
+    quantity = serializers.IntegerField()
 
 
 class CartSerializer(serializers.ModelSerializer):
-    items = EntrySerializer(source="items", many=True)
+    items = OutputEntrySerializer(many=True, read_only=True)
 
     class Meta:
         model = Cart
-        fields = ("count", "total", "items")
+        fields = ("items", "count", "total")
+
+
+class CheckoutSerializer(serializers.Serializer):
+    products = serializers.ListSerializer(child=serializers.IntegerField())
 
 
 class ProductFilterSerializer(serializers.Serializer):
-    price_points = serializers.IntegerField()
+    price_points = serializers.IntegerField(required=False)
+
+
+# class OfferSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = SpecialOffer
+#         fields = "__all__"

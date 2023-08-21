@@ -399,11 +399,11 @@ class AddPeopleToChannel(APIView):
 
 
 class SendEmailInvite(APIView):
-    class InputSerializer(serializers.Serializer):
+    class EmailInputSerializer(serializers.Serializer):
         email = serializers.EmailField()
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = InputSerializer
+    serializer_class = EmailInputSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)

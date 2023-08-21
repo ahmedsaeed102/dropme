@@ -1,25 +1,11 @@
-# from datetime import date
-# from django.db import models
-# from django.core.validators import MinValueValidator, MaxValueValidator
-# from django.contrib.auth import get_user_model
+from datetime import date
+from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth import get_user_model
 
-# User = get_user_model()
+User = get_user_model()
 
-# PERCENTAGE_VALIDATOR = [MinValueValidator(0), MaxValueValidator(100)]
-
-
-# class Product(models.Model):
-#     name = models.CharField(max_length=100)
-#     description = models.TextField()
-#     img = models.ImageField(upload_to="marketplace/products")
-#     link = models.URLField()
-
-#     price_points = models.PositiveIntegerField(default=0)
-#     price_eg = models.FloatField(default=0.00)
-#     discount = models.IntegerField(default=0, validators=PERCENTAGE_VALIDATOR)
-
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+PERCENTAGE_VALIDATOR = [MinValueValidator(0), MaxValueValidator(100)]
 
 
 # class PromoCode(models.Model):
@@ -27,19 +13,52 @@
 #     code = models.CharField(max_length=20)
 
 
-# class Cart(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cart")
-#     count = models.PositiveIntegerField(default=0)
-#     total = models.DecimalField(default=0.00, max_digits=10, decimal_places=2)
+class Product(models.Model):
+    product_name_en = models.CharField(max_length=100)
+    product_name_ar = models.CharField(max_length=100)
+    description_en = models.TextField()
+    description_ar = models.TextField()
+    img = models.ImageField(upload_to="marketplace/products")
+    product_page_link = models.URLField()
 
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+    product_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    discount = models.IntegerField(default=0, validators=PERCENTAGE_VALIDATOR)
+
+    price_points = models.PositiveIntegerField(default=0)
+    # coupon = models.CharField(max_length=20)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.product_name_en
 
 
-# class Entry(models.Model):
-#     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
-#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-#     quantity = models.PositiveIntegerField(default=1)
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cart")
+    count = models.PositiveIntegerField(default=0)
+    total = models.IntegerField(default=0)
+    active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.user.username
+
+
+class Entry(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, blank=True, null=True
+    )
+    quantity = models.PositiveIntegerField(default=1)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.product.product_name_en + " | " + str(self.quantity)
 
 
 # class SpecialOffer(models.Model):
