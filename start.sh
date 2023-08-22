@@ -3,6 +3,7 @@
 # check for any new migrations, then apply them to production database
 python3 manage.py makemigrations 
 python3 manage.py migrate
+python3 manage.py createcachetable
 
 # Starting supervisor  and cron
 service supervisor start

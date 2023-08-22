@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,7 +12,7 @@ from .serializers import (
     InputEntrySerializer,
     EditEntrySerializer,
 )
-from .services import product_list, product_get, EntryService
+from .services import product_list, product_get, EntryService, checkout
 
 
 class ProductsList(generics.ListAPIView):
@@ -38,6 +40,10 @@ class ProductsList(generics.ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+
+    # @method_decorator(cache_page(60 * 60 * 2))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class ProductDetail(generics.RetrieveAPIView):
@@ -113,22 +119,19 @@ class RemoveFromCart(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# class Checkout(APIView):
-#     class InputSerializer(serializers.Serializer):
-#         product_id = serializers.IntegerField()
+class Checkout(APIView):
+    """Cart checout API . checkout all items in cart"""
 
-#     permission_classes = (permissions.IsAuthenticated,)
-#     serializer_class = InputSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    # serializer_class = CheckoutSerializer
 
-#     def get(self, request):
-#         serializer = self.serializer_class(data=request.data)
-#         serializer.is_valid(raise_exception=True)
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-#         product_code_get(
-#             request=request, product_id=serializer.validated_data["product_id"]
-#         )
+        coupons = checkout(user=request.user)
 
-#         return Response("Success")
+        return Response(coupons)
 
 
 # class SpecialOffersList(generics.ListAPIView):

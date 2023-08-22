@@ -45,6 +45,10 @@ class ProductFilterSerializer(serializers.Serializer):
     price_points = serializers.IntegerField(required=False)
 
 
+class CheckoutSerializer(serializers.Serializer):
+    entry_ids = serializers.ListSerializer(child=serializers.IntegerField())
+
+
 # class OfferSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = SpecialOffer

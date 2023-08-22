@@ -1,21 +1,25 @@
-import django_filters
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from users_api.models import UserModel
 from .models import Product, Cart, Entry
+from .filters import ProductFilter
 
 
 def product_get(*, pk: int) -> Product:
     return get_object_or_404(Product, pk=pk)
 
 
-class ProductFilter(django_filters.FilterSet):
-    price_points = django_filters.NumberFilter(lookup_expr="lte")
+def product_list(*, filters=None):
+    filters = filters or {}
 
-    class Meta:
-        model = Product
-        fields = ("price_points",)
+    qs = Product.objects.all()
+
+    return ProductFilter(filters, qs).qs
+
+
+def cart_get(*, user: UserModel) -> Cart:
+    return user.cart.filter(active=True).first()
 
 
 class EntryService:
@@ -24,7 +28,7 @@ class EntryService:
         self.cart_init()
 
     def cart_init(self) -> Cart:
-        cart = self.user.cart.filter(active=True).first()
+        cart = cart_get(user=self.user)
         if cart:
             self.cart = cart
         else:
@@ -91,13 +95,24 @@ class EntryService:
         self.cart.save()
 
 
-def product_list(*, filters=None):
-    filters = filters or {}
+@transaction.atomic
+def checkout(*, user: UserModel) -> dict:
+    cart = cart_get(user=user)
+    if not cart:
+        raise PermissionDenied({"detail": "You have no items in cart"})
 
-    qs = Product.objects.all()
+    if cart.total > user.total_points:
+        raise PermissionDenied({"detail": "You don't have enough points"})
 
-    return ProductFilter(filters, qs).qs
+    coupons = {}
 
+    for item in cart.items.all():
+        coupons.update({f"{item.product.product_name_en}": item.product.coupon})
 
-# def product_coupon_get(*, request, product_id: int) -> str:
-#     pass
+    user.total_points = user.total_points - cart.total
+    user.save()
+
+    cart.active = False
+    cart.save()
+
+    return coupons

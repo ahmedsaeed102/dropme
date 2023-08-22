@@ -8,6 +8,7 @@ from .models import ChannelsModel, MessagesModel
 class ChannelsSerializer(serializers.ModelSerializer):
     messages_num = serializers.SerializerMethodField()
     websocket_url = serializers.SerializerMethodField()
+    joined = serializers.SerializerMethodField()
 
     class Meta:
         model = ChannelsModel
@@ -19,6 +20,11 @@ class ChannelsSerializer(serializers.ModelSerializer):
 
     def get_websocket_url(self, obj):
         return obj.websocket_url
+
+    def get_joined(self, obj):
+        request = self.context.get("request")
+
+        return request.user in obj.users.all() or obj.channel_type == "public"
 
 
 class ChannelsCreateSerializer(serializers.ModelSerializer):

@@ -1,4 +1,6 @@
 from datetime import date
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.shortcuts import redirect
 from rest_framework.exceptions import ValidationError
 from rest_framework import generics, serializers
@@ -29,6 +31,10 @@ class Competitions(GetPermissionsMixin, generics.ListCreateAPIView):
         notification_send_all(
             title="New Competition", body="New competition created check it out!"
         )
+
+    @method_decorator(cache_page(60 * 15))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class CompetitionDetail(GetPermissionsMixin, generics.RetrieveUpdateAPIView):
