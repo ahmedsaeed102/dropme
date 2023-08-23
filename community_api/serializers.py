@@ -37,6 +37,7 @@ class MessagesSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField()
     sender_id = serializers.SerializerMethodField()
     sender_photo = serializers.SerializerMethodField()
+    channel_type = serializers.SerializerMethodField()
 
     current_user_reaction = serializers.SerializerMethodField()
 
@@ -48,6 +49,7 @@ class MessagesSerializer(serializers.ModelSerializer):
             "sender",
             "sender_photo",
             "current_user_reaction",
+            "channel_type",
             "content",
             "message_dt",
             "img",
@@ -71,6 +73,9 @@ class MessagesSerializer(serializers.ModelSerializer):
             return reaction
 
         return ""
+
+    def get_channel_type(self, obj):
+        return obj.message_channel.all().first().channel_type
 
 
 class ReactionSerializer(serializers.ModelSerializer):

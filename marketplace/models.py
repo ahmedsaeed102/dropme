@@ -25,7 +25,7 @@ class Product(models.Model):
     discount = models.IntegerField(default=0, validators=PERCENTAGE_VALIDATOR)
 
     price_points = models.PositiveIntegerField(default=0)
-    # coupon = models.CharField(max_length=20)
+    coupon = models.CharField(max_length=20, default="coupon")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -64,8 +64,8 @@ class Entry(models.Model):
 # class SpecialOffer(models.Model):
 #     description = models.TextField()
 
-#     points = models.PositiveBigIntegerField(default=0)
-#     reward = models.PositiveBigIntegerField(default=0)
+#     required_points = models.PositiveBigIntegerField(default=0)
+#     reward_points = models.PositiveBigIntegerField(default=0)
 
 #     start_date = models.DateField()
 #     end_date = models.DateTimeField()

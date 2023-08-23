@@ -73,7 +73,9 @@ class ChannelsModel(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    messages = models.ManyToManyField(MessagesModel, blank=True)
+    messages = models.ManyToManyField(
+        MessagesModel, blank=True, related_name="message_channel"
+    )
     users = models.ManyToManyField(UserModel, related_name="user_channels", blank=True)
 
     @property

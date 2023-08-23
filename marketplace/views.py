@@ -120,15 +120,12 @@ class RemoveFromCart(APIView):
 
 
 class Checkout(APIView):
-    """Cart checout API . checkout all items in cart"""
+    """Cart checout API. Checkout all items in cart"""
 
     permission_classes = (permissions.IsAuthenticated,)
     # serializer_class = CheckoutSerializer
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
+    def get(self, request):
         coupons = checkout(user=request.user)
 
         return Response(coupons)

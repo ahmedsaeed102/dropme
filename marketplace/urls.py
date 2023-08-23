@@ -23,4 +23,6 @@ urlpatterns = [
         views.RemoveFromCart.as_view(),
         name="cart_delete",
     ),
+    # checkout
+    path("marketplace/cart/checkout/", views.Checkout.as_view(), name="checkout"),
 ]
