@@ -82,8 +82,15 @@ class ChannelMessages(ListAPIView):
     def get_queryset(self):
         room_name = self.kwargs.get(self.lookup_url_kwarg)
         channel = community_get(room_name=room_name)
-        messages = channel.messages.all()
-        return messages
+
+        self.channel_type = channel.channel_type
+
+        return channel.messages.all()
+
+    def get(self, request, *args, **kwargs):
+        data = super().get(request, *args, **kwargs).data
+        data["channel_type"] = self.channel_type
+        return Response(data)
 
 
 @extend_schema(

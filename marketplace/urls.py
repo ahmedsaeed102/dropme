@@ -25,4 +25,12 @@ urlpatterns = [
     ),
     # checkout
     path("marketplace/cart/checkout/", views.Checkout.as_view(), name="checkout"),
+    # slider
+    path(
+        "marketplace/slider/",
+        views.MarketplaceSlider.as_view(),
+        name="marketplace_slider",
+    ),
+    # category
+    path("marketplace/categories/", views.CategoryList.as_view(), name="categories"),
 ]

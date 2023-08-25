@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Product, Cart, Entry
+from competition_api.models import Resource
+from .models import Product, Cart, Entry, Category
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -43,10 +44,23 @@ class CheckoutSerializer(serializers.Serializer):
 
 class ProductFilterSerializer(serializers.Serializer):
     price_points = serializers.IntegerField(required=False)
+    category__category_name = serializers.CharField(required=False)
 
 
 class CheckoutSerializer(serializers.Serializer):
     entry_ids = serializers.ListSerializer(child=serializers.IntegerField())
+
+
+class CategorysSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = "__all__"
+
+
+class ResourcesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Resource
+        fields = "__all__"
 
 
 # class OfferSerializer(serializers.ModelSerializer):

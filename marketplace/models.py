@@ -13,6 +13,14 @@ PERCENTAGE_VALIDATOR = [MinValueValidator(0), MaxValueValidator(100)]
 #     code = models.CharField(max_length=20)
 
 
+class Category(models.Model):
+    category_name = models.CharField(max_length=50, default="Muqbis")
+    img = models.ImageField(upload_to="marketplace/categories", blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.category_name
+
+
 class Product(models.Model):
     product_name_en = models.CharField(max_length=100)
     product_name_ar = models.CharField(max_length=100)
@@ -26,6 +34,13 @@ class Product(models.Model):
 
     price_points = models.PositiveIntegerField(default=0)
     coupon = models.CharField(max_length=20, default="coupon")
+    category = models.ForeignKey(
+        Category,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="products",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

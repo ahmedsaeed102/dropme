@@ -4,15 +4,23 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from .models import Product
+from competition_api.models import Resource
+from .models import Product, Category
 from .serializers import (
     ProductSerializer,
     ProductFilterSerializer,
     CartSerializer,
     InputEntrySerializer,
     EditEntrySerializer,
+    ResourcesSerializer,
+    CategorysSerializer,
 )
 from .services import product_list, product_get, EntryService, checkout
+
+
+class CategoryList(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorysSerializer
 
 
 class ProductsList(generics.ListAPIView):
@@ -35,6 +43,13 @@ class ProductsList(generics.ListAPIView):
                 description="product price points",
                 required=False,
                 type=int,
+            ),
+            OpenApiParameter(
+                name="category__category_name",
+                location=OpenApiParameter.QUERY,
+                description="product category",
+                required=False,
+                type=str,
             ),
         ],
     )
@@ -129,6 +144,14 @@ class Checkout(APIView):
         coupons = checkout(user=request.user)
 
         return Response(coupons)
+
+
+class MarketplaceSlider(generics.ListAPIView):
+    """For marketplace slider"""
+
+    queryset = Resource.objects.filter(resource_type="marketplace")
+    serializer_class = ResourcesSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
 
 # class SpecialOffersList(generics.ListAPIView):
