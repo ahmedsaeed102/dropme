@@ -21,6 +21,7 @@ from .services import product_list, product_get, EntryService, checkout
 class CategoryList(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorysSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
 
 class ProductsList(generics.ListAPIView):
