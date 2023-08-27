@@ -29,11 +29,15 @@ class Product(models.Model):
     img = models.ImageField(upload_to="marketplace/products")
     product_page_link = models.URLField()
 
-    product_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    original_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     discount = models.IntegerField(default=0, validators=PERCENTAGE_VALIDATOR)
+    price_after_discount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00
+    )
 
     price_points = models.PositiveIntegerField(default=0)
     coupon = models.CharField(max_length=20, default="coupon")
+
     category = models.ForeignKey(
         Category,
         blank=True,

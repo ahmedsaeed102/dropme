@@ -9,7 +9,7 @@ from rest_framework.generics import (
     DestroyAPIView,
     UpdateAPIView,
 )
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
@@ -32,8 +32,9 @@ def room(request, room_name):
     return render(request, "community_api/room.html", {"room_name": room_name})
 
 
-class MessagesPagination(PageNumberPagination):
-    page_size = 5
+class MessagesPagination(LimitOffsetPagination):
+    default_limit = 5
+    max_limit = 100
 
 
 class ChannelsListView(ListAPIView):

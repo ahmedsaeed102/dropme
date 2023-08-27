@@ -1,9 +1,9 @@
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from users_api.models import UserModel
-from .models import Product, Cart, Entry
-from .filters import ProductFilter
+from .models import Product, Cart, Entry, Category
+from .filters import ProductFilter, CategoryFilter
 
 
 def product_get(*, pk: int) -> Product:
@@ -16,6 +16,14 @@ def product_list(*, filters=None):
     qs = Product.objects.all()
 
     return ProductFilter(filters, qs).qs
+
+
+def category_list(*, filters=None):
+    filters = filters or {}
+
+    qs = Category.objects.all()
+
+    return CategoryFilter(filters, qs).qs
 
 
 def cart_get(*, user: UserModel) -> Cart:

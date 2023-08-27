@@ -12,16 +12,39 @@ from .serializers import (
     CartSerializer,
     InputEntrySerializer,
     EditEntrySerializer,
-    ResourcesSerializer,
+    MarketplaceResourcesSerializer,
     CategorysSerializer,
+    CategoryFilterSerializer,
 )
-from .services import product_list, product_get, EntryService, checkout
+from .services import product_list, product_get, EntryService, checkout, category_list
 
 
 class CategoryList(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorysSerializer
     permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        filters_serializer = CategoryFilterSerializer(data=self.request.query_params)
+        filters_serializer.is_valid(raise_exception=True)
+
+        categorys = category_list(filters=filters_serializer.validated_data)
+
+        return categorys
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="category_name",
+                location=OpenApiParameter.QUERY,
+                description="category name",
+                required=False,
+                type=str,
+            ),
+        ],
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 class ProductsList(generics.ListAPIView):
@@ -151,7 +174,7 @@ class MarketplaceSlider(generics.ListAPIView):
     """For marketplace slider"""
 
     queryset = Resource.objects.filter(resource_type="marketplace")
-    serializer_class = ResourcesSerializer
+    serializer_class = MarketplaceResourcesSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
 
