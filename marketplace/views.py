@@ -111,8 +111,12 @@ class UserCart(APIView):
 
     def get(self, request):
         user_cart = request.user.cart.filter(active=True).first()
+        # if not user_cart:
+        #     return Response({})
 
-        return Response(self.serializer_class(user_cart).data)
+        return Response(
+            self.serializer_class(user_cart, context={"request": request}).data
+        )
 
 
 class AddToCart(APIView):

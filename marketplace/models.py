@@ -87,10 +87,26 @@ class Entry(models.Model):
 #     reward_points = models.PositiveBigIntegerField(default=0)
 
 #     start_date = models.DateField()
-#     end_date = models.DateTimeField()
+#     end_date = models.DateField()
 
 #     created_at = models.DateTimeField(auto_now_add=True)
+
+#     is_finished = models.BooleanField(default=False)
 
 #     @property
 #     def is_ongoing(self) -> bool:
 #         return self.end_date > date.today()
+
+
+# class UserOffer(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_offers")
+#     offer = models.ForeignKey(
+#         SpecialOffer, on_delete=models.CASCADE, related_name="offers"
+#     )
+
+#     remaining_amount = models.PositiveIntegerField(default=0)
+
+#     def __str__(self) -> str:
+#         return (
+#             self.user.email + " | " + self.offer.id + " | " + str(self.remaining_amount)
+#         )

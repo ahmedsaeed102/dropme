@@ -11,7 +11,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ["id", "created_at", "updated_at"]
 
-    def get_can_buy(self, obj) -> bool:
+    def get_can_buy(self, obj: Product) -> bool:
         user = self.context["request"].user
         return user.total_points >= obj.price_points
 
@@ -44,23 +44,6 @@ class CartSerializer(serializers.ModelSerializer):
         fields = ("items", "count", "total")
 
 
-class CheckoutSerializer(serializers.Serializer):
-    products = serializers.ListSerializer(child=serializers.IntegerField())
-
-
-class ProductFilterSerializer(serializers.Serializer):
-    price_points = serializers.IntegerField(required=False)
-    category__category_name = serializers.CharField(required=False)
-
-
-class CategoryFilterSerializer(serializers.Serializer):
-    category_name = serializers.CharField(required=False)
-
-
-class CheckoutSerializer(serializers.Serializer):
-    entry_ids = serializers.ListSerializer(child=serializers.IntegerField())
-
-
 class CategorysSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -73,7 +56,15 @@ class MarketplaceResourcesSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-# class OfferSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = SpecialOffer
-#         fields = "__all__"
+# class CheckoutSerializer(serializers.Serializer):
+#     entry_ids = serializers.ListSerializer(child=serializers.IntegerField())
+
+
+# Filters
+class ProductFilterSerializer(serializers.Serializer):
+    price_points = serializers.IntegerField(required=False)
+    category__category_name = serializers.CharField(required=False)
+
+
+class CategoryFilterSerializer(serializers.Serializer):
+    category_name = serializers.CharField(required=False)

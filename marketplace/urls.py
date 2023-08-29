@@ -2,6 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # category
+    path("marketplace/categories/", views.CategoryList.as_view(), name="categories"),
     # products
     path("marketplace/products/", views.ProductsList.as_view(), name="products"),
     path(
@@ -31,6 +33,4 @@ urlpatterns = [
         views.MarketplaceSlider.as_view(),
         name="marketplace_slider",
     ),
-    # category
-    path("marketplace/categories/", views.CategoryList.as_view(), name="categories"),
 ]

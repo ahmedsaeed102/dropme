@@ -1,6 +1,7 @@
-from rest_framework.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.db.models import QuerySet
+from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import PermissionDenied
 from users_api.models import UserModel
 from .models import Product, Cart, Entry, Category
 from .filters import ProductFilter, CategoryFilter
@@ -10,23 +11,21 @@ def product_get(*, pk: int) -> Product:
     return get_object_or_404(Product, pk=pk)
 
 
-def product_list(*, filters=None):
+def product_list(*, filters: dict = None) -> QuerySet[Product]:
     filters = filters or {}
-
     qs = Product.objects.all()
 
     return ProductFilter(filters, qs).qs
 
 
-def category_list(*, filters=None):
+def category_list(*, filters: dict = None) -> QuerySet[Category]:
     filters = filters or {}
-
     qs = Category.objects.all()
 
     return CategoryFilter(filters, qs).qs
 
 
-def cart_get(*, user: UserModel) -> Cart:
+def cart_get(*, user: UserModel) -> Cart | None:
     return user.cart.filter(active=True).first()
 
 
@@ -52,7 +51,9 @@ class EntryService:
         entry = self.entry_create(product=data["product"], quantity=data["quantity"])
 
         self.cart.count = self.cart.count + entry.quantity
-        self.cart.total = self.cart.total + entry.product.price_points * entry.quantity
+        self.cart.total = self.cart.total + (
+            entry.product.price_points * entry.quantity
+        )
 
         self.cart.save()
 
@@ -71,17 +72,15 @@ class EntryService:
         entry.save()
 
         if old_qunatity >= qunatitiy:
-            self.cart.count = self.cart.count - (old_qunatity - qunatitiy)
-            self.cart.total = (
-                self.cart.total
-                - (old_qunatity - qunatitiy) * entry.product.price_points
-            )
+            diffrence = old_qunatity - qunatitiy
+
+            self.cart.count = self.cart.count - diffrence
+            self.cart.total = self.cart.total - (diffrence * entry.product.price_points)
         else:
-            self.cart.count = self.cart.count + (qunatitiy - old_qunatity)
-            self.cart.total = (
-                self.cart.total
-                + (qunatitiy - old_qunatity) * entry.product.price_points
-            )
+            diffrence = qunatitiy - old_qunatity
+
+            self.cart.count = self.cart.count + diffrence
+            self.cart.total = self.cart.total + (diffrence * entry.product.price_points)
 
         self.cart.save()
 
