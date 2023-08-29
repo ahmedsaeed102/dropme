@@ -32,7 +32,7 @@ class Competitions(GetPermissionsMixin, generics.ListCreateAPIView):
             title="New Competition", body="New competition created check it out!"
         )
 
-    @method_decorator(cache_page(60 * 15))
+    @method_decorator(cache_page(60 * 30))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 

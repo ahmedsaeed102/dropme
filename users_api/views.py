@@ -17,7 +17,6 @@ from .services import (
     send_reset_password_email,
     send_welcome_email,
     otp_set,
-    user_list,
 )
 from .serializers import (
     LocationModelserializers,

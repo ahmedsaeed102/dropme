@@ -19,7 +19,7 @@ def email_send(
     email_from = settings.EMAIL_HOST_USER
 
     if template:
-        template = get_template("otp_email.html").render(context)
+        template = get_template(template).render(context)
 
         send_mail(
             subject,

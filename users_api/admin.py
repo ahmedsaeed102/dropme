@@ -3,7 +3,7 @@ from .models import UserModel, LocationModel, Feedback
 
 
 @admin.register(UserModel)
-class Admin_dropMe(admin.ModelAdmin):
+class CustomUserAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "username",
