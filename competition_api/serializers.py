@@ -1,5 +1,8 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from .models import Competition, CompetitionRanking
+from .models import Competition, CompetitionRanking, Resource
+
+User = get_user_model()
 
 
 class CompetitionSerializer(serializers.ModelSerializer):
@@ -36,17 +39,15 @@ class CompetitionRankingSerializer(serializers.ModelSerializer):
         fields = ("name", "photo", "points", "rank")
 
 
-class CustomCompetitionSerializer(serializers.ModelSerializer):
-    """custom competition serializer for returning competition rankings"""
-
-    top_ten = serializers.SerializerMethodField()
-
-    def get_top_ten(self, obj):
-        ranking = obj.competitionranking_set.all()[:10]
-        return CompetitionRankingSerializer(
-            ranking, many=True, context={"request": self.context.get("request")}
-        ).data
+class LeaderboardSerializer(serializers.ModelSerializer):
+    rank = serializers.ReadOnlyField(source="ranking")
 
     class Meta:
-        model = Competition
-        fields = ("top_ten",)
+        model = User
+        fields = ["username", "profile_photo", "total_points", "rank"]
+
+
+class ResourcesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Resource
+        fields = "__all__"
