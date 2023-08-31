@@ -80,33 +80,35 @@ class Entry(models.Model):
         return self.product.product_name_en + " | " + str(self.quantity)
 
 
-# class SpecialOffer(models.Model):
-#     description = models.TextField()
+class SpecialOffer(models.Model):
+    description = models.TextField(blank=True, null=True)
 
-#     required_points = models.PositiveBigIntegerField(default=0)
-#     reward_points = models.PositiveBigIntegerField(default=0)
+    required_points = models.PositiveBigIntegerField()
+    reward_points = models.PositiveBigIntegerField()
 
-#     start_date = models.DateField()
-#     end_date = models.DateField()
+    start_date = models.DateField()
+    end_date = models.DateField()
 
-#     created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-#     is_finished = models.BooleanField(default=False)
+    is_finished = models.BooleanField(default=False)
 
-#     @property
-#     def is_ongoing(self) -> bool:
-#         return self.end_date > date.today()
+    @property
+    def is_ongoing(self) -> bool:
+        return self.end_date >= date.today()
 
 
-# class UserOffer(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_offers")
-#     offer = models.ForeignKey(
-#         SpecialOffer, on_delete=models.CASCADE, related_name="offers"
-#     )
+class UserOffer(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_offers")
+    offer = models.ForeignKey(
+        SpecialOffer, on_delete=models.CASCADE, related_name="offer_status"
+    )
 
-#     remaining_amount = models.PositiveIntegerField(default=0)
+    can_be_used = models.BooleanField(default=True)
+    remaining_amount = models.PositiveIntegerField(default=0)
 
-#     def __str__(self) -> str:
-#         return (
-#             self.user.email + " | " + self.offer.id + " | " + str(self.remaining_amount)
-#         )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"{self.user.email} | {self.offer.id} | {self.remaining_amount}"

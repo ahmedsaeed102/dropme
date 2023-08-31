@@ -3,7 +3,7 @@ from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 from users_api.models import UserModel
-from .models import Product, Cart, Entry, Category
+from .models import Product, Cart, Entry, Category, SpecialOffer, UserOffer
 from .filters import ProductFilter, CategoryFilter
 
 
@@ -123,3 +123,31 @@ def checkout(*, user: UserModel) -> dict:
     cart.save()
 
     return coupons
+
+
+def special_offer_apply(*, user: UserModel, points: int) -> int:
+    offer = SpecialOffer.objects.filter(is_finished=False).first()
+
+    if offer:
+        user_offer = UserOffer.objects.filter(user=user, offer=offer).first()
+
+        if user_offer:
+            if user_offer.can_be_used:
+                if points >= user_offer.remaining_amount:
+                    user_offer.remaining_amount = 0
+                    user_offer.can_be_used = False
+                    user_offer.save()
+                    return offer.reward_points
+                else:
+                    user_offer.remaining_amount = user_offer.remaining_amount - points
+                    user_offer.save()
+        else:
+            if points >= offer.required_points:
+                return offer.reward_points
+            else:
+                remaining = offer.required_points - points
+                UserOffer.objects.create(
+                    user=user, offer=offer, remaining_amount=remaining
+                )
+
+    return 0

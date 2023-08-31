@@ -10,7 +10,7 @@ from channels.layers import get_channel_layer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework_api_key.permissions import HasAPIKey
 from users_api.models import UserModel
 from users_api.serializers import UserSerializer
@@ -166,7 +166,7 @@ class RecycleWithPhoneNumber(APIView):
     The machine sends phone number and the number of items recycled
     """
 
-    permission_classes = [HasAPIKey]
+    permission_classes = [HasAPIKey | IsAdminUser]
     serializer_class = UpdateRecycleLog
 
     def post(self, request, name, phone_number):

@@ -1,11 +1,16 @@
 import random
 import django_filters
 from datetime import timedelta, datetime
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from .models import UserModel
+
+
+def user_get(*, id: int) -> UserModel:
+    return get_object_or_404(UserModel, pk=id)
 
 
 def email_send(
