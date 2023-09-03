@@ -6,10 +6,8 @@ from .models import UserModel, LocationModel, Feedback
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "username",
         "email",
-        "password",
-        "profile_photo",
+        "phone_number",
         "total_points",
         "address",
     )

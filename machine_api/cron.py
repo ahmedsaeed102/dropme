@@ -10,7 +10,7 @@ from .utlis import get_user_weekly_logs
 def send_weekly_recycle_summary_email():
     from_email = settings.EMAIL_HOST_USER
 
-    for user in UserModel.objects.all():
+    for user in UserModel.objects.all(is_active=True):
         subject = "Weekly Recycle Summary - Your Impact with Drop Me!"
         data = get_user_weekly_logs(user.id)
 

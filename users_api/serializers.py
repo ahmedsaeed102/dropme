@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.utils import timezone
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import UserModel, LocationModel, Feedback
 from .services import send_otp
@@ -34,7 +34,8 @@ class UserSerializer(serializers.ModelSerializer):
         password1 = data.get("password1")
         password2 = data.get("password2")
         if password1 != password2:
-            raise serializers.ValidationError("the two password does not match")
+            raise serializers.ValidationError("Passwords don't match")
+
         return data
 
     # create and return user with encrybted password
@@ -50,30 +51,16 @@ class UserSerializer(serializers.ModelSerializer):
             otp_expiration=otp_expiration,
             max_otp_try=settings.MAX_OTP_TRY,
         )
+
         user.set_password(val_data["password1"])
         user.save()
+
         send_otp(user)
+
         return user
 
 
 class UserProfileSerializer(UserSerializer):
-    password1 = serializers.CharField(
-        write_only=True,
-        min_length=settings.MIN_PASSWORD_LENGTH,
-        error_messages={
-            "min_length": f"Password must be longer than{settings.MIN_PASSWORD_LENGTH} length"
-        },
-    )
-    password2 = serializers.CharField(
-        write_only=True,
-        min_length=settings.MIN_PASSWORD_LENGTH,
-        error_messages={
-            "min_length": f"Password must be longer than{settings.MIN_PASSWORD_LENGTH} length"
-        },
-    )
-    email = serializers.EmailField()
-    username = serializers.CharField(max_length=80)
-
     class Meta:
         model = UserModel
         fields = [
@@ -90,11 +77,15 @@ class UserProfileSerializer(UserSerializer):
 
     def update(self, instance, val_data):
         """update profile for User"""
+
         password = val_data.pop("password1", None)
+
         user = super().update(instance, val_data)
+
         if password:
             user.set_password(password)
             user.save()
+
         return user
 
 
@@ -126,13 +117,12 @@ class OTPSerializer(serializers.Serializer):
         user = UserModel.objects.filter(email=email).first()
 
         if user:
-            if user.otp == otp and timezone.now() < user.otp_expiration:
-                return data
-            else:
-                raise AuthenticationFailed("Invalid OTP", 401)
-
+            if not (user.otp == otp and user.otp_expiration > timezone.now()):
+                raise ValidationError({"detail": "Invalid OTP"})
         else:
-            raise AuthenticationFailed("Invalid Email", 401)
+            raise ValidationError({"detail": "Invalid Email"})
+
+        return data
 
 
 class SetNewPasswordSerializer(serializers.Serializer):
@@ -153,15 +143,15 @@ class SetNewPasswordSerializer(serializers.Serializer):
         user = UserModel.objects.filter(email=email).first()
 
         if user:
-            if user.otp == otp and timezone.now() < user.otp_expiration:
+            if user.otp == otp and user.otp_expiration > timezone.now():
                 user.set_password(password)
                 user.max_otp_try = settings.MAX_OTP_TRY
                 user.save()
             else:
-                raise AuthenticationFailed("Invalid OTP", 401)
+                raise ValidationError({"detail": "Invalid OTP"})
 
         else:
-            raise AuthenticationFailed("Invalid Email", 401)
+            raise ValidationError({"detail": "Invalid Email"})
 
         return data
 
@@ -180,11 +170,14 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not self.user.is_active:
             otp = random.randint(1000, 9999)
             otp_expiration = timezone.now() + timedelta(minutes=5)
+
             self.user.otp = otp
             self.user.otp_expiration = otp_expiration
+
             self.user.save()
 
             send_otp(self.user)
+
             return {"is_verified": False, "id": self.user.id}
 
         # Add custom claims

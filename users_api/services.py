@@ -1,3 +1,4 @@
+import threading
 import random
 import django_filters
 from datetime import timedelta, datetime
@@ -13,34 +14,55 @@ def user_get(*, id: int) -> UserModel:
     return get_object_or_404(UserModel, pk=id)
 
 
+class EmailThread(threading.Thread):
+    def __init__(
+        self,
+        *,
+        subject: str,
+        email_to: list,
+        email_from: str,
+        html=None,
+        body: str | None = None,
+    ):
+        self.subject = subject
+        self.body = body
+        self.html = html
+        self.email_to = email_to
+        self.email_from = email_from
+        threading.Thread.__init__(self)
+
+    def run(self):
+        send_mail(
+            self.subject,
+            self.body,
+            self.email_from,
+            self.email_to,
+            fail_silently=False,
+            html_message=self.html,
+        )
+
+
 def email_send(
     *,
     subject: str,
     to: list,
-    body: str = None,
+    body: str | None = None,
     context: dict = {},
-    template=None,
+    template: str | None = None,
 ) -> None:
     email_from = settings.EMAIL_HOST_USER
 
     if template:
         template = get_template(template).render(context)
 
-        send_mail(
-            subject,
-            None,
-            email_from,
-            to,
-            fail_silently=False,
-            html_message=template,
-        )
+        EmailThread(
+            subject=subject, email_to=to, email_from=email_from, html=template
+        ).start()
+
     else:
-        send_mail(
-            subject,
-            body,
-            email_from,
-            to,
-        )
+        EmailThread(
+            subject=subject, email_to=to, email_from=email_from, body=body
+        ).start()
 
 
 def send_otp(user: UserModel) -> None:
@@ -49,19 +71,11 @@ def send_otp(user: UserModel) -> None:
     """
 
     context = {"username": user.username, "otp": user.otp}
-    template = get_template("otp_email.html").render(context)
-
     subject = "Your One-Time Password (OTP) for DropMe"
-    email_from = settings.EMAIL_HOST_USER
     recipient_list = [user.email]
 
-    send_mail(
-        subject,
-        None,
-        email_from,
-        recipient_list,
-        fail_silently=False,
-        html_message=template,
+    email_send(
+        subject=subject, to=recipient_list, context=context, template="otp_email.html"
     )
 
 
@@ -73,19 +87,14 @@ def send_reset_password_email(email, otp):
     user.save()
 
     context = {"username": user.username, "otp": otp}
-    template = get_template("reset_password_email.html").render(context)
-
     subject = "Password Reset Request for DropMe"
-    email_from = settings.EMAIL_HOST_USER
     recipient_list = [email]
 
-    send_mail(
-        subject,
-        None,
-        email_from,
-        recipient_list,
-        fail_silently=False,
-        html_message=template,
+    email_send(
+        subject=subject,
+        to=recipient_list,
+        context=context,
+        template="reset_password_email.html",
     )
 
 
@@ -97,16 +106,12 @@ def send_welcome_email(email):
     # template = get_template('welcome_email.html').render(context)
 
     subject = "Welcome to DropMe"
-    email_from = settings.EMAIL_HOST_USER
     recipient_list = [email]
 
-    send_mail(
-        subject,
-        "Welcome to dropme",
-        email_from,
-        recipient_list,
-        # fail_silently=False,
-        # html_message=template
+    email_send(
+        subject=subject,
+        to=recipient_list,
+        body="Welcome to dropme",
     )
 
 

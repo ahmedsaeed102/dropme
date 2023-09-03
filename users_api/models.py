@@ -1,9 +1,8 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from model_utils import Choices
-from django.utils.translation import gettext_lazy as _
 from django.core.validators import validate_email
+from model_utils import Choices
 from core.validators import validate_phone_number
 from .managers import UserManager
 
@@ -46,12 +45,11 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     )
 
     age = models.IntegerField(null=True, blank=True)
+
     GENDER = Choices("male", "female")
     gender = models.CharField(choices=GENDER, default=GENDER.male, max_length=20)
 
-    total_points = models.PositiveIntegerField(
-        default=0, help_text=_("User total earned points")
-    )
+    total_points = models.PositiveIntegerField(default=0)
 
     address = models.ForeignKey(
         LocationModel,
