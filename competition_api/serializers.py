@@ -51,3 +51,9 @@ class ResourcesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
         fields = "__all__"
+
+
+class ContactUsLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Resource
+        fields = ["name", "link"]

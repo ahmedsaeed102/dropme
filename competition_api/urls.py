@@ -28,4 +28,6 @@ urlpatterns = [
     ),
     # Home page ads
     path("advertisements/", AdsList.as_view(), name="ads"),
+    # contact_us
+    path("contactus/", LinksAPI.as_view(), name="contact_us"),
 ]
