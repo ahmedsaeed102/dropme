@@ -10,6 +10,7 @@ from rest_framework import (
 )
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 from machine_api.models import PhoneNumber, RecycleLog
 from .models import LocationModel, Feedback
 from .services import (
@@ -219,3 +220,21 @@ class FeedbackCreate(generics.CreateAPIView):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
     permission_classes = (permissions.IsAuthenticated,)
+
+
+class AnonymousUser(generics.GenericAPIView):
+    def get(self, *args, **kwargs):
+        user, _ = User.objects.get_or_create(
+            username="anonymous",
+            email="anonymous@anonymous.com",
+            is_active=True,
+        )
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            }
+        )

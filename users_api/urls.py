@@ -54,4 +54,6 @@ urlpatterns = [
     # user feedback
     path("feedbacks/list/", views.FeedbacksList.as_view(), name="list_feedback"),
     path("feedbacks/create/", views.FeedbackCreate.as_view(), name="create_feedback"),
+    # anoynmous user
+    path("anonymous/", views.AnonymousUser.as_view(), name="anonymous_user"),
 ]
