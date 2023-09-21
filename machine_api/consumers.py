@@ -25,8 +25,8 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
         await self.send_json(
             {
                 "status": "success",
-                "message": f"we are waiting for you to throw your bottle or can",
-                "message_ar": f"نحن في انتظارك لرمي الزجاجة أو العلبة",
+                "message": "we are waiting for you to throw your bottle or can",
+                "message_ar": "نحن في انتظارك لرمي الزجاجة أو العلبة",
             }
         )
 

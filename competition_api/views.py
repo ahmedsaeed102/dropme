@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -85,10 +86,10 @@ class JoinCompetition(APIView):
         competition = competition_get(pk=pk)
 
         if competition.end_date < date.today():
-            raise ValidationError({"detail": "Competition has already ended"})
+            raise ValidationError({"detail": _("Competition has already ended")})
 
         if request.user in competition.users.all():
-            raise ValidationError({"detail": "You already joined this competition"})
+            raise ValidationError({"detail": _("You already joined this competition")})
 
         competition.users.add(request.user.pk)
 

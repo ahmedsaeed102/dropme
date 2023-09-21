@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 from rest_framework import (
     viewsets,
     status,
@@ -83,7 +84,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response("Successfully verfied the user.", status=status.HTTP_200_OK)
 
         return Response(
-            "User already verfied or OTP is incorrect.",
+            _("User already verfied or OTP is incorrect."),
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -163,7 +164,7 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
             )
         else:
             raise exceptions.NotFound(
-                "There is no account registered with this email.",
+                {"detail:": _("There is no account registered with this email.")},
             )
 
 
@@ -224,9 +225,13 @@ class FeedbackCreate(generics.CreateAPIView):
 
 class AnonymousUser(generics.GenericAPIView):
     def get(self, *args, **kwargs):
-        user, _ = User.objects.get_or_create(
-            username="anonymous",
-            email="anonymous@anonymous.com",
+        from faker import Faker
+
+        fake = Faker()
+
+        user = User.objects.create(
+            username=fake.name(),
+            email=f"{fake.word()}@anonymous.com",
             is_active=True,
         )
 

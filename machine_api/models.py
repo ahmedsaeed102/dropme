@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 from core.validators import validate_phone_number
 from users_api.models import UserModel
 from django.contrib.gis.db.models import PointField
@@ -19,33 +18,22 @@ class Machine(models.Model):
     identification_name = models.CharField(
         max_length=200,
         unique=True,
-        verbose_name=_("Machine name"),
-        help_text=_(
-            "[required] Unique identification name for the machine, max-length:200"
-        ),
     )
-    name_ar = models.CharField(
-        max_length=200, blank=True, null=True, help_text=_("arabic machine name")
-    )
+    name_ar = models.CharField(max_length=200, blank=True, null=True)
 
     location = PointField(null=True, srid=4326, blank=True)
 
-    city = models.CharField(max_length=50, null=True, help_text=_("Machine city"))
-    city_ar = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-        help_text=_("arabic translation for Machine city"),
-    )
+    city = models.CharField(max_length=50, null=True)
+    city_ar = models.CharField(max_length=50, blank=True, null=True)
 
     place = models.CharField(
-        max_length=200, null=True, help_text=_("machine address inside city")
+        max_length=200,
+        null=True,
     )
     place_ar = models.CharField(
         max_length=200,
         blank=True,
         null=True,
-        help_text=_("arabic machine address inside city"),
     )
 
     status = models.CharField(choices=STATUS, default="available", max_length=20)

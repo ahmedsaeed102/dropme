@@ -2,6 +2,7 @@ import random
 from datetime import timedelta
 from django.conf import settings
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -13,16 +14,12 @@ class UserSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(
         write_only=True,
         min_length=settings.MIN_PASSWORD_LENGTH,
-        error_messages={
-            "min_length": f"Password must be longer than{settings.MIN_PASSWORD_LENGTH} length"
-        },
+        error_messages={"min_length": _("Password must be longer than 8 length")},
     )
     password2 = serializers.CharField(
         write_only=True,
         min_length=settings.MIN_PASSWORD_LENGTH,
-        error_messages={
-            "min_length": f"Password must be longer than{settings.MIN_PASSWORD_LENGTH} length"
-        },
+        error_messages={"min_length": _("Password must be longer than 8 length")},
     )
 
     class Meta:
@@ -34,7 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
         password1 = data.get("password1")
         password2 = data.get("password2")
         if password1 != password2:
-            raise serializers.ValidationError("Passwords don't match")
+            raise serializers.ValidationError(_("Passwords don't match"))
 
         return data
 
@@ -118,9 +115,9 @@ class OTPSerializer(serializers.Serializer):
 
         if user:
             if not (user.otp == otp and user.otp_expiration > timezone.now()):
-                raise ValidationError({"detail": "Invalid OTP"})
+                raise ValidationError({"detail": _("Invalid OTP")})
         else:
-            raise ValidationError({"detail": "Invalid Email"})
+            raise ValidationError({"detail": _("Invalid Email")})
 
         return data
 
@@ -148,10 +145,10 @@ class SetNewPasswordSerializer(serializers.Serializer):
                 user.max_otp_try = settings.MAX_OTP_TRY
                 user.save()
             else:
-                raise ValidationError({"detail": "Invalid OTP"})
+                raise ValidationError({"detail": _("Invalid OTP")})
 
         else:
-            raise ValidationError({"detail": "Invalid Email"})
+            raise ValidationError({"detail": _("Invalid Email")})
 
         return data
 

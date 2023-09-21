@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.generics import (
@@ -11,7 +12,7 @@ from rest_framework.generics import (
 )
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -113,7 +114,7 @@ class SendMessage(APIView):
 
     def post(self, request, room_name):
         if not request.data:
-            raise ValidationError({"detail": "message is empty"})
+            raise ValidationError({"detail": _("message is empty")})
 
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -292,10 +293,7 @@ class JoinChannel(APIView):
         room = community_get(room_name=room_name)
 
         if request.user in room.users.all() or room.channel_type == "public":
-            return Response(
-                {"detail": "You already joined this channel"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise ValidationError({"detail": _("You already joined this channel")})
 
         room.users.add(request.user.pk)
 
@@ -309,16 +307,10 @@ class LeaveChannel(APIView):
         room = community_get(room_name=room_name)
 
         if room.channel_type == "public":
-            return Response(
-                {"detail": "You cannot leave a public channel"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise ValidationError({"detail": _("You cannot leave a public channel")})
 
         if request.user not in room.users.all():
-            return Response(
-                {"detail": "You are not in this channel"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise ValidationError({"detail": _("You are not in this channel")})
 
         room.users.remove(request.user.pk)
 
@@ -382,7 +374,7 @@ class AddPeopleToChannel(APIView):
             user_channels__room_name=room_name
         )
         if not users:
-            return Response("No users found", status=status.HTTP_400_BAD_REQUEST)
+            raise NotFound({"detail:": _("No users found")})
 
         notification_list = []
         for user in users:
@@ -392,9 +384,7 @@ class AddPeopleToChannel(APIView):
                 notification_list.append(user)
 
         if not notification_list:
-            return Response(
-                {"detail": "Users already added"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            raise ValidationError({"detail": _("Users already added")})
         # send notification
         devices = fcmdevice_get(user__in=notification_list)
         notification_send(
@@ -419,10 +409,7 @@ class SendEmailInvite(APIView):
 
         email = serializer.validated_data["email"]
         if User.objects.filter(email=email).exists():
-            return Response(
-                {"detail": "User already registered"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise ValidationError({"detail": _("User already registered")})
 
         email_send(
             subject="Invite to Drop Me",

@@ -1,44 +1,19 @@
 from datetime import date
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 from users_api.models import UserModel
 
 
 class Competition(models.Model):
-    name = models.CharField(
-        max_length=100, help_text=_("Format: required, max-length:100")
-    )
-    name_ar = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        help_text=_("arabic translation for name field"),
-    )
+    name = models.CharField(max_length=100)
+    name_ar = models.CharField(max_length=100, blank=True, null=True)
 
-    description = models.TextField(
-        max_length=500,
-        null=True,
-        blank=True,
-        help_text=_("Format: optional, max-length:500"),
-    )
-    description_ar = models.TextField(
-        max_length=500,
-        null=True,
-        blank=True,
-        help_text=_("arabic translation for description"),
-    )
+    description = models.TextField(max_length=500, null=True, blank=True)
+    description_ar = models.TextField(max_length=500, null=True, blank=True)
 
-    target = models.PositiveIntegerField(
-        default=0,
-        help_text=_("Competition target points"),
-    )
+    target = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    start_date = models.DateField(
-        help_text=_("Competition start date"),
-    )
-    end_date = models.DateField(
-        help_text=_("Competition end date"),
-    )
+    start_date = models.DateField()
+    end_date = models.DateField()
 
     users = models.ManyToManyField(
         UserModel, through="CompetitionRanking", related_name="comp_user"
@@ -61,11 +36,7 @@ class CompetitionRanking(models.Model):
         UserModel,
         on_delete=models.CASCADE,
     )
-    points = models.PositiveIntegerField(
-        default=0,
-        blank=True,
-        help_text=_("user points in competition"),
-    )
+    points = models.PositiveIntegerField(default=0, blank=True)
 
     @property
     def ranking(self) -> int:

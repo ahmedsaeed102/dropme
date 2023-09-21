@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.validators import validate_email
+from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from core.validators import validate_phone_number
 from .managers import UserManager
@@ -21,7 +22,12 @@ class LocationModel(models.Model):
 class UserModel(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=50)
     email = models.EmailField(
-        unique=True, null=False, blank=False, max_length=50, validators=[validate_email]
+        unique=True,
+        null=False,
+        blank=False,
+        max_length=50,
+        validators=[validate_email],
+        verbose_name=_("Email"),
     )
     phone_number = models.CharField(
         unique=True,
@@ -73,6 +79,7 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         ordering = ("-total_points",)
+        verbose_name = _("User")
 
 
 class Feedback(models.Model):

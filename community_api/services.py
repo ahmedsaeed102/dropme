@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 from asgiref.sync import async_to_sync
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import (
     APIException,
     NotFound,
@@ -39,7 +40,7 @@ class Message:
     def is_a_participant(room: ChannelsModel, user: User) -> bool:
         if room.channel_type == "private" and user not in room.users.all():
             raise PermissionDenied(
-                {"detail": "You are not a participant in this channel"}
+                {"detail": _("You are not a participant in this channel")}
             )
 
         return True
@@ -82,7 +83,7 @@ class Message:
         *, emoji: str, message: MessagesModel, user_id: int
     ) -> MessagesModel:
         if emoji not in message.reactions:
-            raise NotFound("Emoji not found")
+            raise NotFound({"detail": _("Emoji not found")})
         else:
             if not check_if_user_reacted_to_message(message.reactions, user_id):
                 message.reactions[emoji]["count"] += 1
@@ -92,7 +93,9 @@ class Message:
                 )
                 message.save()
             else:
-                raise ValidationError({"detail": "You already reacted to this message"})
+                raise ValidationError(
+                    {"detail": _("You already reacted to this message")}
+                )
 
         return message
 
@@ -101,7 +104,7 @@ class Message:
         *, emoji: str, message: MessagesModel, user_id: int
     ) -> MessagesModel:
         if emoji not in message.reactions:
-            raise NotFound("Emoji not found")
+            raise NotFound({"detail:": _("Emoji not found")})
         else:
             if user_id in message.reactions[emoji]["users_ids"]:
                 message.reactions[emoji]["count"] -= 1
@@ -114,7 +117,7 @@ class Message:
                 message.save()
             else:
                 raise ValidationError(
-                    {"detail": "You haven't reacted using this emoji"}
+                    {"detail": _("You haven't reacted using this emoji")}
                 )
 
         return message
