@@ -38,7 +38,7 @@ RUN echo $TZ > /etc/timezone && \
     apt-get clean
 
 
-RUN apt-get install -y python3-pip python3.10 locales libpq-dev binutils libproj-dev gdal-bin nginx supervisor cron
+RUN apt-get install -y python3-pip python3.10 locales libpq-dev binutils libproj-dev gdal-bin nginx supervisor cron gettext
 
 RUN locale-gen en_GB.UTF-8
 ENV LC_ALL='en_GB.utf8'
