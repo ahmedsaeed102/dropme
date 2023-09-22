@@ -51,6 +51,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return super().destroy(request, *args, **kwargs)
 
+    @action(methods=["delete"], detail=False)
+    def delete(self, request):
+        User.objects.filter(id=request.user.id).delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=True, methods=["PATCH"], serializer_class=OTPOnlySerializer)
     def verify_otp(self, request, pk=None):
         """to check if the user entered the correct otp or if he/she is already verified (is_active=True)"""
