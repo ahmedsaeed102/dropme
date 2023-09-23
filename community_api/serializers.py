@@ -35,14 +35,7 @@ class ChannelsCreateSerializer(serializers.ModelSerializer):
 
 class MessagesSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField()
-
-    # room_name = serializers.SerializerMethodField()
     room = serializers.SerializerMethodField()
-    # room_name_ar = serializers.SerializerMethodField()
-
-    # description = serializers.SerializerMethodField()
-    # description_ar = serializers.SerializerMethodField()
-
     sender_id = serializers.SerializerMethodField()
     sender_photo = serializers.SerializerMethodField()
 
@@ -53,9 +46,6 @@ class MessagesSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "room",
-            # "room_name_ar",
-            # "description",
-            # "description_ar",
             "sender_id",
             "sender",
             "sender_photo",
@@ -67,9 +57,6 @@ class MessagesSerializer(serializers.ModelSerializer):
             "reactions",
         )
 
-    # def get_room_name(self, obj):
-    #     return obj.message_channel.get(messages__id=obj.id).room_name
-
     def get_room(self, obj):
         room = obj.message_channel.get(messages__id=obj.id)
         return {
@@ -78,15 +65,6 @@ class MessagesSerializer(serializers.ModelSerializer):
             "description": room.description,
             "description_ar": room.description_ar,
         }
-
-    # def get_room_name_ar(self, obj):
-    #     return obj.message_channel.get(messages__id=obj.id).room_name_ar
-
-    # def get_description(self, obj):
-    #     return obj.message_channel.get(messages__id=obj.id).description
-
-    # def get_description_ar(self, obj):
-    #     return obj.message_channel.get(messages__id=obj.id).description_ar
 
     def get_sender(self, obj):
         return obj.user_model.username
