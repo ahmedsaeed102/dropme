@@ -28,7 +28,6 @@ from .serializers import *
 
 User = get_user_model()
 
-
 def room(request, room_name):
     return render(request, "community_api/room.html", {"room_name": room_name})
 
@@ -112,13 +111,13 @@ class SendMessage(APIView):
     permission_classes = (IsAuthenticated,)
     parser_classes = (MultiPartParser, FormParser)
 
-    def post(self, request, room_name):
-        if not request.data:
+    def post(self, request, room_id):
+        if not any(request.data.values()):
             raise ValidationError({"detail": _("message is empty")})
 
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            room = community_get(room_name=room_name)
+            room = community_get(room_id=room_id)
 
             # check if user joined channel in case of private channels
             Message.is_a_participant(room=room, user=request.user)
@@ -131,12 +130,12 @@ class SendMessage(APIView):
             # send msg to all users in room
             new_message = MessagesSerializer(new_message).data
             Message.new_message_send(
-                room_name=room_name, message=new_message, message_type="message"
+                room_name=room.room_name, message=new_message, message_type="message"
             )
 
             # send notification
             Message.new_message_notification_send(
-                request=request, room_type=room.channel_type, room_name=room_name
+                request=request, room_type=room.channel_type, room_name=room.room_name
             )
 
             return Response("message sent successfully", status=status.HTTP_201_CREATED)

@@ -18,8 +18,13 @@ from .utlis import check_if_user_reacted_to_message
 User = get_user_model()
 
 
-def community_get(*, room_name: str) -> ChannelsModel:
-    return get_object_or_404(ChannelsModel, room_name=room_name)
+def community_get(
+    *, room_id: int | None = None, room_name: str | None = None
+) -> ChannelsModel:
+    if room_id:
+        return get_object_or_404(ChannelsModel, id=room_id)
+    else:
+        return get_object_or_404(ChannelsModel, room_name=room_name)
 
 
 def message_get(*, message_id: int) -> MessagesModel:
@@ -37,7 +42,7 @@ def user_reaction_get(*, message: MessagesModel, user_id: int) -> str:
 
 class Message:
     @staticmethod
-    def is_a_participant(room: ChannelsModel, user: User) -> bool:
+    def is_a_participant(room: ChannelsModel, user) -> bool:
         if room.channel_type == "private" and user not in room.users.all():
             raise PermissionDenied(
                 {"detail": _("You are not a participant in this channel")}

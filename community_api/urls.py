@@ -51,7 +51,7 @@ urlpatterns = [
     ),
     # send message
     path(
-        "community/<str:room_name>/send/",
+        "community/<int:room_id>/send/",
         SendMessage.as_view(),
         name="send_message",
     ),
