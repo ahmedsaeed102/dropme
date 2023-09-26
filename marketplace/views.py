@@ -3,8 +3,10 @@ from django.views.decorators.cache import cache_page
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from competition_api.models import Resource
+from .muqbis_products.populate_database import populate
 from .models import Product, Category
 from .serializers import (
     ProductSerializer,
@@ -47,9 +49,14 @@ class CategoryList(generics.ListAPIView):
         return super().get(request, *args, **kwargs)
 
 
+class ProductsPagination(PageNumberPagination):
+    page_size = 20
+
+
 class ProductsList(generics.ListAPIView):
     serializer_class = ProductSerializer
     permission_classes = (permissions.IsAuthenticated,)
+    pagination_class = ProductsPagination
 
     def get_queryset(self):
         filters_serializer = ProductFilterSerializer(data=self.request.query_params)
@@ -186,3 +193,12 @@ class MarketplaceSlider(generics.ListAPIView):
 #     queryset = SpecialOffer.objects.filter(end_date__gte=date.today())
 #     serializer_class = OfferSerializer
 #     permission_classes = (permissions.IsAuthenticated,)
+
+
+class PopulateData(APIView):
+    """For populating database with muqbis products"""
+    permission_classes = (permissions.IsAdminUser,)
+
+    def get(self, request):
+        populate()
+        return Response("success")

@@ -33,4 +33,6 @@ urlpatterns = [
         views.MarketplaceSlider.as_view(),
         name="marketplace_slider",
     ),
+    # populate data
+    # path("marketplace/populate/", views.PopulateData.as_view())
 ]

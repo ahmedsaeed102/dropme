@@ -21,7 +21,7 @@ AUTH_USER_MODEL = "users_api.UserModel"
 MIN_PASSWORD_LENGTH = 8
 
 SECRET_KEY = env("SECRET_KEY")
-DEBUG = int(env("DEBUG"))
+DEBUG = env.bool("DEBUG")
 
 CSRF_TRUSTED_ORIGINS = ["https://*.railway.app", "https://127.0.0.1"]
 ALLOWED_HOSTS = ["*"]

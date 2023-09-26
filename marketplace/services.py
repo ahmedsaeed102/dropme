@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import PermissionDenied
 from users_api.models import UserModel
 from .models import Product, Cart, Entry, Category, SpecialOffer, UserOffer
@@ -64,7 +65,9 @@ class EntryService:
     def entry_update(self, entry_id: int, qunatitiy: int) -> None:
         entry = self.entry_get(pk=entry_id)
         if entry.cart.user.id != self.user.id:
-            raise PermissionDenied({"detail": "You are not allowed to edit this entry"})
+            raise PermissionDenied(
+                {"detail": _("You are not allowed to edit this entry")}
+            )
 
         old_qunatity = entry.quantity
 
@@ -90,7 +93,7 @@ class EntryService:
 
         if entry.cart.user.id != self.user.id:
             raise PermissionDenied(
-                {"detail": "You are not allowed to delete this entry"}
+                {"detail": _("You are not allowed to delete this entry")}
             )
 
         self.cart.count = self.cart.count - entry.quantity
@@ -106,15 +109,20 @@ class EntryService:
 def checkout(*, user: UserModel) -> dict:
     cart = cart_get(user=user)
     if not cart:
-        raise PermissionDenied({"detail": "You have no items in cart"})
+        raise PermissionDenied({"detail": _("You have no items in cart")})
 
     if cart.total > user.total_points:
-        raise PermissionDenied({"detail": "You don't have enough points"})
+        raise PermissionDenied({"detail": _("You don't have enough points")})
 
     coupons = {}
 
     for item in cart.items.all():
-        coupons.update({f"{item.product.product_name_en}": item.product.coupon})
+        coupons.update(
+            {
+                f"{item.product.product_name}": item.product.coupon,
+                "link": item.product.product_page_link,
+            }
+        )
 
     user.total_points = user.total_points - cart.total
     user.save()

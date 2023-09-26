@@ -18,13 +18,8 @@ from .utlis import check_if_user_reacted_to_message
 User = get_user_model()
 
 
-def community_get(
-    *, room_id: int | None = None, room_name: str | None = None
-) -> ChannelsModel:
-    if room_id:
-        return get_object_or_404(ChannelsModel, id=room_id)
-    else:
-        return get_object_or_404(ChannelsModel, room_name=room_name)
+def community_get(*, room_name: str) -> ChannelsModel:
+    return get_object_or_404(ChannelsModel, room_name=room_name)
 
 
 def message_get(*, message_id: int) -> MessagesModel:

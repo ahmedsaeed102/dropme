@@ -22,10 +22,13 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    product_name_en = models.CharField(max_length=100)
-    product_name_ar = models.CharField(max_length=100)
+    product_id = models.IntegerField(null=True, blank=True)
+
+    product_name = models.CharField(max_length=100)
+
     description_en = models.TextField()
     description_ar = models.TextField()
+
     img = models.ImageField(upload_to="marketplace/products")
     product_page_link = models.URLField()
 
@@ -36,7 +39,7 @@ class Product(models.Model):
     )
 
     price_points = models.PositiveIntegerField(default=0)
-    coupon = models.CharField(max_length=20, default="coupon")
+    coupon = models.CharField(max_length=20, default="DropMe")
 
     category = models.ForeignKey(
         Category,
@@ -50,7 +53,7 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return self.product_name_en
+        return self.product_name
 
 
 class Cart(models.Model):
@@ -77,7 +80,7 @@ class Entry(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return self.product.product_name_en + " | " + str(self.quantity)
+        return self.product.product_name + " | " + str(self.quantity)
 
 
 class SpecialOffer(models.Model):

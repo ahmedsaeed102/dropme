@@ -58,6 +58,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+marketplace/muqbis_products/imgs
 
 # Translations
 *.mo

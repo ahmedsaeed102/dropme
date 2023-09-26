@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-21 17:23+0300\n"
+"POT-Creation-Date: 2023-09-25 16:31+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,47 +19,47 @@ msgstr ""
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
-#: .\community_api\services.py:43
+#: .\community_api\services.py:48
 msgid "You are not a participant in this channel"
 msgstr "أنت لست مشاركا في هذه القناة"
 
-#: .\community_api\services.py:86 .\community_api\services.py:107
+#: .\community_api\services.py:91 .\community_api\services.py:112
 msgid "Emoji not found"
 msgstr "لم يتم العثور على الرمز التعبيري"
 
-#: .\community_api\services.py:97
+#: .\community_api\services.py:102
 msgid "You already reacted to this message"
 msgstr "لقد تفاعلت بالفعل مع هذه الرسالة"
 
-#: .\community_api\services.py:120
+#: .\community_api\services.py:125
 msgid "You haven't reacted using this emoji"
 msgstr "لم تتفاعل باستخدام هذا الرمز التعبيري"
 
-#: .\community_api\views.py:117
+#: .\community_api\views.py:116
 msgid "message is empty"
 msgstr "الرسالة فارغة"
 
-#: .\community_api\views.py:296
+#: .\community_api\views.py:295
 msgid "You already joined this channel"
 msgstr "لقد انضممت بالفعل إلى هذه القناة"
 
-#: .\community_api\views.py:310
+#: .\community_api\views.py:309
 msgid "You cannot leave a public channel"
 msgstr "لا يمكنك ترك قناة عامة"
 
-#: .\community_api\views.py:313
+#: .\community_api\views.py:312
 msgid "You are not in this channel"
 msgstr "أنت لست في هذه القناة"
 
-#: .\community_api\views.py:377
+#: .\community_api\views.py:376
 msgid "No users found"
 msgstr "لم يتم العثور على مستخدمين"
 
-#: .\community_api\views.py:387
+#: .\community_api\views.py:386
 msgid "Users already added"
 msgstr "تمت إضافة المستخدمين بالفعل"
 
-#: .\community_api\views.py:412
+#: .\community_api\views.py:411
 msgid "User already registered"
 msgstr "المستخدم مسجل بالفعل"
 
@@ -87,6 +87,26 @@ msgstr "يجب أن يبدأ رقم الهاتف بـ 010 أو 011 أو 012 أو
 msgid "Phone number must be 11 numbers"
 msgstr "رقم الهاتف يجب أن يكون 11 رقم"
 
+#: .\marketplace\services.py:69
+#, fuzzy
+#| msgid "You are not in this channel"
+msgid "You are not allowed to edit this entry"
+msgstr "لا تمتلك صلاحية التعديل"
+
+#: .\marketplace\services.py:96
+msgid "You are not allowed to delete this entry"
+msgstr "لا تمتلك صلاحيةالمسح"
+
+#: .\marketplace\services.py:112
+#, fuzzy
+#| msgid "You are not in this channel"
+msgid "You have no items in cart"
+msgstr "أنت لست في هذه القناة"
+
+#: .\marketplace\services.py:115
+msgid "You don't have enough points"
+msgstr "لا تملك عدد كاف من النقاط"
+
 #: .\users_api\models.py:30
 msgid "Email"
 msgstr "الإيميل"
@@ -113,11 +133,10 @@ msgstr "كلمة المرور لمرة واحدة غير صالحة"
 msgid "Invalid Email"
 msgstr "بريد إلكتروني خاطئ"
 
-#: .\users_api\views.py:87
+#: .\users_api\views.py:93
 msgid "User already verfied or OTP is incorrect."
-msgstr ""
-"تم التحقق من المستخدم بالفعل أو أن كلمة المرور لمرة واحدة (OTP) غير صحيحة."
+msgstr "تم التحقق من المستخدم بالفعل أو أن كلمة المرور لمرة واحدة (OTP) غير صحيحة."
 
-#: .\users_api\views.py:167
+#: .\users_api\views.py:173
 msgid "There is no account registered with this email."
 msgstr "لا يوجد حساب مسجل بهذا البريد الإلكتروني."

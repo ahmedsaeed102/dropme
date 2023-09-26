@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-21 17:23+0300\n"
+"POT-Creation-Date: 2023-09-25 16:31+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,47 +18,47 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: .\community_api\services.py:43
+#: .\community_api\services.py:48
 msgid "You are not a participant in this channel"
 msgstr "You are not a participant in this channel"
 
-#: .\community_api\services.py:86 .\community_api\services.py:107
+#: .\community_api\services.py:91 .\community_api\services.py:112
 msgid "Emoji not found"
 msgstr "Emoji not found"
 
-#: .\community_api\services.py:97
+#: .\community_api\services.py:102
 msgid "You already reacted to this message"
 msgstr "You already reacted to this message"
 
-#: .\community_api\services.py:120
+#: .\community_api\services.py:125
 msgid "You haven't reacted using this emoji"
 msgstr "You haven't reacted using this emoji"
 
-#: .\community_api\views.py:117
+#: .\community_api\views.py:116
 msgid "message is empty"
 msgstr "message is empty"
 
-#: .\community_api\views.py:296
+#: .\community_api\views.py:295
 msgid "You already joined this channel"
 msgstr "You already joined this channel"
 
-#: .\community_api\views.py:310
+#: .\community_api\views.py:309
 msgid "You cannot leave a public channel"
 msgstr "You cannot leave a public channel"
 
-#: .\community_api\views.py:313
+#: .\community_api\views.py:312
 msgid "You are not in this channel"
 msgstr "You are not in this channel"
 
-#: .\community_api\views.py:377
+#: .\community_api\views.py:376
 msgid "No users found"
 msgstr "No users found"
 
-#: .\community_api\views.py:387
+#: .\community_api\views.py:386
 msgid "Users already added"
 msgstr "Users already added"
 
-#: .\community_api\views.py:412
+#: .\community_api\views.py:411
 msgid "User already registered"
 msgstr "User already registered"
 
@@ -86,6 +86,26 @@ msgstr "Phone number must start with 010 or 011 or 012 or 015"
 msgid "Phone number must be 11 numbers"
 msgstr "Phone number must be 11 numbers"
 
+#: .\marketplace\services.py:69
+#, fuzzy
+#| msgid "You are not in this channel"
+msgid "You are not allowed to edit this entry"
+msgstr "You are not in this channel"
+
+#: .\marketplace\services.py:96
+msgid "You are not allowed to delete this entry"
+msgstr "You are not allowed to delete this entry"
+
+#: .\marketplace\services.py:112
+#, fuzzy
+#| msgid "You are not in this channel"
+msgid "You have no items in cart"
+msgstr "You are not in this channel"
+
+#: .\marketplace\services.py:115
+msgid "You don't have enough points"
+msgstr "You don't have enough points"
+
 #: .\users_api\models.py:30
 msgid "Email"
 msgstr "Email"
@@ -112,10 +132,10 @@ msgstr "Invalid OTP"
 msgid "Invalid Email"
 msgstr "Invalid Email"
 
-#: .\users_api\views.py:87
+#: .\users_api\views.py:93
 msgid "User already verfied or OTP is incorrect."
 msgstr "User already verfied or OTP is incorrect."
 
-#: .\users_api\views.py:167
+#: .\users_api\views.py:173
 msgid "There is no account registered with this email."
 msgstr "There is no account registered with this email."
