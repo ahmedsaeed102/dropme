@@ -3,7 +3,7 @@ from django.views.decorators.cache import cache_page
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import LimitOffsetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from competition_api.models import Resource
 from .muqbis_products.populate_database import populate
@@ -49,8 +49,9 @@ class CategoryList(generics.ListAPIView):
         return super().get(request, *args, **kwargs)
 
 
-class ProductsPagination(PageNumberPagination):
-    page_size = 20
+class ProductsPagination(LimitOffsetPagination):
+    default_limit = 5
+    max_limit = 100
 
 
 class ProductsList(generics.ListAPIView):
@@ -197,6 +198,7 @@ class MarketplaceSlider(generics.ListAPIView):
 
 class PopulateData(APIView):
     """For populating database with muqbis products"""
+
     permission_classes = (permissions.IsAdminUser,)
 
     def get(self, request):
