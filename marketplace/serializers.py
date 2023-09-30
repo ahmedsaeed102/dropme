@@ -18,7 +18,8 @@ class ProductSerializer(serializers.ModelSerializer):
     
     def get_count_in_car(self, obj: Product) -> int:
         user = self.context["request"].user
-        item = Cart.objects.get(user=user, active=True).items.filter(product=obj).first()
+        cart = Cart.objects.filter(user=user, active=True).first()
+        item = cart.items.filter(product=obj).first() if cart else None
         return item.quantity if item is not None  else 0
 
 
