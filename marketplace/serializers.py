@@ -5,6 +5,7 @@ from .models import Product, Cart, Entry, Category
 
 class ProductSerializer(serializers.ModelSerializer):
     can_buy = serializers.SerializerMethodField(read_only=True)
+    count_in_car = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Product
@@ -14,6 +15,11 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_can_buy(self, obj: Product) -> bool:
         user = self.context["request"].user
         return user.total_points >= obj.price_points
+    
+    def get_count_in_car(self, obj: Product) -> int:
+        user = self.context["request"].user
+        item = Cart.objects.get(user=user, active=True).items.filter(product=obj).first()
+        return item.quantity if item is not None  else 0
 
 
 class OutputEntrySerializer(serializers.ModelSerializer):
