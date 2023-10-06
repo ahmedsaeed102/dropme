@@ -170,7 +170,7 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
             )
         else:
             raise exceptions.NotFound(
-                {"detail:": _("There is no account registered with this email.")},
+                {"detail": _("There is no account registered with this email.")},
             )
 
 
