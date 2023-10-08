@@ -8,11 +8,6 @@ User = get_user_model()
 PERCENTAGE_VALIDATOR = [MinValueValidator(0), MaxValueValidator(100)]
 
 
-# class PromoCode(models.Model):
-#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-#     code = models.CharField(max_length=20)
-
-
 class Category(models.Model):
     category_name = models.CharField(max_length=50, default="Muqbis")
     img = models.ImageField(upload_to="marketplace/categories", blank=True, null=True)
@@ -84,6 +79,7 @@ class Entry(models.Model):
 
 
 class SpecialOffer(models.Model):
+    # Currently unused
     description = models.TextField(blank=True, null=True)
 
     required_points = models.PositiveBigIntegerField()
@@ -102,6 +98,7 @@ class SpecialOffer(models.Model):
 
 
 class UserOffer(models.Model):
+    # Currently unused
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_offers")
     offer = models.ForeignKey(
         SpecialOffer, on_delete=models.CASCADE, related_name="offer_status"

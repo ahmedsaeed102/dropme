@@ -134,6 +134,7 @@ def checkout(*, user: UserModel) -> dict:
 
 
 def special_offer_apply(*, user: UserModel, points: int) -> int:
+    # Currently unused
     offer = SpecialOffer.objects.filter(is_finished=False).first()
 
     if offer:

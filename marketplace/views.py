@@ -196,11 +196,11 @@ class MarketplaceSlider(generics.ListAPIView):
 #     permission_classes = (permissions.IsAuthenticated,)
 
 
-class PopulateData(APIView):
-    """For populating database with muqbis products"""
+# class PopulateData(APIView):
+#     """For populating database with muqbis products"""
 
-    permission_classes = (permissions.IsAdminUser,)
+#     permission_classes = (permissions.IsAdminUser,)
 
-    def get(self, request):
-        populate()
-        return Response("success")
+#     def get(self, request):
+#         populate()
+#         return Response("success")

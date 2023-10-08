@@ -15,12 +15,12 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_can_buy(self, obj: Product) -> bool:
         user = self.context["request"].user
         return user.total_points >= obj.price_points
-    
+
     def get_count_in_car(self, obj: Product) -> int:
         user = self.context["request"].user
         cart = Cart.objects.filter(user=user, active=True).first()
         item = cart.items.filter(product=obj).first() if cart else None
-        return item.quantity if item is not None  else 0
+        return item.quantity if item is not None else 0
 
 
 class OutputEntrySerializer(serializers.ModelSerializer):
@@ -61,10 +61,6 @@ class MarketplaceResourcesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
         fields = "__all__"
-
-
-# class CheckoutSerializer(serializers.Serializer):
-#     entry_ids = serializers.ListSerializer(child=serializers.IntegerField())
 
 
 # Filters
