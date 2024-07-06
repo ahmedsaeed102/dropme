@@ -29,7 +29,7 @@ ARG AWS_STORAGE_BUCKET_NAME
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-ENV TZ 'GB'
+ENV TZ='GB'
 RUN echo $TZ > /etc/timezone && \
     apt-get install -y tzdata && \
     rm /etc/localtime && \
@@ -57,9 +57,11 @@ RUN mkdir -p $DockerHOME
 WORKDIR $DockerHOME   
 
 # set environment variables  
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1  
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1  
 
+RUN python -m ensurepip --upgrade
+RUN echo 'alias pip=pip3' >> ~/.bashrc
 RUN pip install --upgrade pip  
 
 COPY . $DockerHOME
