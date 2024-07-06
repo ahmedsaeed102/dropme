@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ARG EMAIL_HOST_USER
 ARG EMAIL_HOST_PASSWORD
@@ -60,7 +60,6 @@ WORKDIR $DockerHOME
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1  
 
-RUN echo 'alias pip=pip3' >> ~/.bashrc
 RUN pip3 install --upgrade pip  
 
 COPY . $DockerHOME
