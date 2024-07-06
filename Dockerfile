@@ -60,9 +60,9 @@ WORKDIR $DockerHOME
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1  
 
-RUN python -m ensurepip --upgrade
+RUN python3 -m ensurepip --upgrade
 RUN echo 'alias pip=pip3' >> ~/.bashrc
-RUN pip install --upgrade pip  
+RUN pip3 install --upgrade pip  
 
 COPY . $DockerHOME
 
@@ -70,7 +70,7 @@ COPY supervise.conf /etc/supervisor/conf.d/
 COPY nginx.conf /etc/nginx/nginx.conf
 RUN mkdir /run/daphne/
 
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 ENV EMAIL_HOST_USER=${EMAIL_HOST_USER}
 ENV EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
