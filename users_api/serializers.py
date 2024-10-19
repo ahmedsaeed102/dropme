@@ -6,21 +6,15 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import UserModel, LocationModel, Feedback
+from .models import UserModel, LocationModel, Feedback, LanguageChoices
 from .services import send_otp
 
-
+"""
+    SIGN UP SERIALIZERS
+"""
 class UserSerializer(serializers.ModelSerializer):
-    password1 = serializers.CharField(
-        write_only=True,
-        min_length=settings.MIN_PASSWORD_LENGTH,
-        error_messages={"min_length": _("Password must be longer than 8 length")},
-    )
-    password2 = serializers.CharField(
-        write_only=True,
-        min_length=settings.MIN_PASSWORD_LENGTH,
-        error_messages={"min_length": _("Password must be longer than 8 length")},
-    )
+    password1 = serializers.CharField(write_only=True, min_length=settings.MIN_PASSWORD_LENGTH, error_messages={"min_length": _("Password must be longer than 8 length")})
+    password2 = serializers.CharField(write_only=True, min_length=settings.MIN_PASSWORD_LENGTH, error_messages={"min_length": _("Password must be longer than 8 length")})
 
     class Meta:
         model = UserModel
@@ -32,103 +26,71 @@ class UserSerializer(serializers.ModelSerializer):
         password2 = data.get("password2")
         if password1 != password2:
             raise serializers.ValidationError(_("Passwords don't match"))
-
         return data
 
     # create and return user with encrybted password
     def create(self, val_data):
         otp = random.randint(1000, 9999)
         otp_expiration = timezone.now() + timedelta(minutes=5)
-
-        user = UserModel(
-            username=val_data["username"],
-            phone_number=val_data["phone_number"],
-            email=val_data["email"],
-            otp=otp,
-            otp_expiration=otp_expiration,
-            max_otp_try=settings.MAX_OTP_TRY,
-        )
-
+        user = UserModel(username=val_data["username"], phone_number=val_data["phone_number"], email=val_data["email"], otp=otp, otp_expiration=otp_expiration, max_otp_try=settings.MAX_OTP_TRY)
         user.set_password(val_data["password1"])
         user.save()
-
         send_otp(user)
-
         return user
 
+"""
+    CUSTOM TOKEN OBTAIN PAIR SERIALIZER FROM REST_FRAMEWORK_SIMPLEJWT
+"""
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        if not self.user.is_active:
+            otp = random.randint(1000, 9999)
+            otp_expiration = timezone.now() + timedelta(minutes=5)
+            self.user.otp = otp
+            self.user.otp_expiration = otp_expiration
+            self.user.save()
+            send_otp(self.user)
+            return {"is_verified": False, "id": self.user.id}
+        data["username"] = self.user.username
+        data["email"] = self.user.email
+        data["id"] = self.user.id
+        return data
 
-class UserProfileSerializer(UserSerializer):
-    class Meta:
-        model = UserModel
-        fields = [
-            "username",
-            "phone_number",
-            "age",
-            "email",
-            "password1",
-            "password2",
-            "profile_photo",
-            "gender",
-            "address",
-        ]
-
-    def update(self, instance, val_data):
-        """update profile for User"""
-
-        password = val_data.pop("password1", None)
-
-        user = super().update(instance, val_data)
-
-        if password:
-            user.set_password(password)
-            user.save()
-
-        return user
-
-
+"""
+    FORGOT PASSWORD SERIALIZERS
+"""
 class ResetPasswordEmailRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
-
     class Meta:
         fields = ["email"]
 
-
 class OTPOnlySerializer(serializers.Serializer):
     otp = serializers.CharField(min_length=4, max_length=4, write_only=True)
-
     class Meta:
         fields = ["otp"]
-
 
 class OTPSerializer(serializers.Serializer):
     otp = serializers.CharField(min_length=4, max_length=4, write_only=True)
     email = serializers.EmailField()
-
     class Meta:
         fields = ["email", "otp"]
 
     def validate(self, data):
         otp = data.get("otp", "")
         email = data.get("email", "")
-
         user = UserModel.objects.filter(email=email).first()
-
         if user:
             if not (user.otp == otp and user.otp_expiration > timezone.now()):
                 raise ValidationError({"detail": _("Invalid OTP")})
         else:
             raise ValidationError({"detail": _("Invalid Email")})
-
         return data
 
-
 class SetNewPasswordSerializer(serializers.Serializer):
-    password = serializers.CharField(
-        min_length=settings.MIN_PASSWORD_LENGTH, max_length=68, write_only=True
-    )
+    password = serializers.CharField(min_length=settings.MIN_PASSWORD_LENGTH, max_length=68, write_only=True)
     otp = serializers.CharField(min_length=4, max_length=4, write_only=True)
     email = serializers.EmailField()
-
     class Meta:
         fields = ["password", "otp", "email"]
 
@@ -136,9 +98,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
         password = data.get("password", "")
         otp = data.get("otp", "")
         email = data.get("email", "")
-
         user = UserModel.objects.filter(email=email).first()
-
         if user:
             if user.otp == otp and user.otp_expiration > timezone.now():
                 user.set_password(password)
@@ -146,44 +106,37 @@ class SetNewPasswordSerializer(serializers.Serializer):
                 user.save()
             else:
                 raise ValidationError({"detail": _("Invalid OTP")})
-
         else:
             raise ValidationError({"detail": _("Invalid Email")})
-
         return data
 
+"""
+    PROFILE UPDATE SERIALIZERS
+"""
+class UserProfileSerializer(UserSerializer):
+    class Meta:
+        model = UserModel
+        fields = ["username", "phone_number", "age", "email", "password1", "password2", "profile_photo", "gender", "address"]
+
+    def update(self, instance, val_data):
+        """update profile for User"""
+        password = val_data.pop("password1", None)
+        user = super().update(instance, val_data)
+        if password:
+            user.set_password(password)
+            user.save()
+        return user
+
+class PreferredLanguageSerializer(serializers.ModelSerializer):
+    preferred_language = serializers.ChoiceField(choices=LanguageChoices.choices)
+    class Meta:
+        model = UserModel
+        fields = ["preferred_language"]
 
 class LocationModelserializers(serializers.ModelSerializer):
     class Meta:
         model = LocationModel
         fields = "__all__"
-
-
-# custom serializer from rest_framework_simplejwt.serializers
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-
-        if not self.user.is_active:
-            otp = random.randint(1000, 9999)
-            otp_expiration = timezone.now() + timedelta(minutes=5)
-
-            self.user.otp = otp
-            self.user.otp_expiration = otp_expiration
-
-            self.user.save()
-
-            send_otp(self.user)
-
-            return {"is_verified": False, "id": self.user.id}
-
-        # Add custom claims
-        data["username"] = self.user.username
-        data["email"] = self.user.email
-        data["id"] = self.user.id
-
-        return data
-
 
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
@@ -193,10 +146,5 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
     def create(self, val_data):
         user = self.context["request"].user
-
-        feedback = Feedback.objects.create(
-            title=val_data["title"],
-            description=val_data["description"],
-            user=user,
-        )
+        feedback = Feedback.objects.create(title=val_data["title"], description=val_data["description"], user=user,)
         return feedback
