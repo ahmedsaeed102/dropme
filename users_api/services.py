@@ -50,7 +50,7 @@ def email_send(
     context: dict = {},
     template: str | None = None,
 ) -> None:
-    email_from = settings.EMAIL_HOST_USER
+    email_from = f'DropMe {settings.EMAIL_HOST_USER}'
 
     if template:
         template = get_template(template).render(context)
