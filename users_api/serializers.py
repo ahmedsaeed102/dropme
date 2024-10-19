@@ -127,11 +127,11 @@ class UserProfileSerializer(UserSerializer):
             user.save()
         return user
 
-class PreferedLanguageSerializer(serializers.ModelSerializer):
-    prefered_language = serializers.ChoiceField(choices=LanguageChoices.choices)
+class PreferredLanguageSerializer(serializers.ModelSerializer):
+    preferred_language = serializers.ChoiceField(choices=LanguageChoices.choices)
     class Meta:
         model = UserModel
-        fields = ["prefered_language"]
+        fields = ["preferred_language"]
 
 class LocationModelserializers(serializers.ModelSerializer):
     class Meta:

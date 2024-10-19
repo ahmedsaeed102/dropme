@@ -41,7 +41,7 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     gender = models.CharField(choices=GENDER, default=GENDER.male, max_length=20)
     total_points = models.PositiveIntegerField(default=0)
     address = models.ForeignKey(LocationModel, on_delete=models.CASCADE, null=True, blank=True, related_name="address_name")
-    prefered_language = models.CharField(max_length=2, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
+    preferred_language = models.CharField(max_length=2, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
 
     objects = UserManager()
     USERNAME_FIELD = "email"

@@ -11,7 +11,7 @@ from faker import Faker
 from machine_api.models import PhoneNumber, RecycleLog
 from .models import LocationModel, Feedback
 from .services import send_otp, send_reset_password_email, send_welcome_email, otp_set
-from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferedLanguageSerializer
+from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer
 
 User = get_user_model()
 
@@ -127,17 +127,17 @@ class ManageUserProfileView(generics.RetrieveUpdateAPIView):
             raise exceptions.PermissionDenied()
         return super().get(request, pk)
 
-class PreferedLanguageView(generics.ListCreateAPIView):
+class PreferredLanguageView(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = PreferedLanguageSerializer
+    serializer_class = PreferredLanguageSerializer
 
     def get(self, request):
-        return Response({"prefered_language": request.user.prefered_language}, status=status.HTTP_200_OK)
+        return Response({"preferred_language": request.user.preferred_language}, status=status.HTTP_200_OK)
 
     def patch(self, request):
-        request.user.prefered_language = request.data.get("prefered_language")
+        request.user.preferred_language = request.data.get("preferred_language")
         request.user.save()
-        return Response({"message": "Prefered language updated successfully"}, status=status.HTTP_200_OK)
+        return Response({"message": "Preferred language updated successfully"}, status=status.HTTP_200_OK)
 
 class LocationList(generics.ListCreateAPIView):
     queryset = LocationModel.objects.all()

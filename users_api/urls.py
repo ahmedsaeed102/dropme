@@ -22,8 +22,8 @@ urlpatterns = [
     path("password-reset/verify-otp/", views.VerifyPasswordResetOTP.as_view(), name="password-reset-verify-otp",),
     # edit profile
     path("<int:pk>/edit_profile/", views.ManageUserProfileView.as_view(), name="edit_profile",),
-    # prefered language
-    path("prefered_language/", views.PreferedLanguageView.as_view(), name="prefered_language",),
+    # preferred language
+    path("preferred_language/", views.PreferredLanguageView.as_view(), name="preferred_language",),
     # user points
     path("current_user/points/", views.CurrentUserTotalPointsView.as_view(), name="current_user_points",),
     # address list
