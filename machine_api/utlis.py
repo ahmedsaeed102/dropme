@@ -65,25 +65,18 @@ bottle_point = int
 can_point = int
 total_point = int
 
-
-def calculate_points(
-    bottles: int, cans: int
-) -> tuple[bottle_point, can_point, total_point]:
+def calculate_points(bottles: int, cans: int) -> tuple[bottle_point, can_point, total_point]:
     bottles_points = bottles * 10
     cans_points = cans * 10
-
     total_points = bottles_points + cans_points
-
     return bottles_points, cans_points, total_points
 
 
 def calculate_co2_energy(bottles: int, cans: int) -> dict:
     bottles_co2 = round(bottles * 0.8, 2)
     cans_co2 = round(cans * 0.15, 2)
-
     bottles_energy = round(bottles * 0.06, 2)
     cans_energy = round(cans * 0.09, 2)
-
     return {
         "bottles_co2": bottles_co2,
         "cans_co2": cans_co2,
@@ -91,24 +84,16 @@ def calculate_co2_energy(bottles: int, cans: int) -> dict:
         "cans_energy": cans_energy,
     }
 
-
 def get_user_weekly_logs(userid: int) -> dict:
     friday_last_week = timezone.now().date() - timedelta(days=7)
     friday_last_week = datetime.combine(friday_last_week, datetime.min.time())
-    logs = RecycleLog.objects.filter(
-        user=userid, created_at__gte=make_aware(friday_last_week)
-    )
-
+    logs = RecycleLog.objects.filter(user=userid, created_at__gte=make_aware(friday_last_week))
     if not logs:
         return {"recycled": False}
 
     total_bottles = logs.aggregate(Sum("bottles"))["bottles__sum"]
     total_cans = logs.aggregate(Sum("cans"))["cans__sum"]
-
-    bottles_points, cans_points, total_points = calculate_points(
-        total_bottles, total_cans
-    )
-
+    bottles_points, cans_points, total_points = calculate_points(total_bottles, total_cans)
     co2_energy = calculate_co2_energy(total_bottles, total_cans)
 
     data = {
@@ -120,7 +105,4 @@ def get_user_weekly_logs(userid: int) -> dict:
         "total_points": total_points,
     }
     data.update(co2_energy)
-
-    # items = logs.aggregate(items=Sum(F("bottles") + F("cans")))["items"]
-
     return data

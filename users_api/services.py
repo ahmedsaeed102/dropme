@@ -56,7 +56,7 @@ def send_welcome_email(email):
     """Function to send welcome email to user after account verification"""
     user = UserModel.objects.get(email=email)
     context = {'username': user.username}
-    subject = "Welcome to DropMe"
+    subject = "Welcome to Drop Me - Your Journey Towards a Sustainable Future Begins Here!"
     recipient_list = [email]
     email_send( subject=subject, to=recipient_list, context=context, template="welcome_email.html")
 
@@ -73,23 +73,18 @@ def otp_generate() -> tuple[str, datetime]:
 
 def otp_set(*, user: UserModel) -> UserModel:
     otp, otp_expiration = otp_generate()
-
     user.otp = otp
     user.otp_expiration = otp_expiration
     user.max_otp_try = int(user.max_otp_try) - 1
-
     if user.max_otp_try == 0:
         user.max_otp_out = timezone.now() + timedelta(hours=1)
         user.max_otp_try = settings.MAX_OTP_TRY
-
     user.save()
-
     return user
 
 
 class UserFilter(django_filters.FilterSet):
     email = django_filters.CharFilter(lookup_expr="icontains")
-
     class Meta:
         model = UserModel
         fields = ["email"]
@@ -97,7 +92,5 @@ class UserFilter(django_filters.FilterSet):
 
 def user_list(*, filters=None) -> list[UserModel]:
     filters = filters or {}
-
     qs = UserModel.objects.all()
-
     return UserFilter(filters, qs).qs
