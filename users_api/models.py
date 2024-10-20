@@ -47,6 +47,7 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     gender = models.CharField(choices=GENDER, default=GENDER.male, max_length=20)
     total_points = models.PositiveIntegerField(default=0)
     address = models.ForeignKey(LocationModel, on_delete=models.CASCADE, null=True, blank=True, related_name="address_name")
+    preferred_language = models.CharField(max_length=255, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
     referral_code = models.CharField(max_length=15, unique=True, null=True, blank=True)
     referral_usage_count = models.PositiveIntegerField(default=0)
 
