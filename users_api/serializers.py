@@ -45,6 +45,7 @@ class UserSerializer(serializers.ModelSerializer):
         if referral_code:
             referring_user = UserModel.objects.get(referral_code=referral_code)
             referring_user.total_points += 20
+            referring_user.referral_usage_count += 1
             referring_user.save()
             user.total_points += 10
         user.save()
