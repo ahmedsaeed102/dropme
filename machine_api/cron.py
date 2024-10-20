@@ -7,11 +7,11 @@ from .utlis import get_user_weekly_logs
 
 
 # @kronos.register("0 8 * * 5")
-@kronos.register("35 0 * * *")
+@kronos.register("45 7 * * *")
 def send_weekly_recycle_summary_email():
     from_email = f'DropMe <{settings.EMAIL_HOST_USER}>'
 
-    for user in UserModel.objects.filter(is_staff=True):
+    for user in UserModel.objects.filter(is_active=True):
         data = get_user_weekly_logs(user.id)
         context = {"username": user.username}
         context.update(data)
