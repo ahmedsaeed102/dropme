@@ -84,7 +84,7 @@
                                     "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"email\": \"<email>\",\n  \"password1\": \"<string>\",\n  \"password2\": \"<string>\",\n  \"username\": \"<string>\",\n  \"phone_number\": \"<string>\",\n  \"age\": \"<integer>\",\n  \"profile_photo\": \"<uri>\",\n  \"gender\": \"male\",\n  \"address\": \"<integer>\"\n}",
+                            "body": "{\n  \"email\": \"<email>\",\n  \"password1\": \"<string>\",\n  \"password2\": \"<string>\",\n  \"username\": \"<string>\",\n  \"phone_number\": \"<string>\",\n  \"age\": \"<integer>\",\n  \"profile_photo\": \"<uri>\",\n  \"gender\": \"male\",\n  \"address\": \"<integer>\",\n  \"referral_code\": \"<string>\"\n}",
                             "cookie": [],
                             "_postman_previewlanguage": "json"
                         }
