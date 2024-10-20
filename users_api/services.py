@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import get_template
-from .models import UserModel
+from .models import UserModel, LanguageChoices
 
 def user_get(*, id: int) -> UserModel:
     return get_object_or_404(UserModel, pk=id)
@@ -36,7 +36,7 @@ def email_send(*, subject: str, to: list, body: str | None = None, context: dict
 def send_otp(user: UserModel) -> None:
     """Function to send OTP email to user"""
     context = {"username": user.username, "otp": user.otp}
-    subject = "Your One-Time Password (OTP) for DropMe"
+    subject = "Your Drop Me OTP Code | رمز التحقق لمرة واحدة من Drop Me"
     recipient_list = [user.email]
     email_send(subject=subject, to=recipient_list, context=context, template="otp_email.html")
 
@@ -47,9 +47,14 @@ def send_reset_password_email(email, otp):
     user.otp = otp
     user.save()
     context = {"username": user.username, "otp": otp}
-    subject = "Password Reset Request for DropMe"
+    if user.preferred_language == LanguageChoices.ARABIC:
+        subject = "طلب إعادة تعيين كلمة المرور لحسابك في Drop Me"
+        template = "reset_password_email_arabic.html"
+    else:
+        subject = "Drop Me Password Reset Request"
+        template = "reset_password_email_english.html"
     recipient_list = [email]
-    email_send(subject=subject, to=recipient_list, context=context, template="reset_password_email.html")
+    email_send(subject=subject, to=recipient_list, context=context, template=template)
 
 
 def send_welcome_email(email):

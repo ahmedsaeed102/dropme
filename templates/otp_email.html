@@ -1,29 +1,33 @@
-<html>
-
+<html lang="en">
 <body>
-    <p>Dear {{username}},</p>
 
-    <p>Welcome to DropMe! We're thrilled to have you onboard.</p>
-    <p>
-        To complete your account setup, please use the following OTP: <strong>{{otp}}</strong>.
-    </p>
+    <!-- English Version -->
+    <p><b>Dear {{username}},</b></p>
 
-    <p>
-        This code will expire in 5 minutes.
-    </p>
+    <p>Welcome to Drop Me! Use the following OTP to complete your account setup:</p>
 
-    <p>
-        Please ensure that you keep this OTP confidential and do not share it with anyone. We take the security of our
-        users' accounts seriously and would never ask you to share your OTP with anyone, including our support team.
-    </p>
-    <p>
-        If you did not attempt to sign up for DropMe, please disregard this email.
-    </p>
+    <p><strong>OTP Code: {{ otp }}</strong></p>
 
-    <p>Thank you for choosing DropMe. We're excited to have you as a part of our community.</p>
+    <p>This code is valid for 5 minutes. Please keep it confidential and do not share it. We will never ask for your OTP, even from our support team.</p>
 
-    <p>Best regards,</p>
-    <i>DropMe Team</i>
+    <p>If you didn't sign up, please ignore this email.</p>
+
+    <p><b>Best regards,</b><br>Drop Me Team</p>
+
+    <hr>
+
+    <!-- Arabic Version -->
+    <p dir="rtl"><b>عزيزي/عزيزتي {{username}},</b></p>
+
+    <p dir="rtl">مرحبًا بك في Drop Me! الرجاء استخدام رمز التحقق التالي لإكمال إعداد حسابك:</p>
+
+    <p dir="rtl"><strong>رمز التحقق: {{ otp }}</strong></p>
+
+    <p dir="rtl">هذا الرمز صالح لمدة 5 دقائق. يرجى الحفاظ على سريته وعدم مشاركته. لن نطلب منك الرمز أبدًا، حتى فريق الدعم لدينا.</p>
+
+    <p dir="rtl">إذا لم تقم بالتسجيل، يرجى تجاهل هذا البريد الإلكتروني.</p>
+
+    <p dir="rtl"><b>أطيب التحيات،</b><br>فريق Drop Me</p>
+
 </body>
-
 </html>
