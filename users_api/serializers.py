@@ -15,6 +15,7 @@ from .services import send_otp
 class UserSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True, min_length=settings.MIN_PASSWORD_LENGTH, error_messages={"min_length": _("Password must be longer than 8 length")})
     password2 = serializers.CharField(write_only=True, min_length=settings.MIN_PASSWORD_LENGTH, error_messages={"min_length": _("Password must be longer than 8 length")})
+    referral_code = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = UserModel
@@ -26,6 +27,12 @@ class UserSerializer(serializers.ModelSerializer):
         password2 = data.get("password2")
         if password1 != password2:
             raise serializers.ValidationError(_("Passwords don't match"))
+        referral_code = data.get("referral_code")
+        if referral_code:
+            try:
+                UserModel.objects.get(referral_code=referral_code)
+            except UserModel.DoesNotExist:
+                raise serializers.ValidationError(_("Invalid referral code"))
         return data
 
     # create and return user with encrybted password
@@ -34,6 +41,12 @@ class UserSerializer(serializers.ModelSerializer):
         otp_expiration = timezone.now() + timedelta(minutes=5)
         user = UserModel(username=val_data["username"], phone_number=val_data["phone_number"], email=val_data["email"], otp=otp, otp_expiration=otp_expiration, max_otp_try=settings.MAX_OTP_TRY)
         user.set_password(val_data["password1"])
+        referral_code = val_data.get("referral_code")
+        if referral_code:
+            referring_user = UserModel.objects.get(referral_code=referral_code)
+            referring_user.total_points += 20
+            referring_user.save()
+            user.total_points += 10
         user.save()
         send_otp(user)
         return user

@@ -9,7 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from faker import Faker
 
 from machine_api.models import PhoneNumber, RecycleLog
-from .models import LocationModel, Feedback
+from .models import LocationModel, Feedback, generate_referral_code
 from .services import send_otp, send_reset_password_email, send_welcome_email, otp_set
 from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer
 
@@ -139,6 +139,15 @@ class PreferredLanguageView(generics.ListCreateAPIView):
         request.user.save()
         return Response({"message": "Preferred language updated successfully"}, status=status.HTTP_200_OK)
 
+class ReferralCodeView(generics.GenericAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        if not request.user.referral_code:
+            request.user.referral_code = generate_referral_code(request.user)
+            request.user.save()
+        return Response({"referral_code": request.user.referral_code, "referral_usage_count": request.user.referral_usage_count}, status=status.HTTP_200_OK)
+
 class LocationList(generics.ListCreateAPIView):
     queryset = LocationModel.objects.all()
     serializer_class = LocationModelserializers
@@ -166,119 +175,119 @@ class AnonymousUser(generics.GenericAPIView):
         refresh = RefreshToken.for_user(user)
         return Response({"refresh": str(refresh), "access": str(refresh.access_token)})
 
-class GoogleAuth(generics.GenericAPIView):
+# class GoogleAuth(generics.GenericAPIView):
 
-    @action(detail=True, methods=["POST"])
-    def register(self, request):
-        username=request.data['MobileNumber']
-        phone_number_E164 = request.data.get('phone_number_E164','')
-        country_code= request.data.get('country_code','EG')
-        device=request.data.get('device',None)
-        first_name = request.data.get('first_name','Customer')
-        last_name = request.data.get('last_name',"A")
-        if(not country_code == "EG"):
-            username = phone_number_E164
+#     @action(detail=True, methods=["POST"])
+#     def register(self, request):
+#         username=request.data['MobileNumber']
+#         phone_number_E164 = request.data.get('phone_number_E164','')
+#         country_code= request.data.get('country_code','EG')
+#         device=request.data.get('device',None)
+#         first_name = request.data.get('first_name','Customer')
+#         last_name = request.data.get('last_name',"A")
+#         if(not country_code == "EG"):
+#             username = phone_number_E164
 
-        if otp_verification_response.get('ResultMessage','') != 'Success':
-            return {"message": _('OTP is not verified successfully')}, 400
+#         if otp_verification_response.get('ResultMessage','') != 'Success':
+#             return {"message": _('OTP is not verified successfully')}, 400
 
-        aman_username=username.replace('+', '00')
-        email=''
-        if(oauth_type=='google'):
-            token= request.data['token']
-            payload = jwt.decode(jwt=token,options={"verify_signature": False}, audience="851033294233-3n144jdfadc2adqheoqbukpo3hehppt4.apps.googleusercontent.com", algorithms=["ES256"])
-            email=payload['email']
+#         aman_username=username.replace('+', '00')
+#         email=''
+#         if(oauth_type=='google'):
+#             token= request.data['token']
+#             payload = jwt.decode(jwt=token,options={"verify_signature": False}, audience="851033294233-3n144jdfadc2adqheoqbukpo3hehppt4.apps.googleusercontent.com", algorithms=["ES256"])
+#             email=payload['email']
 
-        elif (oauth_type=='apple'):
-            token= request.data['token']
-            payload = jwt.decode(jwt=token,options={"verify_signature": False}, audience="com.aman.superapp", algorithms=["ES256"])
-            email=payload['email']
+#         elif (oauth_type=='apple'):
+#             token= request.data['token']
+#             payload = jwt.decode(jwt=token,options={"verify_signature": False}, audience="com.aman.superapp", algorithms=["ES256"])
+#             email=payload['email']
 
-        magetno_response, magento_status, amanstore_is_avilable = AuthenticationV4Services.magento_login_user(identifier=email, email=email, full_name=f'{first_name} {last_name}')
-        if not magento_status:
-            return magetno_response, 400
+#         magetno_response, magento_status, amanstore_is_avilable = AuthenticationV4Services.magento_login_user(identifier=email, email=email, full_name=f'{first_name} {last_name}')
+#         if not magento_status:
+#             return magetno_response, 400
 
-        ######### CASE -- user existed
-        if(Customer.objects.filter(username=username).exists()):
-            user=Customer.objects.get(username=username)
-            lang = request.headers.get('Accept-Language', 'en')
-            if user.is_active == False:
-                if(lang == 'en'):
-                    return {'message': f'Sorry There is a problem in your account. For more info please call 19910'}, 400
-                else:
-                    return {'message': f'هناك مشكلة في الحساب - لمزيد من المعلومات الرجاء الاتصال ب١٩٩١٠'}, 400
+#         ######### CASE -- user existed
+#         if(Customer.objects.filter(username=username).exists()):
+#             user=Customer.objects.get(username=username)
+#             lang = request.headers.get('Accept-Language', 'en')
+#             if user.is_active == False:
+#                 if(lang == 'en'):
+#                     return {'message': f'Sorry There is a problem in your account. For more info please call 19910'}, 400
+#                 else:
+#                     return {'message': f'هناك مشكلة في الحساب - لمزيد من المعلومات الرجاء الاتصال ب١٩٩١٠'}, 400
 
-            social,created=SocialEmail.objects.get_or_create(customer=user,email=email)
+#             social,created=SocialEmail.objects.get_or_create(customer=user,email=email)
 
-            if(created):
-                social.source=oauth_type
-                social.save()
+#             if(created):
+#                 social.source=oauth_type
+#                 social.save()
 
-            user.aman_store_status = True
-            user.magento_last_token=magetno_response['customer_token']
+#             user.aman_store_status = True
+#             user.magento_last_token=magetno_response['customer_token']
 
-            if device:
-                device, old, message = DeviceServices.add_device(user, device)
-                if not device:
-                    return {"message": message}, 400
-                if not device.trusted:
-                    device.trusted = True
-                    device.save()
-            else:
-                return {"message": _('device-not-found')}, 400
+#             if device:
+#                 device, old, message = DeviceServices.add_device(user, device)
+#                 if not device:
+#                     return {"message": message}, 400
+#                 if not device.trusted:
+#                     device.trusted = True
+#                     device.save()
+#             else:
+#                 return {"message": _('device-not-found')}, 400
 
 
-            token = Token.objects.filter(user=user).first()
-            if token:
-                token.delete()
-            token = Token.objects.create(user=user)
+#             token = Token.objects.filter(user=user).first()
+#             if token:
+#                 token.delete()
+#             token = Token.objects.create(user=user)
 
-            token_dict = {
-            'user_data': CustomerSerializer(user).data,
-            'social_email':email,
-            'message': _('oauthcheck-success'),
-            'token': token.key,
-            'amanstore_is_avilable': True
-            }
+#             token_dict = {
+#             'user_data': CustomerSerializer(user).data,
+#             'social_email':email,
+#             'message': _('oauthcheck-success'),
+#             'token': token.key,
+#             'amanstore_is_avilable': True
+#             }
 
-        ######### CASE -- user doesn't exist
-        else:
-            current_date_time = datetime.today().now()
-            current_date_time = "%sT%s" %(current_date_time.date(), current_date_time.time())
+#         ######### CASE -- user doesn't exist
+#         else:
+#             current_date_time = datetime.today().now()
+#             current_date_time = "%sT%s" %(current_date_time.date(), current_date_time.time())
 
-            data = {
-                'MobileNumber': aman_username,
-                'Password': username,
-                'Lang': 1,
-                'Full_name': first_name + ' ' + last_name,
-                'E_mail': username+'@aman.com',
-                'Username': username,
-            }
-            aman_response = requests.post(settings.AMAN_USER_REGISTER_API, data=data, verify=False).json()
+#             data = {
+#                 'MobileNumber': aman_username,
+#                 'Password': username,
+#                 'Lang': 1,
+#                 'Full_name': first_name + ' ' + last_name,
+#                 'E_mail': username+'@aman.com',
+#                 'Username': username,
+#             }
+#             aman_response = requests.post(settings.AMAN_USER_REGISTER_API, data=data, verify=False).json()
 
-            aman_status = 1 if aman_response.get('ResultMessage', '') == 'Success' else 0
-            magento_token = magetno_response['customer_token']
-            token_dict, token_status = AuthenticationV4Services.amansuperapp_register_user(user_name=username, password=get_random_string(length=32), full_name=f'{first_name} {last_name}', email=str(username)+'@aman.com', 
-                        date=current_date_time, country_code=country_code, device=device, aman_status=aman_status, verfication_response=None, oauth_type=oauth_type, magento_token=magento_token)
-            if not token_status:
-                return token_dict, 400
+#             aman_status = 1 if aman_response.get('ResultMessage', '') == 'Success' else 0
+#             magento_token = magetno_response['customer_token']
+#             token_dict, token_status = AuthenticationV4Services.amansuperapp_register_user(user_name=username, password=get_random_string(length=32), full_name=f'{first_name} {last_name}', email=str(username)+'@aman.com', 
+#                         date=current_date_time, country_code=country_code, device=device, aman_status=aman_status, verfication_response=None, oauth_type=oauth_type, magento_token=magento_token)
+#             if not token_status:
+#                 return token_dict, 400
 
-            user=Customer.objects.get(username=username)
-            social=SocialEmail.objects.create(customer=user,email=email,source=oauth_type)
-            if device:
-                device, old, message = DeviceServices.add_device(user, device)
+#             user=Customer.objects.get(username=username)
+#             social=SocialEmail.objects.create(customer=user,email=email,source=oauth_type)
+#             if device:
+#                 device, old, message = DeviceServices.add_device(user, device)
 
-                if not device:
-                    return {"message": message}, 400
-                if not device.trusted:
-                    device.trusted = True
-                    device.save()
-            else:
-                return {"message": _('device-not-found')}, 400
+#                 if not device:
+#                     return {"message": message}, 400
+#                 if not device.trusted:
+#                     device.trusted = True
+#                     device.save()
+#             else:
+#                 return {"message": _('device-not-found')}, 400
 
-        if magetno_response.get('customer_id', False) and magetno_response.get('cart_id', False):
-            magetno_response.update({'customer_id': str(magetno_response['customer_id'])})
-            magetno_response.update({'cart_id': str(magetno_response['cart_id'])})
-        token_dict.update({'data': magetno_response})
-        return token_dict, 200
+#         if magetno_response.get('customer_id', False) and magetno_response.get('cart_id', False):
+#             magetno_response.update({'customer_id': str(magetno_response['customer_id'])})
+#             magetno_response.update({'cart_id': str(magetno_response['cart_id'])})
+#         token_dict.update({'data': magetno_response})
+#         return token_dict, 200
 

@@ -5,6 +5,7 @@ from django.core.validators import validate_email
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from core.validators import validate_phone_number
+import datetime
 from .managers import UserManager
 
 class LanguageChoices(models.TextChoices):
@@ -20,6 +21,11 @@ class LocationModel(models.Model):
 
     def __str__(self):
         return self.address
+
+def generate_referral_code(user):
+        prefix = user.username[:3].lower()
+        date_str = datetime.datetime.now().strftime("%Y%m%d")
+        return f"{prefix}{date_str}"
 
 class UserModel(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=50)
@@ -42,12 +48,19 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     total_points = models.PositiveIntegerField(default=0)
     address = models.ForeignKey(LocationModel, on_delete=models.CASCADE, null=True, blank=True, related_name="address_name")
     preferred_language = models.CharField(max_length=255, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
+    referral_code = models.CharField(max_length=15, unique=True, null=True, blank=True)
+    referral_usage_count = models.PositiveIntegerField(default=0)
 
     objects = UserManager()
     USERNAME_FIELD = "email"
 
     def __str__(self):
         return self.email
+
+    def save(self, *args, **kwargs):
+        if not self.referral_code:
+            self.referral_code = generate_referral_code(self)
+        super().save(*args, **kwargs)
 
     @property
     def ranking(self):

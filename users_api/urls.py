@@ -24,6 +24,8 @@ urlpatterns = [
     path("<int:pk>/edit_profile/", views.ManageUserProfileView.as_view(), name="edit_profile",),
     # preferred language
     path("preferred_language/", views.PreferredLanguageView.as_view(), name="preferred_language",),
+    # referral code
+    path("referral_code/", views.ReferralCodeView.as_view(), name="referral_code",),
     # user points
     path("current_user/points/", views.CurrentUserTotalPointsView.as_view(), name="current_user_points",),
     # address list
