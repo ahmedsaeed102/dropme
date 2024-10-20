@@ -9,7 +9,7 @@ class MachineAdmin(admin.ModelAdmin):
 
 
 class RecycleLogAdmin(admin.ModelAdmin):
-    list_display = ["machine_name", "bottles", "cans", "points", "created_at"]
+    list_display = ["user", "machine_name", "bottles", "cans", "points", "created_at"]
 
 
 admin.site.register(Machine, MachineAdmin)

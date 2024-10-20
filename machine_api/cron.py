@@ -25,8 +25,12 @@ def send_weekly_recycle_summary_email():
                 template = get_template("active_recylce_weekly_summary_english.html").render(context)
 
         elif not data["recycled"]:
-            subject = "Let's Get Started on Your Recycling Journey with Drop Me 🌱"
-            template = get_template("inactive_recylce_weekly_summary.html").render(context)
+            if user.preferred_language == LanguageChoices.ARABIC:
+                subject = "لنبدأ رحلتك في إعادة التدوير مع Drop Me 🌱"
+                template = get_template("inactive_recylce_weekly_summary_arabic.html").render(context)
+            else:
+                subject = "Let's Get Started on Your Recycling Journey with Drop Me 🌱"
+                template = get_template("inactive_recylce_weekly_summary_english.html").render(context)
 
         send_mail(subject, None, from_email, [user.email], fail_silently=False, html_message=template)
     print("Weekly Summary Emails Sent")
