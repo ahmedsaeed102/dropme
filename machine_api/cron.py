@@ -7,7 +7,7 @@ from .utlis import get_user_weekly_logs
 
 
 # @kronos.register("0 8 * * 5")
-@kronos.register("15 23 * * *")
+@kronos.register("30 21 * * *")
 def send_weekly_recycle_summary_email():
     from_email = f'DropMe <{settings.EMAIL_HOST_USER}>'
 
