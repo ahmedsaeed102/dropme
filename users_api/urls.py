@@ -23,7 +23,7 @@ urlpatterns = [
     # edit profile
     path("<int:pk>/edit_profile/", views.ManageUserProfileView.as_view(), name="edit_profile",),
     # preferred language
-    path("preferred_language/", views.PreferredLanguageView.as_view({'get': 'get','patch': 'patch'}), name="preferred_language",),
+    path("preferred_language/", views.PreferredLanguageView.as_view(), name="preferred_language",),
     # user points
     path("current_user/points/", views.CurrentUserTotalPointsView.as_view(), name="current_user_points",),
     # address list
