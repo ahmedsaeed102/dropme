@@ -81,7 +81,6 @@ class Entry(models.Model):
 
 class SpecialOffer(models.Model):
     description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to="marketplace/offers", null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=["png", "jpeg", "jpg", "svg"]),]),
     required_points = models.PositiveBigIntegerField()
     reward_points = models.PositiveBigIntegerField()
     start_date = models.DateField()

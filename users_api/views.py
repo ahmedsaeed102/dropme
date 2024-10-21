@@ -13,7 +13,7 @@ import random
 from datetime import date
 
 from machine_api.models import PhoneNumber, RecycleLog
-from .models import LocationModel, Feedback, UserModel, SocialEmail, generate_referral_code
+from .models import LocationModel, Feedback, UserModel, generate_referral_code
 from competition_api.models import Competition
 from marketplace.models import SpecialOffer
 from .services import send_otp, send_reset_password_email, send_welcome_email, otp_set
@@ -227,7 +227,6 @@ class GoogleAuth(generics.GenericAPIView):
 
         if(UserModel.objects.filter(email=email).exists()):
             user=UserModel.objects.get(email=email)
-            SocialEmail.objects.get_or_create(customer=user,email=email)
             refresh = RefreshToken.for_user(user)
             return Response({
             'refresh': str(refresh),
@@ -239,7 +238,6 @@ class GoogleAuth(generics.GenericAPIView):
         else:
             user=UserModel.objects.create(email=email, username=payload['name'])
             user.set_password(''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)))
-            SocialEmail.objects.create(customer=user,email=email)
             return Response({
             "id": user.id,
             "username": user.username,

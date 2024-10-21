@@ -72,14 +72,6 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
         ordering = ("-total_points",)
         verbose_name = _("User")
 
-class SocialEmail(models.Model):
-    email = models.EmailField(unique=True, null=False, blank=False, max_length=50, validators=[validate_email], verbose_name=_("Email"))
-    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name="social_emails")
-
-    def __str__(self):
-        return self.email
-
-
 class Feedback(models.Model):
     title = models.CharField(max_length=50)
     description = models.TextField(null=True, blank=True)
