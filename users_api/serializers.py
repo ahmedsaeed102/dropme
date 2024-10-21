@@ -179,7 +179,7 @@ class UserPointsSerializer(serializers.ModelSerializer):
         if logs:
             total_bottles = logs.aggregate(Sum("bottles"))["bottles__sum"]
             total_cans = logs.aggregate(Sum("cans"))["cans__sum"]
-            bottles_points, cans_points, total_points = calculate_points(total_bottles, total_cans)
+            _, _, total_points = calculate_points(total_bottles, total_cans)
             return total_points
         else:
             return 0

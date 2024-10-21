@@ -73,12 +73,6 @@ class CategoryFilterSerializer(serializers.Serializer):
     category_name = serializers.CharField(required=False)
 
 class SpecialOfferSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
-
-    def get_image(self, obj):
-        image = obj.image.url
-        request = self.context.get("request")
-        return request.build_absolute_uri(image)
 
     class Meta:
         model = SpecialOffer
