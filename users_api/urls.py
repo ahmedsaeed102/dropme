@@ -16,6 +16,8 @@ urlpatterns = [
     path("user_login/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("user_login/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("logout/", TokenBlacklistView.as_view(), name="token_blacklist"),
+    # google auth
+    path("google_auth/", views.GoogleAuth.as_view(), name="google_auth"),
     # reset password
     path("reset_password_emaillink/", views.RequestPasswordResetEmail.as_view(), name="send_email_password",),
     path("password-reset/",  views.SetNewPasswordAPIView.as_view(), name="password-reset-complete",),

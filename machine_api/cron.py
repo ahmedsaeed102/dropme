@@ -6,8 +6,7 @@ from users_api.models import UserModel, LanguageChoices
 from .utlis import get_user_weekly_logs
 
 
-# @kronos.register("0 8 * * 5")
-@kronos.register("30 21 * * *")
+@kronos.register("0 8 * * 5")
 def send_weekly_recycle_summary_email():
     from_email = f'DropMe <{settings.EMAIL_HOST_USER}>'
 

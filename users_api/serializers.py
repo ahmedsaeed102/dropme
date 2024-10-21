@@ -16,6 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True, min_length=settings.MIN_PASSWORD_LENGTH, error_messages={"min_length": _("Password must be longer than 8 length")})
     password2 = serializers.CharField(write_only=True, min_length=settings.MIN_PASSWORD_LENGTH, error_messages={"min_length": _("Password must be longer than 8 length")})
     referral_code = serializers.CharField(write_only=True, required=False)
+    phone_number = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = UserModel
@@ -39,7 +40,11 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, val_data):
         otp = random.randint(1000, 9999)
         otp_expiration = timezone.now() + timedelta(minutes=5)
-        user = UserModel(username=val_data["username"], phone_number=val_data["phone_number"], email=val_data["email"], otp=otp, otp_expiration=otp_expiration, max_otp_try=settings.MAX_OTP_TRY)
+        if val_data.get("phone_number"):
+            val_data["phone_number"] = f"0{val_data['phone_number']}"
+            user = UserModel(username=val_data["username"], phone_number=val_data["phone_number"], email=val_data["email"], otp=otp, otp_expiration=otp_expiration, max_otp_try=settings.MAX_OTP_TRY)
+        else:
+            user = UserModel(username=val_data["username"], email=val_data["email"], otp=otp, otp_expiration=otp_expiration, max_otp_try=settings.MAX_OTP_TRY)
         user.set_password(val_data["password1"])
         referral_code = val_data.get("referral_code")
         if referral_code:
