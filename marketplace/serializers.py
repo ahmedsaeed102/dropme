@@ -22,6 +22,14 @@ class ProductSerializer(serializers.ModelSerializer):
         item = cart.items.filter(product=obj).first() if cart else None
         return item.quantity if item is not None else 0
 
+class InputEntrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Entry
+        fields = ("product", "quantity")
+
+class EditEntrySerializer(serializers.Serializer):
+    entry_id = serializers.IntegerField()
+    quantity = serializers.IntegerField()
 
 class OutputEntrySerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
@@ -30,18 +38,6 @@ class OutputEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Entry
         fields = ("entry_id", "product", "quantity")
-
-
-class InputEntrySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Entry
-        fields = ("product", "quantity")
-
-
-class EditEntrySerializer(serializers.Serializer):
-    entry_id = serializers.IntegerField()
-    quantity = serializers.IntegerField()
-
 
 class CartSerializer(serializers.ModelSerializer):
     items = OutputEntrySerializer(many=True, read_only=True)
@@ -62,18 +58,14 @@ class MarketplaceResourcesSerializer(serializers.ModelSerializer):
         model = Resource
         fields = "__all__"
 
-
-# Filters
 class ProductFilterSerializer(serializers.Serializer):
     price_points = serializers.IntegerField(required=False)
     category__category_name = serializers.CharField(required=False)
-
 
 class CategoryFilterSerializer(serializers.Serializer):
     category_name = serializers.CharField(required=False)
 
 class SpecialOfferSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = SpecialOffer
         fields = "__all__"

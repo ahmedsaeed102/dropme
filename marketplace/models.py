@@ -2,12 +2,10 @@ from datetime import date
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth import get_user_model
-from django.core.validators import FileExtensionValidator
 
 User = get_user_model()
 
 PERCENTAGE_VALIDATOR = [MinValueValidator(0), MaxValueValidator(100)]
-
 
 class Category(models.Model):
     category_name = models.CharField(max_length=50, default="Muqbis")
@@ -16,68 +14,45 @@ class Category(models.Model):
     def __str__(self) -> str:
         return self.category_name
 
-
 class Product(models.Model):
     product_id = models.IntegerField(null=True, blank=True)
-
     product_name = models.CharField(max_length=100)
-
     description_en = models.TextField()
     description_ar = models.TextField()
-
     img = models.ImageField(upload_to="marketplace/products")
     product_page_link = models.URLField()
-
     original_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     discount = models.IntegerField(default=0, validators=PERCENTAGE_VALIDATOR)
-    price_after_discount = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0.00
-    )
-
+    price_after_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     price_points = models.PositiveIntegerField(default=0)
     coupon = models.CharField(max_length=20, default="DropMe")
-
-    category = models.ForeignKey(
-        Category,
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE,
-        related_name="products",
-    )
-
+    category = models.ForeignKey(Category, blank=True, null=True, on_delete=models.CASCADE, related_name="products")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return self.product_name
 
-
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cart")
     count = models.PositiveIntegerField(default=0)
     total = models.IntegerField(default=0)
     active = models.BooleanField(default=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return self.user.username
 
-
 class Entry(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
-    product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, blank=True, null=True
-    )
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True)
     quantity = models.PositiveIntegerField(default=1)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return self.product.product_name + " | " + str(self.quantity)
-
 
 class SpecialOffer(models.Model):
     description = models.TextField(blank=True, null=True)
@@ -92,17 +67,11 @@ class SpecialOffer(models.Model):
     def is_ongoing(self) -> bool:
         return self.end_date >= date.today()
 
-
 class UserOffer(models.Model):
-    # Currently unused
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_offers")
-    offer = models.ForeignKey(
-        SpecialOffer, on_delete=models.CASCADE, related_name="offer_status"
-    )
-
+    offer = models.ForeignKey(SpecialOffer, on_delete=models.CASCADE, related_name="offer_status")
     can_be_used = models.BooleanField(default=True)
     remaining_amount = models.PositiveIntegerField(default=0)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
