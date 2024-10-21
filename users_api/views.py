@@ -171,7 +171,7 @@ class CurrentUserDetailsView(generics.GenericAPIView):
             "username": user.username,
             "email": user.email, 
             "phone_number": user.phone_number,
-            "profile_photo": user.profile_photo,
+            "profile_photo": user.profile_photo.url,
             "age": user.age,
             "gender": user.gender,
             "address": user.address.address if user.address else None,
