@@ -29,7 +29,7 @@ urlpatterns = [
     # referral code
     path("referral_code/", views.ReferralCodeView.as_view(), name="referral_code",),
     # user points
-    path("current_user/points/", views.CurrentUserTotalPointsView.as_view(), name="current_user_points",),
+    path("current_user_details/", views.CurrentUserDetailsView.as_view(), name="current_user_details",),
     #  home page data
     path("home_page_data/", views.HomePageView.as_view(), name="home_page_data",),
     path("users_points", views.UsersPointsView.as_view(), name="users_points"),

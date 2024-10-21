@@ -162,11 +162,25 @@ class LocationList(generics.ListCreateAPIView):
     serializer_class = LocationModelserializers
     permission_classes = (permissions.IsAuthenticated,)
 
-class CurrentUserTotalPointsView(generics.GenericAPIView):
+class CurrentUserDetailsView(generics.GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     def get(self, request):
         user = request.user
-        return Response({"total_points": user.total_points, "total_recycled_items": get_total_recycled_items(user.id), "referral_code": user.referral_code}, status=status.HTTP_200_OK)
+        return Response({
+            "id": user.id, 
+            "username": user.username,
+            "email": user.email, 
+            "phone_number": user.phone_number,
+            "profile_photo": user.profile_photo,
+            "age": user.age,
+            "gender": user.gender,
+            "address": user.address.address if user.address else None,
+            "referral_code": user.referral_code,
+            "referral_usage_count": user.referral_usage_count,
+            "preferred_language": user.preferred_language,
+            "total_points": user.total_points, 
+            "total_recycled_items": get_total_recycled_items(user.id), 
+        }, status=status.HTTP_200_OK)
 
 class FeedbacksList(generics.ListAPIView):
     queryset = Feedback.objects.all()
