@@ -66,8 +66,8 @@ can_point = int
 total_point = int
 
 def calculate_points(bottles: int, cans: int) -> tuple[bottle_point, can_point, total_point]:
-    bottles_points = bottles * 10
-    cans_points = cans * 10
+    bottles_points = bottles * 2
+    cans_points = cans * 4
     total_points = bottles_points + cans_points
     return bottles_points, cans_points, total_points
 

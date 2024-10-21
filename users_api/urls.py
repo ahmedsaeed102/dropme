@@ -30,6 +30,7 @@ urlpatterns = [
     path("current_user/points/", views.CurrentUserTotalPointsView.as_view(), name="current_user_points",),
     #  home page data
     path("home_page_data/", views.HomePageView.as_view(), name="home_page_data",),
+    path("users_points", views.UsersPointsView.as_view(), name="users_points"),
     # address list
     path("list_address/", views.LocationList.as_view(), name="create_address"),
     # user feedback

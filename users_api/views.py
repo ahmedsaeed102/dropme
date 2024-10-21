@@ -205,6 +205,17 @@ class HomePageView(generics.GenericAPIView):
             }
         )
 
+from .serializers import UserPointsSerializer
+class UsersPointsView(generics.GenericAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        # get all users points
+        users = UserModel.objects.all()
+        users_serializer = UserPointsSerializer(users, many=True)
+        return Response(users_serializer.data, status=status.HTTP_200_OK)
+
+
 # class GoogleAuth(generics.GenericAPIView):
 
 #     @action(detail=True, methods=["POST"])

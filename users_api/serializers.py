@@ -44,7 +44,7 @@ class UserSerializer(serializers.ModelSerializer):
         referral_code = val_data.get("referral_code")
         if referral_code:
             referring_user = UserModel.objects.get(referral_code=referral_code)
-            referring_user.total_points += 20
+            referring_user.total_points += int((10*referring_user.total_points)/100)
             referring_user.referral_usage_count += 1
             referring_user.save()
             user.total_points += 10
@@ -167,4 +167,23 @@ class TopUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
         fields = ["username", "profile_photo", "total_points"]
+        read_only_fields = fields
+
+from machine_api.models import RecycleLog
+from django.db.models import Sum
+from machine_api.utlis import calculate_points
+class UserPointsSerializer(serializers.ModelSerializer):
+    points = serializers.SerializerMethodField()
+    def get_points(self, obj):
+        logs = RecycleLog.objects.filter(user=obj)
+        if logs:
+            total_bottles = logs.aggregate(Sum("bottles"))["bottles__sum"]
+            total_cans = logs.aggregate(Sum("cans"))["cans__sum"]
+            bottles_points, cans_points, total_points = calculate_points(total_bottles, total_cans)
+            return total_points
+        else:
+            return 0
+    class Meta:
+        model = UserModel
+        fields = ["email", "points"]
         read_only_fields = fields
