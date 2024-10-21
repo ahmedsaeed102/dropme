@@ -5,7 +5,7 @@ from django.core.validators import validate_email
 from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from core.validators import validate_phone_number
-import datetime
+import random
 from .managers import UserManager
 
 class LanguageChoices(models.TextChoices):
@@ -24,7 +24,9 @@ class LocationModel(models.Model):
 
 def generate_referral_code(user):
         prefix = user.username[:3].lower()
-        date_str = datetime.datetime.now().strftime("%Y%m%d")
+        date_str = random.randint(10000000, 99999999)
+        while UserModel.objects.filter(referral_code=f"{prefix}{date_str}").exists():
+            date_str = random.randint(10000000, 99999999)
         return f"{prefix}{date_str}"
 
 class UserModel(AbstractBaseUser, PermissionsMixin):

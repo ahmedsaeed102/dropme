@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from competition_api.models import Resource
-from .models import Product, Cart, Entry, Category
+from .models import Product, Cart, Entry, Category, SpecialOffer
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -71,3 +71,15 @@ class ProductFilterSerializer(serializers.Serializer):
 
 class CategoryFilterSerializer(serializers.Serializer):
     category_name = serializers.CharField(required=False)
+
+class SpecialOfferSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        image = obj.image.url
+        request = self.context.get("request")
+        return request.build_absolute_uri(image)
+
+    class Meta:
+        model = SpecialOffer
+        fields = "__all__"

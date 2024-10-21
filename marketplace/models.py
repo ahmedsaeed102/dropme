@@ -2,6 +2,7 @@ from datetime import date
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth import get_user_model
+from django.core.validators import FileExtensionValidator
 
 User = get_user_model()
 
@@ -79,17 +80,13 @@ class Entry(models.Model):
 
 
 class SpecialOffer(models.Model):
-    # Currently unused
     description = models.TextField(blank=True, null=True)
-
+    image = models.ImageField(upload_to="marketplace/offers", null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=["png", "jpeg", "jpg", "svg"]),]),
     required_points = models.PositiveBigIntegerField()
     reward_points = models.PositiveBigIntegerField()
-
     start_date = models.DateField()
     end_date = models.DateField()
-
     created_at = models.DateTimeField(auto_now_add=True)
-
     is_finished = models.BooleanField(default=False)
 
     @property

@@ -28,6 +28,8 @@ urlpatterns = [
     path("referral_code/", views.ReferralCodeView.as_view(), name="referral_code",),
     # user points
     path("current_user/points/", views.CurrentUserTotalPointsView.as_view(), name="current_user_points",),
+    #  home page data
+    path("home_page_data/", views.HomePageView.as_view(), name="home_page_data",),
     # address list
     path("list_address/", views.LocationList.as_view(), name="create_address"),
     # user feedback

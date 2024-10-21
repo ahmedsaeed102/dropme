@@ -7,11 +7,18 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from faker import Faker
+from django.db.models import Sum
+from datetime import date
 
 from machine_api.models import PhoneNumber, RecycleLog
-from .models import LocationModel, Feedback, generate_referral_code
+from .models import LocationModel, Feedback, UserModel, generate_referral_code
+from competition_api.models import Competition
+from marketplace.models import SpecialOffer
 from .services import send_otp, send_reset_password_email, send_welcome_email, otp_set
-from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer
+from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer
+from marketplace.serializers import SpecialOfferSerializer
+from competition_api.serializers import CompetitionSerializer
+from machine_api.utlis import get_total_recycled_items
 
 User = get_user_model()
 
@@ -156,7 +163,8 @@ class LocationList(generics.ListCreateAPIView):
 class CurrentUserTotalPointsView(generics.GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     def get(self, request):
-        return Response({"total_points": request.user.total_points}, status=status.HTTP_200_OK)
+        user = request.user
+        return Response({"total_points": user.total_points, "total_recycled_items": get_total_recycled_items(user.id), "referral_code": user.referral_code}, status=status.HTTP_200_OK)
 
 class FeedbacksList(generics.ListAPIView):
     queryset = Feedback.objects.all()
@@ -174,6 +182,28 @@ class AnonymousUser(generics.GenericAPIView):
         user = User.objects.create(username=fake.name(), email=f"{fake.word()}@anonymous.com", is_active=True)
         refresh = RefreshToken.for_user(user)
         return Response({"refresh": str(refresh), "access": str(refresh.access_token)})
+
+class HomePageView(generics.GenericAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        user = request.user
+        user_points = user.total_points
+        top_users = UserModel.objects.order_by("-total_points")[:3]
+        top_users_Serializer = TopUserSerializer(top_users, many=True).data
+        special_offers = SpecialOffer.objects.filter(end_date__gte=date.today(), is_finished=False).order_by('-created_at')[:3]
+        special_offers_Serializer = SpecialOfferSerializer(special_offers, many=True, context={'request':request}).data
+        competition = Competition.objects.filter(end_date__gte=date.today()).order_by('-created_at')[:1]
+        competition_Serializer = CompetitionSerializer(competition, many=True, context={'request':request}).data
+        return Response(
+            {
+                "user_points": user_points,
+                "recycled_items": get_total_recycled_items(user.id),
+                "top_users": top_users_Serializer,
+                "special_offers": special_offers_Serializer,
+                "competition": competition_Serializer,
+            }
+        )
 
 # class GoogleAuth(generics.GenericAPIView):
 

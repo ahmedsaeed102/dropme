@@ -162,3 +162,9 @@ class FeedbackSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         feedback = Feedback.objects.create(title=val_data["title"], description=val_data["description"], user=user,)
         return feedback
+
+class TopUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserModel
+        fields = ["username", "profile_photo", "total_points"]
+        read_only_fields = fields

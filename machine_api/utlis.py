@@ -84,11 +84,16 @@ def calculate_co2_energy(bottles: int, cans: int) -> dict:
         "cans_energy": cans_energy,
     }
 
+def get_total_recycled_items(userid: int) -> int:
+    user_recycle_logs = RecycleLog.objects.filter(user=userid)
+    total_bottles = user_recycle_logs.aggregate(Sum("bottles"))["bottles__sum"]
+    total_cans = user_recycle_logs.aggregate(Sum("cans"))["cans__sum"]
+    return total_bottles + total_cans if total_bottles and total_cans else 0
+
 def get_user_weekly_logs(userid: int) -> dict:
     friday_last_week = timezone.now().date() - timedelta(days=7)
     friday_last_week = datetime.combine(friday_last_week, datetime.min.time())
-    # logs = RecycleLog.objects.filter(user=userid, created_at__gte=make_aware(friday_last_week))
-    logs = RecycleLog.objects.filter(user=userid)
+    logs = RecycleLog.objects.filter(user=userid, created_at__gte=make_aware(friday_last_week))
     if not logs:
         return {"recycled": False}
 

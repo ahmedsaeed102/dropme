@@ -6,22 +6,31 @@ User = get_user_model()
 
 
 class CompetitionSerializer(serializers.ModelSerializer):
+    is_user_joined = serializers.SerializerMethodField(read_only=True)
+    duration_in_days = serializers.SerializerMethodField(read_only=True)
+
+    def get_is_user_joined(self, obj):
+        if not self.context["request"]:
+            return False
+        if not self.context["request"].user.is_authenticated:
+            return False
+        user = self.context["request"].user
+        return obj.users.filter(id=user.id).exists()
+
+    def get_duration_in_days(self, obj):
+        return obj.duration
+
+    def validate(self, data):
+        if data["start_date"] > data["end_date"]:
+            raise serializers.ValidationError("End date cannot be before start date")
+        if data["target"] < 0:
+            raise serializers.ValidationError("Target points can't be negative")
+        return data
+
     class Meta:
         model = Competition
         fields = "__all__"
         read_only_fields = ("created_at",)
-
-    def validate(self, data):
-        """
-        validate Competition dates and target points
-        """
-        if data["start_date"] > data["end_date"]:
-            raise serializers.ValidationError("End date cannot be before start date")
-
-        if data["target"] < 0:
-            raise serializers.ValidationError("Target points can't be negative")
-
-        return data
 
 
 class CompetitionRankingSerializer(serializers.ModelSerializer):
