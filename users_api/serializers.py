@@ -135,7 +135,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
 class UserProfileSerializer(UserSerializer):
     class Meta:
         model = UserModel
-        fields = ["username", "phone_number", "age", "email", "password1", "password2", "profile_photo", "gender", "address"]
+        fields = ["username", "phone_number", "age", "email", "password1", "password2", "profile_photo", "gender", "address", "preferred_language"]
 
     def update(self, instance, val_data):
         """update profile for User"""
