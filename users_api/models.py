@@ -51,6 +51,7 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     address = models.ForeignKey(LocationModel, on_delete=models.CASCADE, null=True, blank=True, related_name="address_name")
     referral_code = models.CharField(max_length=15, unique=True, null=True, blank=True)
     referral_usage_count = models.PositiveIntegerField(default=0)
+    preferred_language = models.CharField(max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
 
     objects = UserManager()
     USERNAME_FIELD = "email"
