@@ -9,7 +9,7 @@ def fcmdevice_get_all() -> FCMDeviceQuerySet:
     return FCMDevice.objects.all()
 
 def notification_create(*, devices: FCMDeviceQuerySet, title: str, body: str) -> None:
-    NotificaitonModel.objects.bulk_create([NotificaitonModel(user=device.user, title=title, body=body) for device in devices])
+    NotificaitonModel.objects.bulk_create([NotificaitonModel(user=device.user, title_en=title, body_en=body) for device in devices])
 
 def notification_send_all(*, title: str, body: str) -> None:
     FCMDevice.objects.send_message(Message(notification=Notification(title=title, body=body)))

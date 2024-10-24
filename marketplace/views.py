@@ -69,10 +69,7 @@ class WishlistView(APIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        try:
-            wishlist = Wishlist.objects.get(user=user)
-        except Wishlist.DoesNotExist:
-            return Response([], status=404)
+        wishlist, created = Wishlist.objects.get_or_create(user=user)
         serializer = WishlistSerializer(wishlist, context={"request": request})
         return Response(serializer.data)
 
