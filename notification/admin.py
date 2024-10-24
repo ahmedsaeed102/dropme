@@ -1,5 +1,7 @@
 from django.contrib import admin
 from .models import Notification
 
-# Register your models here.
-admin.site.register(Notification)
+@admin.register(Notification)
+class MotificationAdmin(admin.ModelAdmin):
+    list_display = ("user", "title", "is_read", "created_at")
+    list_filter = ("user",)

@@ -192,13 +192,6 @@ class FeedbackCreate(generics.CreateAPIView):
     serializer_class = FeedbackSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
-class AnonymousUser(generics.GenericAPIView):
-    def get(self, *args, **kwargs):
-        fake = Faker()
-        user = User.objects.create(username=fake.name(), email=f"{fake.word()}@anonymous.com", is_active=True)
-        refresh = RefreshToken.for_user(user)
-        return Response({"refresh": str(refresh), "access": str(refresh.access_token)})
-
 class HomePageView(generics.GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 

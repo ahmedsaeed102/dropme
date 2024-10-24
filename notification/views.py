@@ -1,30 +1,31 @@
-from rest_framework.generics import ListAPIView, DestroyAPIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework import status
-from .models import Notification
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from .serializers import NotificationSerializer
+from .models import Notification
 
-
-class Notifications(ListAPIView):
+class Notifications(GenericAPIView, ListModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin):
     serializer_class = NotificationSerializer
     permission_classes = (IsAuthenticated,)
+    lookup_field = 'pk'
 
     def get_queryset(self):
-        queryset = Notification.objects.filter(user=self.request.user)
+        return Notification.objects.filter(user=self.request.user)
 
-        return queryset
+    def get(self, request, *args, **kwargs):
+        if 'pk' in kwargs:
+            return self.retrieve(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)
 
+    def patch(self, request, *args, **kwargs):
+        if 'pk' in kwargs:
+            notification = self.get_object()
+            notification.is_read = True
+            notification.save()
+            return Response({'status': 'notification read'}, status=status.HTTP_200_OK)
 
-class DeleteNotification(DestroyAPIView):
-    queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if not instance.user == request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request, *args, **kwargs):
+        if 'pk' in kwargs:
+            return self.destroy(request, *args, **kwargs)
