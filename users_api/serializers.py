@@ -8,6 +8,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import UserModel, LocationModel, Feedback, LanguageChoices, TermsAndCondition
 from .services import send_otp
+from machine_api.utlis import get_total_recycled_items
 
 """
     SIGN UP SERIALIZERS
@@ -74,6 +75,16 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["username"] = self.user.username
         data["email"] = self.user.email
         data["id"] = self.user.id
+        data["phone_number"] = self.user.phone_number
+        data["profile_photo"] = self.user.profile_photo.url if self.user.profile_photo else None
+        data["age"] = self.user.age
+        data["gender"] = self.user.gender
+        data["address"] = self.user.address.address if self.user.address else None
+        data["referral_code"] = self.user.referral_code
+        data["referral_usage_count"] = self.user.referral_usage_count
+        data["preferred_language"] = self.user.preferred_language
+        data["total_points"] = self.user.total_points
+        data["total_recycled_items"] = get_total_recycled_items(self.user.id)
         return data
 
 """
