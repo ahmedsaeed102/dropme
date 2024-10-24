@@ -211,7 +211,7 @@ class HomePageView(generics.GenericAPIView):
                 "top_users": top_users_Serializer,
                 "special_offers": special_offers_Serializer,
                 "competition": competition_Serializer,
-            }
+            }, status=200
         )
 
 from .serializers import UserPointsSerializer

@@ -1,5 +1,6 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.db.models import Sum
 from datetime import date
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
@@ -10,8 +11,11 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from competition_api.models import Resource
 from .muqbis_products.populate_database import populate
 from .models import Product, Category, SpecialOffer, Wishlist
+from machine_api.models import RecycleLog
 from .serializers import ProductSerializer, ProductFilterSerializer, CartSerializer, InputEntrySerializer, EditEntrySerializer, MarketplaceResourcesSerializer, CategorysSerializer, CategoryFilterSerializer, SpecialOfferSerializer, WishlistSerializer
+from machine_api.serializers import RecycleLogSerializer
 from .services import product_list, product_get, EntryService, checkout, category_list
+from machine_api.utlis import get_total_recycled_items
 
 class CategoryList(generics.ListAPIView):
     queryset = Category.objects.all()
@@ -152,6 +156,26 @@ class SpecialOffersList(generics.ListAPIView):
     queryset = SpecialOffer.objects.filter(end_date__gte=date.today())
     serializer_class = SpecialOfferSerializer
     permission_classes = (permissions.IsAuthenticated,)
+
+class WalletPageView(generics.GenericAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        user = request.user
+        user_points = user.total_points
+        logs = RecycleLog.objects.filter(user=request.user.id, is_complete=True)
+        paginated_logs = RecycleLog.objects.filter(user=request.user.id, is_complete=True).order_by('-created_at')[:2]
+        log_serializer = RecycleLogSerializer(paginated_logs, many=True, context={"request": request}).data
+        return Response(
+            {
+                "user_points": user_points,
+                "recycled_items": get_total_recycled_items(user.id),
+                "bottles_number": logs.aggregate(Sum("bottles"))["bottles__sum"] if logs else 0,
+                "cans_number": logs.aggregate(Sum("cans"))["cans__sum"] if logs else 0,
+                "other_number": 0,
+                "recycle_logs": log_serializer
+            }, status=200
+        )
 
 # class PopulateData(APIView):
 #     """For populating database with muqbis products"""

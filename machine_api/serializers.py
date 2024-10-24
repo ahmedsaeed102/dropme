@@ -35,7 +35,7 @@ class QRCodeSerializer(serializers.ModelSerializer):
 class RecycleLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecycleLog
-        fields = ["machine_name", "bottles", "cans", "created_at"]
+        fields = ["machine_name", "bottles", "cans", "points", "created_at"]
 
 
 class UpdateRecycleLog(serializers.ModelSerializer):

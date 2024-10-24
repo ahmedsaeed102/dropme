@@ -23,6 +23,8 @@ urlpatterns = [
     path("marketplace/slider/", views.MarketplaceSlider.as_view(), name="marketplace_slider",),
     # special offer
     path("marketplace/special_offer/", views.SpecialOffersList.as_view(), name="special_offer_list",),
+    # wallet page data
+    path("wallet_page_data/", views.WalletPageView.as_view(), name="wallet_page_data",),
     # populate data
     # path("marketplace/populate/", views.PopulateData.as_view())
 ]
