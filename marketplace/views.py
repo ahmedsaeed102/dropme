@@ -6,10 +6,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+
 from competition_api.models import Resource
 from .muqbis_products.populate_database import populate
-from .models import Product, Category, SpecialOffer
-from .serializers import ProductSerializer, ProductFilterSerializer, CartSerializer, InputEntrySerializer, EditEntrySerializer, MarketplaceResourcesSerializer, CategorysSerializer, CategoryFilterSerializer, SpecialOfferSerializer
+from .models import Product, Category, SpecialOffer, Wishlist
+from .serializers import ProductSerializer, ProductFilterSerializer, CartSerializer, InputEntrySerializer, EditEntrySerializer, MarketplaceResourcesSerializer, CategorysSerializer, CategoryFilterSerializer, SpecialOfferSerializer, WishlistSerializer
 from .services import product_list, product_get, EntryService, checkout, category_list
 
 class CategoryList(generics.ListAPIView):
@@ -62,6 +63,43 @@ class RelatedProducts(generics.ListAPIView):
     def get_queryset(self):
         product = product_get(pk=self.kwargs["pk"])
         return (Product.objects.filter(price_points__lte=product.price_points).exclude(id=product.id).order_by("-price_points")[:5])
+
+class WishlistView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        try:
+            wishlist = Wishlist.objects.get(user=user)
+        except Wishlist.DoesNotExist:
+            return Response([], status=404)
+        serializer = WishlistSerializer(wishlist, context={"request": request})
+        return Response(serializer.data)
+
+class AddToWishlistView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, product_id, *args, **kwargs):
+        user = request.user
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({"error": "product not found"}, status=status.HTTP_404_NOT_FOUND)
+        wishlist, created = Wishlist.objects.get_or_create(user=user)
+        wishlist.products.add(product)
+        return Response({"status": "Products added to wishlist"}, status=status.HTTP_201_CREATED)
+
+class RemoveFromWishlistView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def delete(self, request, product_id, *args, **kwargs):
+        user = request.user
+        try:
+            wishlist = Wishlist.objects.get(user=user)
+        except Wishlist.DoesNotExist:
+            return Response({"error": "Wishlist not found"}, status=status.HTTP_404_NOT_FOUND)
+        wishlist.products.remove(product_id)
+        return Response({"status": "Products removed from wishlist"}, status=status.HTTP_204_NO_CONTENT)
 
 class UserCart(APIView):
     serializer_class = CartSerializer

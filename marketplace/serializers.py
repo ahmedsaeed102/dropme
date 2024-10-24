@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from competition_api.models import Resource
-from .models import Product, Cart, Entry, Category, SpecialOffer
+from .models import Product, Cart, Entry, Category, SpecialOffer, Wishlist
 
 
 class ProductSerializer(serializers.ModelSerializer):
     can_buy = serializers.SerializerMethodField(read_only=True)
     count_in_car = serializers.SerializerMethodField(read_only=True)
+    is_wishlisted = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Product
@@ -21,6 +22,18 @@ class ProductSerializer(serializers.ModelSerializer):
         cart = Cart.objects.filter(user=user, active=True).first()
         item = cart.items.filter(product=obj).first() if cart else None
         return item.quantity if item is not None else 0
+
+    def get_is_wishlisted(self, obj: Product) -> bool:
+        user = self.context["request"].user
+        if user.is_authenticated:
+            return Wishlist.objects.filter(user=user, products=obj).exists()
+        return False
+
+class WishlistSerializer(serializers.ModelSerializer):
+    products = ProductSerializer(many=True, read_only=True)
+    class Meta:
+        model = Wishlist
+        fields = ['user', 'products']
 
 class InputEntrySerializer(serializers.ModelSerializer):
     class Meta:

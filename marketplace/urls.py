@@ -8,6 +8,10 @@ urlpatterns = [
     path("marketplace/products/", views.ProductsList.as_view(), name="products"),
     path("marketplace/products/<int:pk>/", views.ProductDetail.as_view(), name="product_detail",),
     path("marketplace/products/<int:pk>/related_products/", views.RelatedProducts.as_view(), name="related_products",),
+    # WishList
+    path('marketplace/products/wishlist/', views.WishlistView.as_view(), name='wishlist-list'),
+    path('marketplace/products/<int:product_id>/wishlist/add/', views.AddToWishlistView.as_view(), name='wishlist-add'),
+    path('marketplace/products/<int:product_id>/wishlist/remove/', views.RemoveFromWishlistView.as_view(), name='wishlist-remove'),
     # cart
     path("marketplace/cart/", views.UserCart.as_view(), name="cart"),
     path("marketplace/cart/add", views.AddToCart.as_view(), name="cart_add"),
