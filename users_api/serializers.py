@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import UserModel, LocationModel, Feedback, LanguageChoices
+from .models import UserModel, LocationModel, Feedback, LanguageChoices, TermsAndCondition
 from .services import send_otp
 
 """
@@ -173,6 +173,11 @@ class TopUserSerializer(serializers.ModelSerializer):
         model = UserModel
         fields = ["username", "profile_photo", "total_points"]
         read_only_fields = fields
+
+class TermsAndConditionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TermsAndCondition
+        fields = ['title_en', 'title_ar', 'description_en', 'description_ar']
 
 from machine_api.models import RecycleLog
 from django.db.models import Sum

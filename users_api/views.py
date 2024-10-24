@@ -13,11 +13,11 @@ import random
 from datetime import date
 
 from machine_api.models import PhoneNumber, RecycleLog
-from .models import LocationModel, Feedback, UserModel, generate_referral_code
+from .models import LocationModel, Feedback, UserModel, generate_referral_code, TermsAndCondition
 from competition_api.models import Competition
 from marketplace.models import SpecialOffer
 from .services import send_otp, send_reset_password_email, send_welcome_email, otp_set
-from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer
+from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer, TermsAndConditionSerializer
 from marketplace.serializers import SpecialOfferSerializer
 from competition_api.serializers import CompetitionSerializer
 from machine_api.utlis import get_total_recycled_items
@@ -251,3 +251,12 @@ class GoogleAuth(generics.GenericAPIView):
             "phone_number": user.phone_number,
             "email": user.email,
             },status=status.HTTP_200_OK)
+
+class TermsAndConditionsView(generics.ListAPIView):
+
+    def get(self, request, *args, **kwargs):
+        terms_and_conditions = TermsAndCondition.objects.last()
+        if terms_and_conditions:
+            serializer = TermsAndConditionSerializer(terms_and_conditions)
+            return Response(serializer.data)
+        return Response({"error": "Terms and conditions not found"}, status=404)

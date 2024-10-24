@@ -80,3 +80,12 @@ class Feedback(models.Model):
 
     def __str__(self):
         return self.title
+
+class TermsAndCondition(models.Model):
+    title_en = models.CharField(max_length=50)
+    title_ar = models.CharField(max_length=50)
+    description_ar = models.TextField(null=True, blank=True)
+    description_en = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.title_en

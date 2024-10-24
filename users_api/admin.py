@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserModel, LocationModel, Feedback
+from .models import UserModel, LocationModel, Feedback, TermsAndCondition
 
 @admin.register(UserModel)
 class CustomUserAdmin(admin.ModelAdmin):
@@ -10,3 +10,4 @@ class CustomUserAdmin(admin.ModelAdmin):
 
 admin.site.register(LocationModel)
 admin.site.register(Feedback)
+admin.site.register(TermsAndCondition)
