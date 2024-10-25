@@ -7,7 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import UserModel, LocationModel, Feedback, LanguageChoices, TermsAndCondition
-from .services import send_otp
+from .services import send_otp, unread_notification
 from machine_api.utlis import get_total_recycled_items
 
 """
@@ -72,6 +72,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             self.user.save()
             send_otp(self.user)
             return {"is_verified": False, "id": self.user.id}
+        unread_notifications, count = unread_notification(self.user)
         data["username"] = self.user.username
         data["email"] = self.user.email
         data["id"] = self.user.id
@@ -85,6 +86,9 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["preferred_language"] = self.user.preferred_language
         data["total_points"] = self.user.total_points
         data["total_recycled_items"] = get_total_recycled_items(self.user.id)
+        data["unread_notifications"] = unread_notifications
+        data["unread_notifications_count"] = count
+        data["is_admin"] = self.user.is_staff
         return data
 
 """

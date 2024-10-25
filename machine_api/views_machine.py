@@ -90,6 +90,8 @@ class MachineIsFull(APIView):
             name="admin",
             title="Machine is full",
             body=f"{name} machine is full empty it!",
+            title_ar="Machine is full",
+            body_ar=f"{name} machine is full empty it!",
         )
 
         subject = "Machine is full"

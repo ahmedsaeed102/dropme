@@ -16,7 +16,7 @@ from machine_api.models import PhoneNumber, RecycleLog
 from .models import LocationModel, Feedback, UserModel, generate_referral_code, TermsAndCondition
 from competition_api.models import Competition
 from marketplace.models import SpecialOffer
-from .services import send_otp, send_reset_password_email, send_welcome_email, otp_set
+from .services import send_otp, send_reset_password_email, send_welcome_email, otp_set, unread_notification
 from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer, TermsAndConditionSerializer
 from marketplace.serializers import SpecialOfferSerializer
 from competition_api.serializers import CompetitionSerializer
@@ -204,6 +204,7 @@ class HomePageView(generics.GenericAPIView):
         special_offers_Serializer = SpecialOfferSerializer(special_offers, many=True, context={'request':request}).data
         competition = Competition.objects.filter(end_date__gte=date.today()).order_by('-created_at')[:1]
         competition_Serializer = CompetitionSerializer(competition, many=True, context={'request':request}).data
+        unread_notifications, count = unread_notification(user)
         return Response(
             {
                 "user_points": user_points,
@@ -211,6 +212,9 @@ class HomePageView(generics.GenericAPIView):
                 "top_users": top_users_Serializer,
                 "special_offers": special_offers_Serializer,
                 "competition": competition_Serializer,
+                "unread_notifications": unread_notifications,
+                "unread_notifications_count": count,
+                "is_admin": user.is_staff
             }, status=200
         )
 

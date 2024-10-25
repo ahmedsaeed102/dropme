@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from .models import UserModel, LanguageChoices
+from notification.models import Notification
 
 def user_get(*, id: int) -> UserModel:
     return get_object_or_404(UserModel, pk=id)
@@ -23,7 +24,6 @@ class EmailThread(threading.Thread):
     def run(self):
         send_mail(self.subject, self.body, self.email_from, self.email_to, fail_silently=False, html_message=self.html,)
 
-
 def email_send(*, subject: str, to: list, body: str | None = None, context: dict = {}, template: str | None = None,) -> None:
     email_from = f'DropMe <{settings.EMAIL_HOST_USER}>'
     if template:
@@ -32,14 +32,12 @@ def email_send(*, subject: str, to: list, body: str | None = None, context: dict
     else:
         EmailThread(subject=subject, email_to=to, email_from=email_from, body=body).start()
 
-
 def send_otp(user: UserModel) -> None:
     """Function to send OTP email to user"""
     context = {"username": user.username, "otp": user.otp}
     subject = "Your Drop Me OTP Code | رمز التحقق لمرة واحدة من Drop Me"
     recipient_list = [user.email]
     email_send(subject=subject, to=recipient_list, context=context, template="otp_email.html")
-
 
 def send_reset_password_email(email, otp):
     """Function to send reset password email with OTP"""
@@ -56,7 +54,6 @@ def send_reset_password_email(email, otp):
     recipient_list = [email]
     email_send(subject=subject, to=recipient_list, context=context, template=template)
 
-
 def send_welcome_email(email):
     """Function to send welcome email to user after account verification"""
     user = UserModel.objects.get(email=email)
@@ -64,7 +61,6 @@ def send_welcome_email(email):
     subject = "Welcome to Drop Me - Your Journey Towards a Sustainable Future Begins Here!"
     recipient_list = [email]
     email_send( subject=subject, to=recipient_list, context=context, template="welcome_email.html")
-
 
 def otp_generate() -> tuple[str, datetime]:
     """
@@ -74,7 +70,6 @@ def otp_generate() -> tuple[str, datetime]:
     otp = random.randint(1000, 9999)
     otp_expiration = timezone.now() + timedelta(minutes=5)
     return otp, otp_expiration
-
 
 def otp_set(*, user: UserModel) -> UserModel:
     otp, otp_expiration = otp_generate()
@@ -87,15 +82,20 @@ def otp_set(*, user: UserModel) -> UserModel:
     user.save()
     return user
 
-
 class UserFilter(django_filters.FilterSet):
     email = django_filters.CharFilter(lookup_expr="icontains")
     class Meta:
         model = UserModel
         fields = ["email"]
 
-
 def user_list(*, filters=None) -> list[UserModel]:
     filters = filters or {}
     qs = UserModel.objects.all()
     return UserFilter(filters, qs).qs
+
+def unread_notification(user):
+    notifications = Notification.objects.filter(user=user.pk, is_read=False)
+    if notifications:
+        return True, notifications.count()
+    else:
+        return False, 0

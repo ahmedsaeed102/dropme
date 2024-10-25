@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             field=models.ImageField(
                 blank=True,
                 null=True,
-                upload_to=community_api.models.upload_to_imgs,
+                upload_to=community_api.models.messages_upload_to_imgs,
                 validators=[
                     django.core.validators.FileExtensionValidator(
                         allowed_extensions=["png", "jpeg", "jpg", "svg"]
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
             field=models.FileField(
                 blank=True,
                 null=True,
-                upload_to=community_api.models.upload_to_videos,
+                upload_to=community_api.models.messages_upload_to_videos,
                 validators=[
                     django.core.validators.FileExtensionValidator(
                         allowed_extensions=["MOV", "avi", "mp4", "webm", "mkv"]
