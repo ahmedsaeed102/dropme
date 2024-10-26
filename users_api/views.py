@@ -265,3 +265,10 @@ class TermsAndConditionsView(generics.ListAPIView):
             serializer = TermsAndConditionSerializer(terms_and_conditions)
             return Response(serializer.data)
         return Response({"error": "Terms and conditions not found"}, status=404)
+
+class AnonymousUser(generics.GenericAPIView):
+    def get(self, *args, **kwargs):
+        fake = Faker()
+        user = User.objects.create(username=fake.name(), email=f"{fake.word()}@anonymous.com", is_active=True)
+        refresh = RefreshToken.for_user(user)
+        return Response({"refresh": str(refresh), "access": str(refresh.access_token)})
