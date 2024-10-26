@@ -6,7 +6,6 @@ from . import views
 
 router = DefaultRouter()
 router.register("user_register", views.UserViewSet, basename="user_register")
-router.register("devices", FCMDeviceAuthorizedViewSet)
 
 urlpatterns = [
     # register user

@@ -6,6 +6,8 @@ from rest_framework import viewsets, status, generics, permissions, exceptions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from fcm_django.api.rest_framework import FCMDeviceSerializer
+from rest_framework.exceptions import ValidationError
 from faker import Faker
 import jwt
 import string
@@ -31,6 +33,15 @@ User = get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+        fcm_data = self.request.data.get("fcm_device", {})
+        fcm_serializer = FCMDeviceSerializer(data=fcm_data, context={"request": self.request})
+        if fcm_serializer.is_valid():
+            fcm_serializer.save(user=user)
+        else:
+            raise ValidationError(fcm_serializer.errors)
 
     def list(self, request, *args, **kwargs):
         if request.user.is_staff:

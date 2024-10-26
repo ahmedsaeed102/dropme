@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from fcm_django.models import FCMDevice
 from .models import UserModel, LocationModel, Feedback, LanguageChoices, TermsAndCondition
 from .services import send_otp, unread_notification
 from machine_api.utlis import get_total_recycled_items
@@ -72,6 +73,17 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             self.user.save()
             send_otp(self.user)
             return {"is_verified": False, "id": self.user.id}
+        fcm_data = self.context['request'].data.get("fcm_device", {})
+        fcm_registration_id = fcm_data.get("registration_id")
+        fcm_device_type = fcm_data.get("type")
+        # Register or update FCM device
+        if fcm_registration_id and fcm_device_type:
+            fcm_device, created = FCMDevice.objects.get_or_create(user=self.user, defaults={"registration_id": fcm_registration_id, "type": fcm_device_type})
+            if not created and fcm_device.registration_id != fcm_registration_id:
+                fcm_device.registration_id = fcm_registration_id
+                fcm_device.type = fcm_device_type
+                fcm_device.save()
+
         unread_notifications, count = unread_notification(self.user)
         data["username"] = self.user.username
         data["email"] = self.user.email
