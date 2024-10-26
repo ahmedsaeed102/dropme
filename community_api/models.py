@@ -13,6 +13,9 @@ def messages_upload_to_imgs(instance, filename):
 def messages_upload_to_videos(instance, filename):
     return f"community/videos/{instance.user_model.username}/{filename}"
 
+def messages_upload_to_files(instance, filename):
+    return f"community/files/{instance.user_model.username}/{filename}"
+
 def comments_upload_to_imgs(instance, filename):
     return f"community/comments/imgs/{instance.user_model.username}/{filename}"
 
@@ -51,6 +54,8 @@ class MessagesModel(models.Model):
     comments = models.ManyToManyField(CommentsModel, blank=True, related_name="message_comment")
     img = models.ImageField(upload_to=messages_upload_to_imgs, null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=["png", "jpeg", "jpg", "svg"])])
     video = models.FileField(upload_to=messages_upload_to_videos, null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=["MOV", "avi", "mp4", "webm", "mkv"])])
+    gif = models.ImageField(upload_to=messages_upload_to_imgs, null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=["gif"])])
+    file = models.FileField(upload_to=messages_upload_to_files, null=True, blank=True)
     approved = models.BooleanField(default=False)
 
     class Meta:

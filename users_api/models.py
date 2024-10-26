@@ -89,3 +89,12 @@ class TermsAndCondition(models.Model):
 
     def __str__(self):
         return self.title_en
+
+class FAQ(models.Model):
+    question_en = models.TextField(null=True, blank=True)
+    question_ar = models.TextField(null=True, blank=True)
+    answer_en = models.TextField(null=True, blank=True)
+    answer_ar = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.question_en

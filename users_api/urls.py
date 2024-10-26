@@ -39,6 +39,8 @@ urlpatterns = [
     path("feedbacks/create/", views.FeedbackCreate.as_view(), name="create_feedback"),
     # terms and conditions
     path('terms-and-conditions/', views.TermsAndConditionsView.as_view(), name='terms-and-conditions'),
+    # terms and conditions
+    path('faqs/', views.FAQsView.as_view(), name='terms-and-conditions'),
     # anoynmous user
     path("anonymous/", views.AnonymousUser.as_view(), name="anonymous_user"),
 ]

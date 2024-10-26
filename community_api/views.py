@@ -219,7 +219,7 @@ class ChannelMessages(ListAPIView):
         data["description_ar"] = self.description_ar
         return Response(data)
 
-@extend_schema(request={"multipart/form-data": {"type": "object", "properties": {"content": {"type": "string", "format": "string"},"img": {"type": "string", "format": "binary"},"video": {"type": "string", "format": "binary"}}}})
+@extend_schema(request={"multipart/form-data": {"type": "object", "properties": {"content": {"type": "string", "format": "string"},"img": {"type": "string", "format": "binary"},"video": {"type": "string", "format": "binary"}, "gif": {"type": "string", "format": "binary"}, "file": {"type": "string", "format": "binary"}}}})
 class SendMessage(APIView):
     serializer_class = SendMessageSerializer
     permission_classes = (IsAuthenticated,)

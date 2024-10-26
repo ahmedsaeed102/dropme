@@ -7,7 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from fcm_django.models import FCMDevice
-from .models import UserModel, LocationModel, Feedback, LanguageChoices, TermsAndCondition
+from .models import UserModel, LocationModel, Feedback, LanguageChoices, TermsAndCondition, FAQ
 from .services import send_otp, unread_notification
 from machine_api.utlis import get_total_recycled_items
 
@@ -205,6 +205,11 @@ class TermsAndConditionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TermsAndCondition
         fields = ['title_en', 'title_ar', 'description_en', 'description_ar']
+
+class FAQsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FAQ
+        fields = ['question_en', 'question_ar', 'answer_en', 'answer_ar']
 
 from machine_api.models import RecycleLog
 from django.db.models import Sum

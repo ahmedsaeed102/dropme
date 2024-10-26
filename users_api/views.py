@@ -15,12 +15,12 @@ import random
 from datetime import date
 
 from machine_api.models import PhoneNumber, RecycleLog
-from .models import LocationModel, Feedback, UserModel, generate_referral_code, TermsAndCondition
+from .models import LocationModel, Feedback, UserModel, generate_referral_code, TermsAndCondition, FAQ
 from competition_api.models import Resource
 from competition_api.models import Competition
 from marketplace.models import SpecialOffer
 from .services import send_otp, send_reset_password_email, send_welcome_email, otp_set, unread_notification
-from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer, TermsAndConditionSerializer
+from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer, TermsAndConditionSerializer, FAQsSerializer
 from marketplace.serializers import SpecialOfferSerializer
 from competition_api.serializers import CompetitionSerializer, ResourcesSerializer
 from machine_api.utlis import get_total_recycled_items
@@ -210,9 +210,11 @@ class HomePageView(generics.GenericAPIView):
     def get(self, request):
         user = request.user
         user_points = user.total_points
-        top_users = UserModel.objects.order_by("-total_points")[:3]
+        top_users = UserModel.objects.order_by("-total_points")[:10]
         top_users_Serializer = TopUserSerializer(top_users, many=True).data
-        competition = Competition.objects.filter(end_date__gte=date.today()).order_by('-created_at')[:1]
+        new_target_competition = Competition.objects.filter(end_date__gte=date.today()).order_by('-created_at')[:1]
+        new_target_competition_Serializer = CompetitionSerializer(new_target_competition, many=True, context={'request':request}).data
+        competition = Competition.objects.filter(end_date__gte=date.today()).order_by('-created_at')
         competition_Serializer = CompetitionSerializer(competition, many=True, context={'request':request}).data
         unread_notifications, count = unread_notification(user)
         ads = Resource.objects.filter(resource_type="ad")
@@ -223,7 +225,8 @@ class HomePageView(generics.GenericAPIView):
                 "recycled_items": get_total_recycled_items(user.id),
                 "top_users": top_users_Serializer,
                 "ads": ads_serializer,
-                "competition": competition_Serializer,
+                "new_target_competition": new_target_competition_Serializer,
+                "competitions": competition_Serializer,
                 "unread_notifications": unread_notifications,
                 "unread_notifications_count": count,
                 "is_admin": user.is_staff
@@ -272,10 +275,15 @@ class TermsAndConditionsView(generics.ListAPIView):
 
     def get(self, request, *args, **kwargs):
         terms_and_conditions = TermsAndCondition.objects.last()
-        if terms_and_conditions:
-            serializer = TermsAndConditionSerializer(terms_and_conditions)
-            return Response(serializer.data)
-        return Response({"error": "Terms and conditions not found"}, status=404)
+        serializer = TermsAndConditionSerializer(terms_and_conditions, context={"request": request})
+        return Response(serializer.data)
+
+class FAQsView(generics.ListAPIView):
+
+    def get(self, request, *args, **kwargs):
+        faqs = FAQ.objects.all()
+        serializer = FAQsSerializer(faqs, many=True, context={"request": request})
+        return Response(serializer.data)
 
 class AnonymousUser(generics.GenericAPIView):
     def get(self, *args, **kwargs):

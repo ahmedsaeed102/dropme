@@ -74,7 +74,7 @@ class MessagesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MessagesModel
-        fields = ("id", "sender_id", "sender", "sender_photo", "current_user_reaction", "content", "message_dt", "img", "video", "reactions", "approved", "comments_num")
+        fields = ("id", "sender_id", "sender", "sender_photo", "current_user_reaction", "content", "message_dt", "img", "video", 'gif', 'file', "reactions", "approved", "comments_num")
 
     def get_sender(self, obj):
         return obj.user_model.username
@@ -98,10 +98,12 @@ class MessagesSerializer(serializers.ModelSerializer):
 class SendMessageSerializer(serializers.ModelSerializer):
     img = serializers.ImageField(required=False,validators=[FileExtensionValidator(allowed_extensions=["png", "jpeg", "jpg", "svg"])])
     video = serializers.FileField(required=False,validators=[FileExtensionValidator(allowed_extensions=["MOV", "avi", "mp4", "webm", "mkv"])])
+    gif = serializers.ImageField(required=False,validators=[FileExtensionValidator(allowed_extensions=["gif"])])
+    file = serializers.FileField(required=False)
 
     class Meta:
         model = MessagesModel
-        fields = ("content", "img", "video")
+        fields = ("content", "img", "video", "gif", "file")
 
 class ReactionSerializer(serializers.ModelSerializer):
     msg_id = serializers.SerializerMethodField()
