@@ -55,12 +55,10 @@ class LeaderboardSerializer(serializers.ModelSerializer):
         model = User
         fields = ["username", "profile_photo", "total_points", "rank"]
 
-
 class ResourcesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
         fields = "__all__"
-
 
 class ContactUsLinkSerializer(serializers.ModelSerializer):
     class Meta:

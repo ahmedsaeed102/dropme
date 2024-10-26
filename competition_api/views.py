@@ -106,18 +106,7 @@ class CompetitionRanking(APIView):
 
         return Response(ranking)
 
-
-class AdsList(generics.ListAPIView):
-    """For Home page slider"""
-
-    queryset = Resource.objects.filter(resource_type="ad")
-    serializer_class = ResourcesSerializer
-    permission_classes = [IsAuthenticated]
-
-
 class LinksAPI(generics.ListAPIView):
-    """For contact us links"""
-
     queryset = Resource.objects.filter(resource_type="contact_us")
     serializer_class = ContactUsLinkSerializer
     permission_classes = [IsAuthenticated]
@@ -125,8 +114,6 @@ class LinksAPI(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         data = super().get(request, *args, **kwargs).data
         new_data = {}
-
         for item in data:
             new_data[item["name"]] = item["link"]
-
         return Response(new_data)

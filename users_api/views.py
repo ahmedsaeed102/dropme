@@ -14,12 +14,13 @@ from datetime import date
 
 from machine_api.models import PhoneNumber, RecycleLog
 from .models import LocationModel, Feedback, UserModel, generate_referral_code, TermsAndCondition
+from competition_api.models import Resource
 from competition_api.models import Competition
 from marketplace.models import SpecialOffer
 from .services import send_otp, send_reset_password_email, send_welcome_email, otp_set, unread_notification
 from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer, TermsAndConditionSerializer
 from marketplace.serializers import SpecialOfferSerializer
-from competition_api.serializers import CompetitionSerializer
+from competition_api.serializers import CompetitionSerializer, ResourcesSerializer
 from machine_api.utlis import get_total_recycled_items
 
 User = get_user_model()
@@ -200,17 +201,17 @@ class HomePageView(generics.GenericAPIView):
         user_points = user.total_points
         top_users = UserModel.objects.order_by("-total_points")[:3]
         top_users_Serializer = TopUserSerializer(top_users, many=True).data
-        special_offers = SpecialOffer.objects.filter(end_date__gte=date.today(), is_finished=False).order_by('-created_at')[:3]
-        special_offers_Serializer = SpecialOfferSerializer(special_offers, many=True, context={'request':request}).data
         competition = Competition.objects.filter(end_date__gte=date.today()).order_by('-created_at')[:1]
         competition_Serializer = CompetitionSerializer(competition, many=True, context={'request':request}).data
         unread_notifications, count = unread_notification(user)
+        ads = Resource.objects.filter(resource_type="ad")
+        ads_serializer = ResourcesSerializer(ads, many=True, context={'request':request}).data
         return Response(
             {
                 "user_points": user_points,
                 "recycled_items": get_total_recycled_items(user.id),
                 "top_users": top_users_Serializer,
-                "special_offers": special_offers_Serializer,
+                "ads": ads_serializer,
                 "competition": competition_Serializer,
                 "unread_notifications": unread_notifications,
                 "unread_notifications_count": count,

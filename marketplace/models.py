@@ -1,11 +1,15 @@
 from datetime import date
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import FileExtensionValidator
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
 PERCENTAGE_VALIDATOR = [MinValueValidator(0), MaxValueValidator(100)]
+
+def upload_to_imgs(instance, filename):
+    return f"special_offers/{instance.user_model.username}/{filename}"
 
 class Category(models.Model):
     category_name = models.CharField(max_length=50, default="Muqbis")
@@ -63,6 +67,7 @@ class Entry(models.Model):
 
 class SpecialOffer(models.Model):
     description = models.TextField(blank=True, null=True)
+    img = models.ImageField(upload_to=upload_to_imgs, null=True, blank=True, validators=[FileExtensionValidator(allowed_extensions=["png", "jpeg", "jpg", "svg"])])
     required_points = models.PositiveBigIntegerField()
     reward_points = models.PositiveBigIntegerField()
     start_date = models.DateField()
