@@ -239,7 +239,7 @@ class SendMessage(APIView):
         if request.user.is_staff:
             new_message.approved = True
             new_message.save()
-            Message.new_message_send(room=room, message=new_message, message_type="message")
+            Message.new_message_send(room_name=room_name, message=new_message, message_type="message")
             Message.new_message_notification_send(request=request, room_type=room.channel_type, room=room)
             return Response("message sent successfully", status=status.HTTP_201_CREATED)
         return Response("Message sent successfully, pending admin approval.", status=status.HTTP_201_CREATED)

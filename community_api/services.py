@@ -41,10 +41,10 @@ class Message:
         return new_message
 
     @staticmethod
-    def new_message_send(*, room, message, message_type) -> None:
+    def new_message_send(*, room_name, message, message_type) -> None:
         try:
             channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)(room.room_name,{"type": "send.messages","message_type": message_type,"data": message})
+            async_to_sync(channel_layer.group_send)(room_name,{"type": "send.messages","message_type": message_type,"data": message})
         except Exception as e:
             raise APIException(str(e))
 
