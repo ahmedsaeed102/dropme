@@ -85,10 +85,7 @@ class ChannelsModel(models.Model):
 
     @property
     def messages_num(self):
-        if self.messages and self.room_name:
-            return self.messages.count()
-        else:
-            return 0
+        return self.messages.filter(approved=True).count() if self.messages.exists() else 0
 
     @property
     def websocket_url(self):
