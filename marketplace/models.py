@@ -9,7 +9,7 @@ User = get_user_model()
 PERCENTAGE_VALIDATOR = [MinValueValidator(0), MaxValueValidator(100)]
 
 def upload_to_imgs(instance, filename):
-    return f"special_offers/{instance.user_model.username}/{filename}"
+    return f"special_offers/{instance.description}/{filename}"
 
 class Category(models.Model):
     category_name = models.CharField(max_length=50, default="Muqbis")

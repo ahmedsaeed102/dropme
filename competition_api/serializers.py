@@ -4,6 +4,12 @@ from .models import Competition, CompetitionRanking, Resource
 
 User = get_user_model()
 
+class LeaderboardSerializer(serializers.ModelSerializer):
+    rank = serializers.ReadOnlyField(source="ranking")
+
+    class Meta:
+        model = User
+        fields = ["username", "profile_photo", "total_points", "rank"]
 
 class CompetitionSerializer(serializers.ModelSerializer):
     is_user_joined = serializers.SerializerMethodField(read_only=True)
@@ -46,14 +52,6 @@ class CompetitionRankingSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompetitionRanking
         fields = ("name", "photo", "points", "rank")
-
-
-class LeaderboardSerializer(serializers.ModelSerializer):
-    rank = serializers.ReadOnlyField(source="ranking")
-
-    class Meta:
-        model = User
-        fields = ["username", "profile_photo", "total_points", "rank"]
 
 class ResourcesSerializer(serializers.ModelSerializer):
     class Meta:

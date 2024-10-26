@@ -3,7 +3,7 @@ from .views import *
 
 urlpatterns = [
     # Leaderboard
-    path("leaderboard/", Leaderboard.as_view(), name="leaderboard"),
+    # path("leaderboard/", Leaderboard.as_view(), name="leaderboard"),
     # Competitions
     path("competitions/", Competitions.as_view(), name="competitions"),
     path("competitions/<int:pk>/", CompetitionDetail.as_view(), name="competition_detail"),

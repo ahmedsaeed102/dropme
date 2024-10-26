@@ -10,18 +10,30 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from core.mixins import AdminOrReadOnlyPermissionMixin
+
 from notification.services import notification_send_all
 from .services import competition_get, current_user_ranking, competition_ranking
-from .serializers import (
-    CompetitionSerializer,
-    LeaderboardSerializer,
-    ResourcesSerializer,
-    ContactUsLinkSerializer,
-)
+from .serializers import CompetitionSerializer, LeaderboardSerializer, ResourcesSerializer, ContactUsLinkSerializer
 from .models import Competition, Resource
 
 
 User = get_user_model()
+
+class Leaderboard(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = LeaderboardSerializer
+
+    def get(self, request):
+        top_ten = User.objects.all()[:10]
+        serializer = self.serializer_class(top_ten, many=True, context={"request": request})
+        current_user = current_user_ranking(request=request)
+        return Response(
+            {
+                "status": "success",
+                "message": "got leaderboard successfully",
+                "data": {"current_user": current_user, "ranking": serializer.data},
+            }
+        )
 
 
 class Competitions(AdminOrReadOnlyPermissionMixin, generics.ListCreateAPIView):
@@ -53,30 +65,6 @@ class CompetitionDetail(AdminOrReadOnlyPermissionMixin, generics.RetrieveUpdateA
 class CompetitionDelete(AdminOrReadOnlyPermissionMixin, generics.DestroyAPIView):
     queryset = Competition.objects.all()
     serializer_class = CompetitionSerializer
-
-
-class Leaderboard(APIView):
-    """Global leaderboard"""
-
-    permission_classes = [IsAuthenticated]
-    serializer_class = LeaderboardSerializer
-
-    def get(self, request):
-        top_ten = User.objects.all()[:10]
-
-        serializer = self.serializer_class(
-            top_ten, many=True, context={"request": request}
-        )
-
-        current_user = current_user_ranking(request=request)
-
-        return Response(
-            {
-                "status": "success",
-                "message": "got leaderboard successfully",
-                "data": {"current_user": current_user, "ranking": serializer.data},
-            }
-        )
 
 
 class JoinCompetition(APIView):
