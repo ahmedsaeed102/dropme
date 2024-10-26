@@ -186,7 +186,7 @@ class FeedbackSerializer(serializers.ModelSerializer):
 class TopUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ["username", "profile_photo", "total_points"]
+        fields = ["id", "username", "profile_photo", "total_points"]
         read_only_fields = fields
 
 class TermsAndConditionSerializer(serializers.ModelSerializer):
