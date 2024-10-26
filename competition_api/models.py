@@ -1,7 +1,10 @@
 from datetime import date
 from django.db import models
-from users_api.models import UserModel
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
+from users_api.models import UserModel
+from notification.services import notification_send_all
 
 class Competition(models.Model):
     name = models.CharField(max_length=100)
@@ -25,23 +28,24 @@ class Competition(models.Model):
     def __str__(self) -> str:
         return self.name
 
+@receiver(post_save, sender=Competition)
+def Competition_created(sender, instance, created, **kwargs):
+    if created:
+        notification_send_all(
+            title="New Competition", 
+            body="New competition created check it out!",
+            title_ar="مسابقة جديدة",
+            body_ar="تم إنشاء مسابقة جديدة، تحقق منها!"
+        )
 
 class CompetitionRanking(models.Model):
-    competition = models.ForeignKey(
-        Competition,
-        on_delete=models.CASCADE,
-    )
-    user = models.ForeignKey(
-        UserModel,
-        on_delete=models.CASCADE,
-    )
+    competition = models.ForeignKey(Competition,on_delete=models.CASCADE)
+    user = models.ForeignKey(UserModel,on_delete=models.CASCADE)
     points = models.PositiveIntegerField(default=0, blank=True)
 
     @property
     def ranking(self) -> int:
-        count = CompetitionRanking.objects.filter(
-            competition=self.competition.pk, points__gt=self.points
-        ).count()
+        count = CompetitionRanking.objects.filter(competition=self.competition.pk, points__gt=self.points).count()
         return count + 1
 
     class Meta:
@@ -49,7 +53,6 @@ class CompetitionRanking(models.Model):
 
     def __str__(self) -> str:
         return f"{self.competition.name} | {self.user.username}"
-
 
 class Resource(models.Model):
     name = models.CharField(max_length=100)

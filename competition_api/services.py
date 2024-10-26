@@ -2,10 +2,8 @@ from django.shortcuts import get_object_or_404
 from .serializers import CompetitionRankingSerializer
 from .models import Competition
 
-
 def competition_get(*, pk: int) -> Competition:
     return get_object_or_404(Competition, pk=pk)
-
 
 def current_user_ranking(*, request) -> dict:
     return {
@@ -15,16 +13,10 @@ def current_user_ranking(*, request) -> dict:
         "rank": request.user.ranking,
     }
 
-
 def competition_ranking(*, request, competition: Competition) -> dict:
     ranking = competition.competitionranking_set.all()[:10]
-
-    serializer = CompetitionRankingSerializer(
-        ranking, many=True, context={"request": request}
-    )
-
+    serializer = CompetitionRankingSerializer(ranking, many=True, context={"request": request})
     has_currentuser_joined = competition.users.filter(pk=request.user.pk).exists()
-
     if has_currentuser_joined:
         current_user = competition.competitionranking_set.get(user=request.user.pk)
         current_user_ranking = {
@@ -39,7 +31,6 @@ def competition_ranking(*, request, competition: Competition) -> dict:
             "photo": request.build_absolute_uri(request.user.profile_photo.url),
             "joined": False,
         }
-
     return {
         "status": "success",
         "message": "got competition ranking successfully",

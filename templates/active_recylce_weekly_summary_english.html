@@ -20,7 +20,7 @@
     <hr>
 
     <p><b>Points Earned:</b> {{ total_points }} 🏅</p>
-    <p><b>Current Leaderboard Rank:</b> 20 </p>
+    <p><b>Current Leaderboard Rank:</b> {{ rank  }} </p>
 
     <p>
         You're making a real difference, and it's great to see your progress. Every bottle and can counts 
@@ -30,7 +30,11 @@
     <hr>
 
     <p><strong>Competitions & Rewards</strong></p>
-    <p>You're 20 points away from unlocking your next reward! Don't forget to check the app for the latest competitions and chances to earn bonus points.</p>
+    {% if remaining_points == 0 %}
+        <p>Congratulations! You've unlocked your next reward! 🎉 Check the app to claim it.</p>
+    {% else %}
+        <p>You're {{ remaining_points }} points away from unlocking your next reward! Don't forget to check the app for the latest competitions and chances to earn bonus points.</p>
+    {% endif %}
 
     <hr>
 

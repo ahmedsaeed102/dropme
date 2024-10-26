@@ -16,7 +16,6 @@ from .services import competition_get, current_user_ranking, competition_ranking
 from .serializers import CompetitionSerializer, LeaderboardSerializer, ResourcesSerializer, ContactUsLinkSerializer
 from .models import Competition, Resource
 
-
 User = get_user_model()
 
 class Leaderboard(APIView):
@@ -35,63 +34,44 @@ class Leaderboard(APIView):
             }
         )
 
-
 class Competitions(AdminOrReadOnlyPermissionMixin, generics.ListCreateAPIView):
-    queryset = Competition.objects.filter(
-        end_date__gte=date.today()
-    )  # return only ongoing competitions
+    queryset = Competition.objects.filter(end_date__gte=date.today())
     serializer_class = CompetitionSerializer
 
     def perform_create(self, serializer):
-        """send notification to all user after a new competition is created"""
-
         serializer.save()
-
-        notification_send_all(
-            title="New Competition", body="New competition created check it out!"
-        )
 
     @method_decorator(cache_page(60 * 30))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-
 
 class CompetitionDetail(AdminOrReadOnlyPermissionMixin, generics.RetrieveUpdateAPIView):
     queryset = Competition.objects.all()
     serializer_class = CompetitionSerializer
     http_method_names = ["head", "get", "put"]
 
-
 class CompetitionDelete(AdminOrReadOnlyPermissionMixin, generics.DestroyAPIView):
     queryset = Competition.objects.all()
     serializer_class = CompetitionSerializer
-
 
 class JoinCompetition(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         competition = competition_get(pk=pk)
-
         if competition.end_date < date.today():
             raise ValidationError({"detail": _("Competition has already ended")})
-
         if request.user in competition.users.all():
             raise ValidationError({"detail": _("You already joined this competition")})
-
         competition.users.add(request.user.pk)
-
         return redirect("competition_ranking", competition.pk)
-
 
 class CompetitionRanking(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         competition = competition_get(pk=pk)
-
         ranking = competition_ranking(request=request, competition=competition)
-
         return Response(ranking)
 
 class LinksAPI(generics.ListAPIView):

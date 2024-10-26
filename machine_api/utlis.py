@@ -8,6 +8,7 @@ from rest_framework.exceptions import APIException
 from users_api.services import user_get
 from marketplace.services import special_offer_apply
 from .models import RecycleLog
+from competition_api.models import CompetitionRanking
 
 
 def update_user_points(user_pk, points):
@@ -92,10 +93,8 @@ def get_total_recycled_items(userid: int) -> int:
     total_cans = user_recycle_logs.aggregate(Sum("cans"))["cans__sum"]
     return total_bottles + total_cans
 
-def get_user_weekly_logs(userid: int) -> dict:
-    friday_last_week = timezone.now().date() - timedelta(days=7)
-    friday_last_week = datetime.combine(friday_last_week, datetime.min.time())
-    logs = RecycleLog.objects.filter(user=userid, created_at__gte=make_aware(friday_last_week))
+def get_user_logs(userid: int) -> dict:
+    logs = RecycleLog.objects.filter(user=userid)
     if not logs:
         return {"recycled": False}
 
@@ -110,7 +109,17 @@ def get_user_weekly_logs(userid: int) -> dict:
         "bottles_points": bottles_points,
         "cans_number": total_cans,
         "cans_points": cans_points,
-        "total_points": total_points,
     }
     data.update(co2_energy)
     return data
+
+def get_remaining_points(user):
+    competition_ranking = CompetitionRanking.objects.filter(user=user)
+    points = []
+    for ranking in competition_ranking:
+        remaining_points = ranking.competition.target - ranking.points
+        if remaining_points < 0:
+            return 0
+        else:
+            points.append(remaining_points)
+        return min(points)
