@@ -55,7 +55,7 @@ class CompetitionRankingSerializer(serializers.ModelSerializer):
 class ResourcesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
-        fields = "__all__"
+        fields = ("name", "img", "link")
 
 class ContactUsLinkSerializer(serializers.ModelSerializer):
     class Meta:
