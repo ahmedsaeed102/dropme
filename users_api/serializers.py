@@ -211,12 +211,12 @@ class TopUserSerializer(serializers.ModelSerializer):
 class TermsAndConditionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TermsAndCondition
-        fields = ['title_en', 'title_ar', 'description_en', 'description_ar']
+        fields = ['about_app_en', 'about_app_ar', 'description_en', 'description_ar']
 
 class FAQsSerializer(serializers.ModelSerializer):
     class Meta:
         model = FAQ
-        fields = ['question_en', 'question_ar', 'answer_en', 'answer_ar']
+        fields = ['question_en', 'question_ar', 'terms_en', 'terms_ar', 'privacy_en', 'privacy_ar']
 
 from machine_api.models import RecycleLog
 from django.db.models import Sum

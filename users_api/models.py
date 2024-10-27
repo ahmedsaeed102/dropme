@@ -83,10 +83,13 @@ class Feedback(models.Model):
         return self.title
 
 class TermsAndCondition(models.Model):
-    title_en = models.CharField(max_length=50)
-    title_ar = models.CharField(max_length=50)
-    description_ar = models.TextField(null=True, blank=True)
-    description_en = models.TextField(null=True, blank=True)
+    about_app_en = models.TextField(null=True, blank=True)
+    about_app_ar = models.TextField(null=True, blank=True)
+    terms_en = models.TextField(null=True, blank=True)
+    terms_ar = models.TextField(null=True, blank=True)
+    privacy_en = models.TextField(null=True, blank=True)
+    privacy_ar = models.TextField(null=True, blank=True)
+
 
     def __str__(self):
         return self.title_en

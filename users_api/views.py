@@ -277,7 +277,9 @@ class TermsAndConditionsView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         terms_and_conditions = TermsAndCondition.objects.last()
         serializer = TermsAndConditionSerializer(terms_and_conditions, context={"request": request})
-        return Response(serializer.data)
+        social_media = Resource.objects.filter(resource_type="contact_us")
+        social_media_serializer = ResourcesSerializer(social_media, many=True, context={"request": request})
+        return Response({"data":serializer.data, "social_media": social_media_serializer.data})
 
 class FAQsView(generics.ListAPIView):
 
