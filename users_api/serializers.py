@@ -192,6 +192,11 @@ class LocationModelserializers(serializers.ModelSerializer):
         fields = "__all__"
 
 class FeedbackSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required=True)
+    description = serializers.CharField(required=True)
+    type = serializers.CharField(required=True)
+    name = serializers.CharField(required=False)
+
     class Meta:
         model = Feedback
         fields = "__all__"
@@ -199,7 +204,10 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
     def create(self, val_data):
         user = self.context["request"].user
-        feedback = Feedback.objects.create(title=val_data["title"], description=val_data["description"], user=user,)
+        if val_data.get("name"):
+            feedback = Feedback.objects.create(title=val_data["title"], description=val_data["description"], user=user, type=val_data["type"], name=val_data['name'])
+        else:
+            feedback = Feedback.objects.create(title=val_data["title"], description=val_data["description"], user=user, type=val_data["type"])
         return feedback
 
 class TopUserSerializer(serializers.ModelSerializer):

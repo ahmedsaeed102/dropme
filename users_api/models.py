@@ -78,6 +78,8 @@ class Feedback(models.Model):
     title = models.CharField(max_length=50)
     description = models.TextField(null=True, blank=True)
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name="feedbacks")
+    name = models.CharField(max_length=50, default="app")
+    type = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return self.title
