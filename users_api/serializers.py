@@ -211,7 +211,7 @@ class TopUserSerializer(serializers.ModelSerializer):
 class TermsAndConditionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TermsAndCondition
-        fields = ['about_app_en', 'about_app_ar', 'description_en', 'description_ar']
+        fields = "__all__"
 
 class FAQsSerializer(serializers.ModelSerializer):
     class Meta:
