@@ -92,7 +92,7 @@ class TermsAndCondition(models.Model):
 
 
     def __str__(self):
-        return self.id
+        return f"{self.id}"
 
 class FAQ(models.Model):
     question_en = models.TextField(null=True, blank=True)
