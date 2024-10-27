@@ -7,6 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from fcm_django.models import FCMDevice
+from fcm_django.api.rest_framework import FCMDeviceSerializer
 from .models import UserModel, LocationModel, Feedback, LanguageChoices, TermsAndCondition, FAQ
 from .services import send_otp, unread_notification
 from machine_api.utlis import get_total_recycled_items
@@ -14,15 +15,21 @@ from machine_api.utlis import get_total_recycled_items
 """
     SIGN UP SERIALIZERS
 """
+class CustomFCMDeviceSerializer(serializers.Serializer):
+    type = serializers.CharField(required=False, allow_blank=True)
+    registration_id = serializers.CharField(required=False, allow_blank=True)
+
 class UserSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True, min_length=settings.MIN_PASSWORD_LENGTH, error_messages={"min_length": _("Password must be longer than 8 length")})
     password2 = serializers.CharField(write_only=True, min_length=settings.MIN_PASSWORD_LENGTH, error_messages={"min_length": _("Password must be longer than 8 length")})
     referral_code = serializers.CharField(write_only=True, required=False)
     phone_number = serializers.CharField(required=False, allow_blank=True)
+    fcm_device = CustomFCMDeviceSerializer(required=False)
+
 
     class Meta:
         model = UserModel
-        fields = ["id", "username", "phone_number", "email", "password1", "password2", "referral_code"]
+        fields = ["id", "username", "phone_number", "email", "password1", "password2", "referral_code", "country_code", "fcm_device"]
 
     # to check password validation in sign up form
     def validate(self, data):
@@ -43,10 +50,9 @@ class UserSerializer(serializers.ModelSerializer):
         otp = random.randint(1000, 9999)
         otp_expiration = timezone.now() + timedelta(minutes=5)
         if val_data.get("phone_number"):
-            val_data["phone_number"] = f"0{val_data['phone_number']}"
-            user = UserModel(username=val_data["username"], phone_number=val_data["phone_number"], email=val_data["email"], otp=otp, otp_expiration=otp_expiration, max_otp_try=settings.MAX_OTP_TRY)
+            user = UserModel(username=val_data["username"], phone_number=val_data["phone_number"], email=val_data["email"], otp=otp, otp_expiration=otp_expiration, max_otp_try=settings.MAX_OTP_TRY, country_code=val_data["country_code"])
         else:
-            user = UserModel(username=val_data["username"], email=val_data["email"], otp=otp, otp_expiration=otp_expiration, max_otp_try=settings.MAX_OTP_TRY)
+            user = UserModel(username=val_data["username"], email=val_data["email"], otp=otp, otp_expiration=otp_expiration, max_otp_try=settings.MAX_OTP_TRY, country_code=val_data["country_code"])
         user.set_password(val_data["password1"])
         referral_code = val_data.get("referral_code")
         if referral_code:
@@ -89,6 +95,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["email"] = self.user.email
         data["id"] = self.user.id
         data["phone_number"] = self.user.phone_number
+        data["country_code"] = self.user.country_code
         data["profile_photo"] = self.user.profile_photo.url if self.user.profile_photo else None
         data["age"] = self.user.age
         data["gender"] = self.user.gender

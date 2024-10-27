@@ -183,6 +183,7 @@ class CurrentUserDetailsView(generics.GenericAPIView):
             "username": user.username,
             "email": user.email, 
             "phone_number": user.phone_number,
+            "country_code": user.country_code,
             "profile_photo": user.profile_photo.url,
             "age": user.age,
             "gender": user.gender,

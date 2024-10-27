@@ -33,6 +33,7 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=50)
     email = models.EmailField(unique=True, null=False, blank=False, max_length=50, validators=[validate_email], verbose_name=_("Email"))
     phone_number = models.CharField(unique=True, null=True, blank=True, max_length=11, validators=[validate_phone_number])
+    country_code = models.CharField(max_length=50, default="+20")
 
     otp = models.CharField(max_length=4)
     otp_expiration = models.DateTimeField(null=True, blank=True)
