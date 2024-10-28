@@ -84,7 +84,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         fcm_device_type = fcm_data.get("type")
         # Register or update FCM device
         if fcm_registration_id and fcm_device_type:
-            fcm_device, created = FCMDevice.objects.get_or_create(user=self.user, defaults={"registration_id": fcm_registration_id, "type": fcm_device_type})
+            fcm_device, created = FCMDevice.objects.get_or_create(user=self.user, defaults={"registration_id": fcm_registration_id, "type": fcm_device_type, "name": self.user.username})
             if not created and fcm_device.registration_id != fcm_registration_id:
                 fcm_device.registration_id = fcm_registration_id
                 fcm_device.type = fcm_device_type
