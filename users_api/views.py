@@ -39,7 +39,7 @@ class UserViewSet(viewsets.ModelViewSet):
         fcm_data = self.request.data.get("fcm_device", {})
         fcm_serializer = FCMDeviceSerializer(data=fcm_data, context={"request": self.request})
         if fcm_serializer.is_valid():
-            fcm_serializer.save(user=user)
+            fcm_serializer.save(user=user, name=user.username)
         else:
             raise ValidationError(fcm_serializer.errors)
 

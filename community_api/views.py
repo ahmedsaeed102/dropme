@@ -297,11 +297,12 @@ class SendReactionMessage(APIView):
         message_id = serializer.data["message_id"]
         user_id = request.user.id
         message = message_get(message_id=message_id)
+        message_user = message.user_model.username
         message = Message.message_reaction_add(emoji=emoji, message=message, user_id=user_id)
         message = ReactionSerializer(message).data
         Message.new_message_send(room_name=room_name, message=message, message_type="reaction")
         notification_send_by_name(
-            name=message.user_model.username,
+            name=message_user,
             title=f"Reaction on your message",
             body=f"{request.user.username} reacted to your message.",
             title_ar = "رد على رسالتك",

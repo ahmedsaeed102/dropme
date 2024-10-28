@@ -88,6 +88,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             if not created and fcm_device.registration_id != fcm_registration_id:
                 fcm_device.registration_id = fcm_registration_id
                 fcm_device.type = fcm_device_type
+                fcm_device.name = self.user.username
                 fcm_device.save()
 
         unread_notifications, count = unread_notification(self.user)
