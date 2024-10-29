@@ -7,8 +7,8 @@ from rest_framework.exceptions import APIException, NotFound, ValidationError, P
 from channels.layers import get_channel_layer
 
 from notification.services import notification_send, fcmdevice_get, fcmdevice_get_all
-from .models import ChannelsModel, MessagesModel, ReportModel
-from .utlis import check_if_user_reacted_to_message
+from .models import ChannelsModel, MessagesModel, ReportModel, CommentsModel
+from .utlis import check_if_user_reacted_to_message, check_if_user_reacted_to_comment
 
 User = get_user_model()
 
@@ -18,8 +18,11 @@ def community_get(*, room_name: str) -> ChannelsModel:
 def message_get(*, message_id: int) -> MessagesModel:
     return get_object_or_404(MessagesModel, pk=message_id)
 
-def user_reaction_get(*, message: MessagesModel, user_id: int) -> str:
-    reactions = message.reactions
+def comment_get(*, comment_id: int) -> CommentsModel:
+    return get_object_or_404(CommentsModel, pk=comment_id)
+
+def user_reaction_get(*, model, user_id):
+    reactions = model.reactions
     for reaction, value in reactions.items():
         if user_id in value["users_ids"]:
             return reaction
@@ -100,6 +103,43 @@ class Message:
         message = Message.message_reaction_remove(emoji=old_emoji, message=message, user_id=user_id)
         message = Message.message_reaction_add(emoji=new_emoji, message=message, user_id=user_id)
         return message
+
+class Comment:
+
+    @staticmethod
+    def comment_reaction_add(*, emoji: str, comment: CommentsModel, user_id: int) -> CommentsModel:
+        if emoji not in comment.reactions:
+            raise NotFound({"detail": _("Emoji not found")})
+        else:
+            if not check_if_user_reacted_to_comment(comment.reactions, user_id):
+                comment.reactions[emoji]["count"] += 1
+                comment.reactions[emoji]["users_ids"].append(user_id)
+                comment.reactions[emoji]["users"].append({"id": user_id, "reaction": emoji})
+                comment.save()
+            else:
+                raise ValidationError({"detail": _("You already reacted to this comment")})
+        return comment
+
+    @staticmethod
+    def comment_reaction_remove(*, emoji: str, comment: CommentsModel, user_id: int) -> CommentsModel:
+        if emoji not in comment.reactions:
+            raise NotFound({"detail:": _("Emoji not found")})
+        else:
+            if user_id in comment.reactions[emoji]["users_ids"]:
+                comment.reactions[emoji]["count"] -= 1
+                comment.reactions[emoji]["users_ids"].remove(user_id)
+                comment.reactions[emoji]["users"] = [dictionary for dictionary in comment.reactions[emoji]["users"] if dictionary.get("id") != user_id]
+                comment.save()
+            else:
+                raise ValidationError({"detail": _("You haven't reacted using this emoji")})
+        return comment
+
+    @transaction.atomic
+    @staticmethod
+    def comment_reaction_change(*, old_emoji: str, new_emoji: str, comment: CommentsModel, user_id: int) -> CommentsModel:
+        comment = Comment.comment_reaction_remove(emoji=old_emoji, comment=comment, user_id=user_id)
+        comment = Comment.comment_reaction_add(emoji=new_emoji, comment=comment, user_id=user_id)
+        return comment
 
 def report_create(*, request, message_id: int) -> ReportModel:
     try:

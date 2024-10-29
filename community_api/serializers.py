@@ -88,7 +88,7 @@ class MessagesSerializer(serializers.ModelSerializer):
     def get_current_user_reaction(self, obj):
         request = self.context.get("request")
         if request:
-            reaction = user_reaction_get(message=obj, user_id=request.user.id)
+            reaction = user_reaction_get(model=obj, user_id=request.user.id)
             return reaction
         return ""
 
@@ -115,6 +115,16 @@ class ReactionSerializer(serializers.ModelSerializer):
     def get_msg_id(self, obj):
         return obj.id
 
+class CommentReactionSerializer(serializers.ModelSerializer):
+    comment_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CommentsModel
+        fields = ("comment_id", "reactions")
+
+    def get_comment_id(self, obj):
+        return obj.id
+
 class EditMessageSerializer(serializers.ModelSerializer):
         class Meta:
             model = MessagesModel
@@ -123,12 +133,29 @@ class EditMessageSerializer(serializers.ModelSerializer):
 class SendReactionSerializer(serializers.Serializer):
     message_id = serializers.IntegerField()
     emoji = serializers.CharField(max_length=50)
+    comment_id = serializers.IntegerField(required=False)
 
 class CommentsSerializer(serializers.ModelSerializer):
     img = serializers.ImageField(required=False,validators=[FileExtensionValidator(allowed_extensions=["png", "jpeg", "jpg", "svg"])])
     video = serializers.FileField(required=False,validators=[FileExtensionValidator(allowed_extensions=["MOV", "avi", "mp4", "webm", "mkv"])])
+    user_model = serializers.SerializerMethodField()
+    current_user_reaction = serializers.SerializerMethodField()
+
+    def get_user_model(self, obj):
+        return{
+            "id": obj.user_model.id,
+            "username": obj.user_model.username,
+            "profile_photo": obj.user_model.profile_photo
+        }
+
+    def get_current_user_reaction(self, obj):
+        request = self.context.get("request")
+        if request:
+            reaction = user_reaction_get(model=obj, user_id=request.user.id)
+            return reaction
+        return ""
 
     class Meta:
         model = CommentsModel
-        fields = ['id', 'user_model', 'content', 'comment_dt', 'reactions', 'img', 'video']
+        fields = ['id', 'user_model', 'content', 'comment_dt', 'current_user_reaction', 'reactions', 'img', 'video']
         read_only_fields = ['user_model', 'comment_dt']

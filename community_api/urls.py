@@ -26,8 +26,8 @@ urlpatterns = [
     path("community/messages/<int:pk>/update/",EditMessage.as_view(),name="edit_message"),
     path("community/messages/<int:pk>/delete/",DeleteMessage.as_view(),name="delete_message"),
     # add, remove, change message reaction
-    path("community/<str:room_name>/reaction/add/",SendReactionMessage.as_view(),name="send_reaction"),
-    path("community/<str:room_name>/reaction/remove/",RemoveReactionMessage.as_view(),name="Remove_reaction"),
+    path("community/<str:room_name>/reaction/add/",SendReaction.as_view(),name="send_reaction"),
+    path("community/<str:room_name>/reaction/remove/",RemoveReaction.as_view(),name="Remove_reaction"),
     path("community/<str:room_name>/reaction/change/",ChangeReaction.as_view(),name="change_reaction"),
     # list, add, remove, change comment
     path('community/messages/<int:message_id>/comments/', CommentListCreateView.as_view(), name='comment-list-create'),

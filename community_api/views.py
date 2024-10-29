@@ -16,7 +16,7 @@ from rest_framework import generics
 from notification.services import notification_send_by_name, notification_send, fcmdevice_get
 from users_api.services import email_send, user_list
 from .models import ChannelsModel, MessagesModel, Invitations
-from .services import community_get, Message, message_get, report_create
+from .services import community_get, Message, message_get, report_create, comment_get, Comment
 from .serializers import *
 
 User = get_user_model()
@@ -283,7 +283,7 @@ class DeleteMessage(DestroyAPIView):
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class SendReactionMessage(APIView):
+class SendReaction(APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = SendReactionSerializer
 
@@ -294,25 +294,40 @@ class SendReactionMessage(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         emoji = serializer.data["emoji"]
-        message_id = serializer.data["message_id"]
         user_id = request.user.id
-        message = message_get(message_id=message_id)
-        message_user = message.user_model.username
-        message = Message.message_reaction_add(emoji=emoji, message=message, user_id=user_id)
-        message = ReactionSerializer(message).data
-        Message.new_message_send(room_name=room_name, message=message, message_type="reaction")
-        notification_send_by_name(
-            name=message_user,
-            title=f"Reaction on your message",
-            body=f"{request.user.username} reacted to your message.",
-            title_ar = "رد على رسالتك",
-            body_ar = f"{request.user.username} قام بالتفاعل مع رسالتك."
-        )
+        if request.data.get('comment_id', None):
+            comment_id = serializer.data["comment_id"]
+            comment = comment_get(comment_id=comment_id)
+            comment = Comment.comment_reaction_add(emoji=emoji, comment=comment, user_id=user_id)
+            comment_user = comment.user_model.username
+            serializer_data = CommentReactionSerializer(comment).data
+            notification_send_by_name(
+                name=comment_user,
+                title=f"Reaction on your comment",
+                body=f"{request.user.username} reacted to your message.",
+                title_ar = "رد على تعليقك",
+                body_ar = f"{request.user.username} قام بالتفاعل مع تعليقك."
+            )
+        else:
+            message_id = serializer.data["message_id"]
+            message = message_get(message_id=message_id)
+            message_user = message.user_model.username
+            message = Message.message_reaction_add(emoji=emoji, message=message, user_id=user_id)
+            serializer_data = ReactionSerializer(message).data
+            notification_send_by_name(
+                name=message_user,
+                title=f"Reaction on your message",
+                body=f"{request.user.username} reacted to your message.",
+                title_ar = "رد على رسالتك",
+                body_ar = f"{request.user.username} قام بالتفاعل مع رسالتك."
+            )
+        Message.new_message_send(room_name=room_name, message=serializer_data, message_type="reaction")
         return Response("Reaction added successfully", status=status.HTTP_200_OK)
 
 class ChangeReaction(APIView):
     class InputSerializer(serializers.Serializer):
         message_id = serializers.IntegerField()
+        comment_id = serializers.IntegerField(required= False)
         old_emoji = serializers.CharField(max_length=50)
         new_emoji = serializers.CharField(max_length=50)
 
@@ -324,16 +339,22 @@ class ChangeReaction(APIView):
         if serializer.is_valid():
             old_emoji = serializer.data["old_emoji"]
             new_emoji = serializer.data["new_emoji"]
-            message_id = serializer.data["message_id"]
             user_id = request.user.id
-            message = message_get(message_id=message_id)
-            message = Message.message_reaction_change(old_emoji=old_emoji, new_emoji=new_emoji, message=message, user_id=user_id)
-            message = ReactionSerializer(message).data
-            Message.new_message_send(room_name=room_name, message=message, message_type="reaction")
+            if request.data.get('comment_id', None):
+                comment_id = serializer.data["comment_id"]
+                comment = comment_get(comment_id=comment_id)
+                comment = Comment.comment_reaction_change(old_emoji=old_emoji, new_emoji=new_emoji, comment=comment, user_id=user_id)
+                serializer_data = CommentReactionSerializer(comment).data
+            else:
+                message_id = serializer.data["message_id"]
+                message = message_get(message_id=message_id)
+                message = Message.message_reaction_change(old_emoji=old_emoji, new_emoji=new_emoji, message=message, user_id=user_id)
+                serializer_data = ReactionSerializer(message).data
+            Message.new_message_send(room_name=room_name, message=serializer_data, message_type="reaction")
             return Response("Reaction changed successfully", status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class RemoveReactionMessage(APIView):
+class RemoveReaction(APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = SendReactionSerializer
 
@@ -341,12 +362,18 @@ class RemoveReactionMessage(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             emoji = serializer.data["emoji"]
-            message_id = serializer.data["message_id"]
             user_id = request.user.id
-            message = message_get(message_id=message_id)
-            Message.message_reaction_remove(emoji=emoji, message=message, user_id=user_id)
-            message = ReactionSerializer(message).data
-            Message.new_message_send(room_name=room_name, message=message, message_type="reaction")
+            if request.data.get('comment_id', None):
+                comment_id = serializer.data["comment_id"]
+                comment = comment_get(comment_id=comment_id)
+                Comment.comment_reaction_remove(emoji=emoji, comment=comment, user_id=user_id)
+                serializer_data = CommentReactionSerializer(comment).data
+            else:
+                message_id = serializer.data["message_id"]
+                message = message_get(message_id=message_id)
+                Message.message_reaction_remove(emoji=emoji, message=message, user_id=user_id)
+                serializer_data = ReactionSerializer(message).data
+            Message.new_message_send(room_name=room_name, message=serializer_data, message_type="reaction")
             return Response("Reaction removed successfully", status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
