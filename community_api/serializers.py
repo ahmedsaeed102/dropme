@@ -138,15 +138,19 @@ class SendReactionSerializer(serializers.Serializer):
 class CommentsSerializer(serializers.ModelSerializer):
     img = serializers.ImageField(required=False,validators=[FileExtensionValidator(allowed_extensions=["png", "jpeg", "jpg", "svg"])])
     video = serializers.FileField(required=False,validators=[FileExtensionValidator(allowed_extensions=["MOV", "avi", "mp4", "webm", "mkv"])])
-    user_model = serializers.SerializerMethodField()
+    sender = serializers.SerializerMethodField()
+    sender_id = serializers.SerializerMethodField()
+    sender_photo = serializers.SerializerMethodField()
     current_user_reaction = serializers.SerializerMethodField()
 
-    def get_user_model(self, obj):
-        return{
-            "id": obj.user_model.id,
-            "username": obj.user_model.username,
-            "profile_photo": obj.user_model.profile_photo
-        }
+    def get_sender(self, obj):
+        return obj.user_model.username
+
+    def get_sender_photo(self, obj):
+        return obj.user_model.profile_photo.url
+
+    def get_sender_id(self, obj):
+        return obj.user_model.id
 
     def get_current_user_reaction(self, obj):
         request = self.context.get("request")
@@ -157,5 +161,5 @@ class CommentsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CommentsModel
-        fields = ['id', 'user_model', 'content', 'comment_dt', 'current_user_reaction', 'reactions', 'img', 'video']
+        fields = ['id', 'sender_id', 'sender', 'sender_photo', 'content', 'comment_dt', 'current_user_reaction', 'reactions', 'img', 'video']
         read_only_fields = ['user_model', 'comment_dt']
