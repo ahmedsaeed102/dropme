@@ -248,7 +248,7 @@ class UsersPointsView(generics.GenericAPIView):
         return Response(users_serializer.data, status=status.HTTP_200_OK)
 
 
-class GoogleAuth(generics.GenericAPIView):
+class OAuthRegisterLogin(generics.GenericAPIView):
 
     def post(self, request):
         serializer = SocialLoginSerializer(data=request.data)
