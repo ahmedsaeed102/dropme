@@ -232,7 +232,7 @@ class TermsAndConditionSerializer(serializers.ModelSerializer):
 class FAQsSerializer(serializers.ModelSerializer):
     class Meta:
         model = FAQ
-        fields = ['question_en', 'question_ar', 'terms_en', 'terms_ar', 'privacy_en', 'privacy_ar']
+        fields = ['question_en', 'question_ar', 'answer_en', 'answer_ar']
 
 from machine_api.models import RecycleLog
 from django.db.models import Sum
