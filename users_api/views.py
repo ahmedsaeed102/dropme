@@ -249,6 +249,7 @@ class UsersPointsView(generics.GenericAPIView):
 
 
 class OAuthRegisterLogin(generics.GenericAPIView):
+    serializer_class = SocialLoginSerializer
 
     def post(self, request):
         serializer = SocialLoginSerializer(data=request.data)
