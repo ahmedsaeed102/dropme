@@ -170,7 +170,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
 class UserProfileSerializer(UserSerializer):
     class Meta:
         model = UserModel
-        fields = ["username", "phone_number", "age", "email", "password1", "password2", "profile_photo", "gender", "address", "preferred_language"]
+        fields = ["username", "phone_number", "age", "email", "password1", "password2", "profile_photo", "gender", "address", "preferred_language", "country_code"]
 
     def update(self, instance, val_data):
         """update profile for User"""
@@ -216,6 +216,13 @@ class TopUserSerializer(serializers.ModelSerializer):
         model = UserModel
         fields = ["id", "username", "profile_photo", "total_points"]
         read_only_fields = fields
+
+class SocialLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    token = serializers.CharField()
+    unique_id = serializers.CharField()
+    medium = serializers.ChoiceField(choices=['google', 'apple', 'facebook'])
+    phone = serializers.CharField(required=False, allow_blank=True)
 
 class TermsAndConditionSerializer(serializers.ModelSerializer):
     class Meta:

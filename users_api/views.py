@@ -20,7 +20,7 @@ from competition_api.models import Resource
 from competition_api.models import Competition
 from marketplace.models import SpecialOffer
 from .services import send_otp, send_reset_password_email, send_welcome_email, otp_set, unread_notification
-from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer, TermsAndConditionSerializer, FAQsSerializer
+from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer, TermsAndConditionSerializer, FAQsSerializer, SocialLoginSerializer
 from marketplace.serializers import SpecialOfferSerializer
 from competition_api.serializers import CompetitionSerializer, ResourcesSerializer
 from machine_api.utlis import get_total_recycled_items
@@ -178,6 +178,7 @@ class CurrentUserDetailsView(generics.GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     def get(self, request):
         user = request.user
+        unread_notifications, count = unread_notification(user)
         return Response({
             "id": user.id, 
             "username": user.username,
@@ -193,6 +194,9 @@ class CurrentUserDetailsView(generics.GenericAPIView):
             "preferred_language": user.preferred_language,
             "total_points": user.total_points, 
             "total_recycled_items": get_total_recycled_items(user.id), 
+            "unread_notifications": unread_notifications,
+            "unread_notifications_count": count,
+            "is_admin": user.is_staff
         }, status=status.HTTP_200_OK)
 
 class FeedbacksList(generics.ListAPIView):
@@ -247,30 +251,54 @@ class UsersPointsView(generics.GenericAPIView):
 class GoogleAuth(generics.GenericAPIView):
 
     def post(self, request):
-        token= request.data['token']
-        payload = jwt.decode(jwt=token,options={"verify_signature": False}, audience="851033294233-3n144jdfadc2adqheoqbukpo3hehppt4.apps.googleusercontent.com", algorithms=["ES256"])
-        print(payload)
-        email=payload['email']
-
-        if(UserModel.objects.filter(email=email).exists()):
-            user=UserModel.objects.get(email=email)
-            refresh = RefreshToken.for_user(user)
-            return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-            'username': user.username,
-            'email': user.email,
-            'id': user.id,
-            }, status=status.HTTP_200_OK)
-        else:
-            user=UserModel.objects.create(email=email, username=payload['name'])
-            user.set_password(''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)))
-            return Response({
-            "id": user.id,
-            "username": user.username,
-            "phone_number": user.phone_number,
-            "email": user.email,
-            },status=status.HTTP_200_OK)
+        serializer = SocialLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            token = serializer.validated_data['token']
+            unique_id = serializer.validated_data['unique_id']
+            medium = serializer.validated_data['medium']
+            # payload = jwt.decode(jwt=token,options={"verify_signature": False}, audience="851033294233-3n144jdfadc2adqheoqbukpo3hehppt4.apps.googleusercontent.com", algorithms=["ES256"])
+            # if payload['email'] != email:
+            #     return Response("invalid request", status=status.HTTP_400_BAD_REQUEST)
+            if(UserModel.objects.filter(email=email).exists()):
+                user=UserModel.objects.get(email=email)
+                refresh = RefreshToken.for_user(user)
+                user.oauth_medium = medium
+                user.save()
+                unread_notifications, count = unread_notification(user)
+                return Response({
+                    "refresh": str(refresh), 
+                    "access": str(refresh.access_token),
+                    "id": user.id, 
+                    "username": user.username,
+                    "email": user.email, 
+                    "phone_number": user.phone_number,
+                    "country_code": user.country_code,
+                    "profile_photo": user.profile_photo.url,
+                    "age": user.age,
+                    "gender": user.gender,
+                    "address": user.address.address if user.address else None,
+                    "referral_code": user.referral_code,
+                    "referral_usage_count": user.referral_usage_count,
+                    "preferred_language": user.preferred_language,
+                    "total_points": user.total_points, 
+                    "total_recycled_items": get_total_recycled_items(user.id), 
+                    "unread_notifications": unread_notifications,
+                    "unread_notifications_count": count,
+                    "is_admin": user.is_staff
+                }, status=status.HTTP_200_OK)
+            else:
+                phone_number = request.data.get('phone_number')
+                user=UserModel.objects.create(email=email, username=email.split('@')[0], phone_number=phone_number)
+                user.set_password(''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)))
+                return Response({
+                    "id": user.id,
+                    "username": user.username,
+                    "phone_number": user.phone_number,
+                    "email": user.email,
+                    "country_code": user.country_code,
+                },status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class TermsAndConditionsView(generics.ListAPIView):
 

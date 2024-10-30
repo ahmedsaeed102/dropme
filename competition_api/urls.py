@@ -10,6 +10,8 @@ urlpatterns = [
     path("competitions/delete/<int:pk>/",CompetitionDelete.as_view(), name="competition_delete"),
     # Join
     path("competitions/join/<int:pk>/", JoinCompetition.as_view(), name="competition_join"),
+    #  leave
+    path("competitions/leave/<int:pk>/", leaveCompetition.as_view(), name="competition_join"),
     # Ranking
     path("competitions/ranking/<int:pk>/", CompetitionRanking.as_view(), name="competition_ranking",),
     # contact_us

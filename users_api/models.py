@@ -53,6 +53,7 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     referral_code = models.CharField(max_length=15, unique=True, null=True, blank=True)
     referral_usage_count = models.PositiveIntegerField(default=0)
     preferred_language = models.CharField(max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
+    oauth_medium = models.CharField(max_length=50, null=True, blank=True)
 
     objects = UserManager()
     USERNAME_FIELD = "email"

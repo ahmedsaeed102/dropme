@@ -66,6 +66,18 @@ class JoinCompetition(APIView):
         competition.users.add(request.user.pk)
         return redirect("competition_ranking", competition.pk)
 
+class leaveCompetition(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        competition = competition_get(pk=pk)
+        if competition.end_date < date.today():
+            raise ValidationError({"detail": _("Competition has already ended")})
+        if not request.user in competition.users.all():
+            raise ValidationError({"detail": _("You already not joined this competition")})
+        competition.users.remove(request.user.pk)
+        return Response("Left competition successfully", status = 200)
+
 class CompetitionRanking(APIView):
     permission_classes = [IsAuthenticated]
 
