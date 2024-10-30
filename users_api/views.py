@@ -290,8 +290,16 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                 }, status=status.HTTP_200_OK)
             else:
                 phone_number = request.data.get('phone_number')
-                user=UserModel.objects.create(email=email, username=email.split('@')[0], phone_number=phone_number)
+                if not phone_number:
+                    return Response("Phone number is required", status=status.HTTP_400_BAD_REQUEST)
+                user=UserModel.objects.create(email=email, username=email.split('@')[0], phone_number=phone_number, is_active=True, oauth_medium=medium)
                 user.set_password(''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)))
+                send_welcome_email(email)
+                phone = PhoneNumber.objects.filter(phone_number=phone_number).first()
+                if phone:
+                    user.total_points += phone.points
+                    RecycleLog.objects.filter(phone=phone).update(user=user)
+                    phone.delete()
                 return Response({
                     "id": user.id,
                     "username": user.username,
