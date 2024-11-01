@@ -30,18 +30,18 @@ def claculate_travel_distance_and_time(userlocation, machinelocation):
     timebyfoot = requests.get(f"https://routing.openstreetmap.de/routed-foot/route/v1/driving/{userlocation[0]},{userlocation[1]};{machinelocation[0]},{machinelocation[1]}").json()
     timebycar = requests.get(f"https://routing.openstreetmap.de/routed-car/route/v1/driving/{userlocation[0]},{userlocation[1]};{machinelocation[0]},{machinelocation[1]}").json()
     timebybike = requests.get(f"https://routing.openstreetmap.de/routed-bike/route/v1/driving/{userlocation[0]},{userlocation[1]};{machinelocation[0]},{machinelocation[1]}").json()
-    timebymotorcycle = requests.get(f"https://routing.openstreetmap.de/routed-car/route/v1/driving/{userlocation[0]},{userlocation[1]};{machinelocation[0]},{machinelocation[1]}")
+    timebymotorcycle = requests.get(f"https://routing.openstreetmap.de/routed-car/route/v1/driving/{userlocation[0]},{userlocation[1]};{machinelocation[0]},{machinelocation[1]}").json()
     print(timebymotorcycle)
 
     print(f"timebyfoot: {timebyfoot}")
-    print(f"timebycar: {timebycar}")
+    print(f"timebycar: {timebycar["routes"][0]["duration"] / 60}")
     print(f"timebybike: {timebybike}")
     print(f"timebymotorcycle: {timebymotorcycle}")
     data["distance"] = timebyfoot["routes"][0]["distance"] if timebyfoot.get("routes") else 0
     data["timebyfoot"] = timebyfoot["routes"][0]["duration"] / 60 if timebyfoot.get("routes") else 0
     data["timebycar"] = timebycar["routes"][0]["duration"] / 60 if timebyfoot.get("routes") else 0
     data["timebybike"] = timebybike["routes"][0]["duration"] / 60 if timebybike.get("routes") else 0
-    # data["timebymotorcycle"] = timebymotorcycle["routes"][0]["duration"] / 60 if timebymotorcycle["routes"][0]["duration"] else 0
+    data["timebymotorcycle"] = timebymotorcycle["routes"][0]["duration"] / 60 if timebymotorcycle["routes"][0]["duration"] else 0
     return data
 
 def get_directions(userlocation, machinelocation):
