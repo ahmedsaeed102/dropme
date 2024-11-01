@@ -41,7 +41,7 @@ def claculate_travel_distance_and_time(userlocation, machinelocation):
     data["timebyfoot"] = timebyfoot["routes"][0]["duration"] / 60 if timebyfoot["routes"][0]["duration"] else 0
     data["timebycar"] = timebycar["routes"][0]["duration"] / 60 if timebycar["routes"][0]["duration"] else 0
     data["timebybike"] = timebybike["routes"][0]["duration"] / 60 if timebybike["routes"][0]["duration"] else 0
-    data["timebymotorcycle"] = timebymotorcycle["routes"][0]["duration"] / 60 if timebymotorcycle["routes"][0]["duration"] else 0
+    # data["timebymotorcycle"] = timebymotorcycle["routes"][0]["duration"] / 60 if timebymotorcycle["routes"][0]["duration"] else 0
     return data
 
 def get_directions(userlocation, machinelocation):
