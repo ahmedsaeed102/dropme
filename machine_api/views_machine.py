@@ -19,12 +19,10 @@ from .serializers import QRCodeSerializer, UpdateRecycleLog
 from .models import Machine, RecycleLog, PhoneNumber
 from .utlis import update_user_points, calculate_points
 
-
 class MachineQRCode(APIView):
     """
     Returns a QR code for the given machine name
     """
-
     permission_classes = [HasAPIKey | IsAuthenticated]
     serializer_class = QRCodeSerializer
 
@@ -34,16 +32,13 @@ class MachineQRCode(APIView):
         except Machine.DoesNotExist:
             raise NotFound(detail="Error 404, Machine not found", code=404)
 
-        path = request.build_absolute_uri(
-            reverse("start_recycle", kwargs={"name": machine.identification_name})
-        )
+        path = request.build_absolute_uri(reverse("start_recycle", kwargs={"name": machine.identification_name}))
         path = path.replace("http", "ws")
         qrcode_img = qrcode.make(path)
         fname = f"qr_code-{machine.identification_name}.png"
         buffer = BytesIO()
         qrcode_img.save(buffer, "PNG")
         machine.qr_code.save(fname, File(buffer), save=True)
-
         return HttpResponse(machine.qr_code, content_type="image/png")
 
 
