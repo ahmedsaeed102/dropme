@@ -57,7 +57,7 @@ class UserSerializer(serializers.ModelSerializer):
         referral_code = val_data.get("referral_code")
         if referral_code:
             referring_user = UserModel.objects.get(referral_code=referral_code)
-            referring_user.total_points += int((10*referring_user.total_points)/100)
+            referring_user.total_points += int((10*referring_user.total_points)/100) if referring_user.total_points > 0 else 10
             referring_user.referral_usage_count += 1
             referring_user.save()
             user.total_points += 10
@@ -222,7 +222,7 @@ class SocialLoginSerializer(serializers.Serializer):
     token = serializers.CharField()
     unique_id = serializers.CharField()
     medium = serializers.ChoiceField(choices=['google', 'apple', 'facebook'])
-    phone = serializers.CharField(required=False, allow_blank=True)
+    phone_number = serializers.CharField(required=False, allow_blank=True)
 
 class TermsAndConditionSerializer(serializers.ModelSerializer):
     class Meta:

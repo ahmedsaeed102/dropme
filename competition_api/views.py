@@ -14,7 +14,7 @@ from core.mixins import AdminOrReadOnlyPermissionMixin
 from notification.services import notification_send_all
 from .services import competition_get, current_user_ranking, competition_ranking
 from .serializers import CompetitionSerializer, LeaderboardSerializer, ResourcesSerializer, ContactUsLinkSerializer
-from .models import Competition, Resource
+from .models import Competition, Resource, CompetitionRanking
 
 User = get_user_model()
 
@@ -58,6 +58,11 @@ class JoinCompetition(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
+        user = request.user
+        if CompetitionRanking.objects.filter(user=user):
+            competition_ranking = CompetitionRanking.objects.filter(user=user).first()
+            if competition_ranking.competition.is_ongoing:
+                raise ValidationError({"detail": _("You already joined another competition")})
         competition = competition_get(pk=pk)
         if competition.end_date < date.today():
             raise ValidationError({"detail": _("Competition has already ended")})
@@ -70,15 +75,20 @@ class leaveCompetition(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
+        user = request.user
         competition = competition_get(pk=pk)
         if competition.end_date < date.today():
             raise ValidationError({"detail": _("Competition has already ended")})
         if not request.user in competition.users.all():
             raise ValidationError({"detail": _("You already not joined this competition")})
+        competition_ranking = CompetitionRanking.objects.get(user=user, competition=competition)
+        points = competition_ranking.points
+        user.total_points += points
         competition.users.remove(request.user.pk)
+        competition_ranking.delete()
         return Response("Left competition successfully", status = 200)
 
-class CompetitionRanking(APIView):
+class CompetitionRankingView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):

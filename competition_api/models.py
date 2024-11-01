@@ -40,7 +40,7 @@ def Competition_created(sender, instance, created, **kwargs):
 
 class CompetitionRanking(models.Model):
     competition = models.ForeignKey(Competition,on_delete=models.CASCADE)
-    user = models.ForeignKey(UserModel,on_delete=models.CASCADE)
+    user = models.ForeignKey(UserModel,on_delete=models.CASCADE, unique=True)
     points = models.PositiveIntegerField(default=0, blank=True)
 
     @property

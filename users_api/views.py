@@ -294,6 +294,7 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                     return Response("Phone number is required", status=status.HTTP_400_BAD_REQUEST)
                 user=UserModel.objects.create(email=email, username=email.split('@')[0], phone_number=phone_number, is_active=True, oauth_medium=medium)
                 user.set_password(''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)))
+                user.save()
                 send_welcome_email(email)
                 phone = PhoneNumber.objects.filter(phone_number=phone_number).first()
                 if phone:
@@ -305,7 +306,7 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                     "username": user.username,
                     "phone_number": user.phone_number,
                     "email": user.email,
-                    "country_code": user.country_code,
+                    "country_code": user.country_code
                 },status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

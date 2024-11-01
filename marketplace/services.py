@@ -7,7 +7,6 @@ from users_api.models import UserModel
 from .models import Product, Cart, Entry, Category, SpecialOffer, UserOffer
 from .filters import ProductFilter, CategoryFilter
 
-
 def product_get(*, pk: int) -> Product:
     return get_object_or_404(Product, pk=pk)
 
@@ -77,7 +76,6 @@ class EntryService:
         self.cart.total = self.cart.total - (entry.product.price_points * entry.quantity)
         entry.delete()
         self.cart.save()
-
 
 @transaction.atomic
 def checkout(*, user: UserModel) -> dict:
