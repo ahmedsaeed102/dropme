@@ -33,10 +33,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     # to check password validation in sign up form
     def validate(self, data):
-        password1 = data.get("password1")
-        password2 = data.get("password2")
-        if password1 != password2:
-            raise serializers.ValidationError(_("Passwords don't match"))
+        if password2:
+            password1 = data.get("password1")
+            password2 = data.get("password2")
+            if password1 != password2:
+                raise serializers.ValidationError(_("Passwords don't match"))
         referral_code = data.get("referral_code")
         if referral_code:
             try:
@@ -167,7 +168,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
 """
     PROFILE UPDATE SERIALIZERS
 """
-class UserProfileSerializer(serializers.Serializer):
+class UserProfileSerializer(UserSerializer):
     old_password = serializers.CharField(required=False)
 
     class Meta:
