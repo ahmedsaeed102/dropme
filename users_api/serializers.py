@@ -172,7 +172,7 @@ class UserProfileSerializer(UserSerializer):
 
     class Meta:
         model = UserModel
-        fields = ["username", "phone_number", "age", "email", "password1", "password2", "profile_photo", "gender", "address", "preferred_language", "country_code", 'old_password']
+        fields = ["username", "phone_number", "age", "email", "password1", "profile_photo", "gender", "address", "preferred_language", "country_code", 'old_password']
 
     def update(self, instance, val_data):
         """update profile for User"""
@@ -228,6 +228,7 @@ class SocialLoginSerializer(serializers.Serializer):
     unique_id = serializers.CharField()
     medium = serializers.ChoiceField(choices=['google', 'apple', 'facebook'])
     phone_number = serializers.CharField(required=False, allow_blank=True)
+    fcm_device = CustomFCMDeviceSerializer(required=False)
 
 class TermsAndConditionSerializer(serializers.ModelSerializer):
     class Meta:

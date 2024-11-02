@@ -9,6 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from fcm_django.api.rest_framework import FCMDeviceSerializer
 from rest_framework.exceptions import ValidationError
 from faker import Faker
+from fcm_django.models import FCMDevice
 import jwt
 import string
 import random
@@ -258,6 +259,7 @@ class OAuthRegisterLogin(generics.GenericAPIView):
             token = serializer.validated_data['token']
             unique_id = serializer.validated_data['unique_id']
             medium = serializer.validated_data['medium']
+            fcm_data = request.data.get("fcm_data", None)
             if medium == 'google':
                 payload = jwt.decode(jwt=token,options={"verify_signature": False}, audience="851033294233-3n144jdfadc2adqheoqbukpo3hehppt4.apps.googleusercontent.com", algorithms=["ES256"])
                 if payload['email'] != email:
@@ -268,6 +270,16 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                 user.oauth_medium = medium
                 user.save()
                 unread_notifications, count = unread_notification(user)
+                fcm_registration_id = fcm_data.get("registration_id")
+                fcm_device_type = fcm_data.get("type")
+                # Register or update FCM device
+                if fcm_registration_id and fcm_device_type:
+                    fcm_device, created = FCMDevice.objects.get_or_create(user=user, defaults={"registration_id": fcm_registration_id, "type": fcm_device_type, "name": user.username})
+                    if not created and fcm_device.registration_id != fcm_registration_id:
+                        fcm_device.registration_id = fcm_registration_id
+                        fcm_device.type = fcm_device_type
+                        fcm_device.name = user.username
+                        fcm_device.save()
                 return Response({
                     "refresh": str(refresh), 
                     "access": str(refresh.access_token),
@@ -298,6 +310,9 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                 user.set_password(''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)))
                 user.save()
                 send_welcome_email(email)
+                fcm_serializer = FCMDeviceSerializer(data=fcm_data, context={"request": self.request})
+                if fcm_serializer.is_valid():
+                    fcm_serializer.save(user=user, name=user.username)
                 phone = PhoneNumber.objects.filter(phone_number=phone_number).first()
                 if phone:
                     user.total_points += phone.points
