@@ -1,11 +1,19 @@
 from rest_framework import serializers
 from .models import Machine, RecycleLog
+from .utlis import claculate_travel_distance_and_time
 
 class MachineSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
+        current_location = self.context.get("current_location", None)
         representation = super().to_representation(instance)
         location = instance.location
         if location:
+            if current_location:
+                data = claculate_travel_distance_and_time(current_location.tuple, location.tuple)
+                representation["distance"] = data["distance"]
+                representation["timebyfoot"] = data["timebyfoot"]
+                representation["timebycar"] = data["timebycar"]
+                representation["timebybike"] = data["timebybike"]
             location = [coord for coord in location]
             representation["location"] = {"longitude": location[0],"latitude": location[1],}
         return representation

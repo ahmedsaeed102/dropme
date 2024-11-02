@@ -51,23 +51,14 @@ class MachinePage(APIView):
                                OpenApiParameter(name="city",location=OpenApiParameter.QUERY,description="machine city",required=False,type=str),
                                OpenApiParameter(name="place",location=OpenApiParameter.QUERY,description="machine address",required=False,type=str)])
     def get(self, request, long, lat, *args, **kwargs):
-        machines_seriazlizer = self.serializer_class(self.get_queryset(), many=True)
         current_location = Point(float(long), float(lat), srid=4326)
-        for machine in machines_seriazlizer.data:
-            data = claculate_travel_distance_and_time(current_location.tuple, machine['location'].tuple)
-            machine_data = {
-                "distance": data["distance"],
-                "timebyfoot": data["timebyfoot"],
-                "timebycar": data["timebycar"],
-                "timebybike": data["timebybike"]
-            }
-            machine.update(machine_data)
+        machines_seriazlizer = self.serializer_class(self.get_queryset(), many=True, context={"current_location": current_location})
         nearest_machine = (Machine.objects.annotate(distance=Distance("location", current_location, spheroid=True)).order_by("distance").first())
         nearest_machine_serializer = MachineSerializer(nearest_machine)
         return Response({
-                "machines": machines_seriazlizer.data,
-                "nearest_machine": nearest_machine_serializer.data
-            }, status=200)
+            "machines": machines_seriazlizer.data,
+            "nearest_machine": nearest_machine_serializer.data
+        }, status=200)
 
 class MachineDetail(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
