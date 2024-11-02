@@ -341,7 +341,9 @@ class TermsAndConditionsView(generics.ListAPIView):
         serializer = TermsAndConditionSerializer(terms_and_conditions, context={"request": request})
         social_media = Resource.objects.filter(resource_type="contact_us")
         social_media_serializer = ResourcesSerializer(social_media, many=True, context={"request": request})
-        return Response({"data":serializer.data, "social_media": social_media_serializer.data})
+        faqs = FAQ.objects.all()
+        faq_serializer = FAQsSerializer(faqs, many=True, context={"request": request})
+        return Response({"data":serializer.data, "social_media": social_media_serializer.data, "faqs": faq_serializer.data ,"support_email": "hello@dropmeeg.com"})
 
 class FAQsView(generics.ListAPIView):
 

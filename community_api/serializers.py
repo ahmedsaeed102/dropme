@@ -128,7 +128,7 @@ class CommentReactionSerializer(serializers.ModelSerializer):
 class EditMessageSerializer(serializers.ModelSerializer):
         class Meta:
             model = MessagesModel
-            fields = ["content", 'img', 'video', 'gif', 'file']
+            fields = "__all__"
 
 class SendReactionSerializer(serializers.Serializer):
     message_id = serializers.IntegerField()
