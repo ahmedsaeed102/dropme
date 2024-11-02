@@ -27,6 +27,7 @@ class Machine(models.Model):
     status = models.CharField(choices=STATUS, default="available", max_length=20)
     status_ar = models.CharField(choices=STATUS_AR, default="متاح", max_length=20)
     qr_code = models.ImageField(upload_to="qr_codes", blank=True)
+    ordering = models.IntegerField(null=True, blank=True, unique=True)
 
     def delete(self, using=None, keep_parents=False):
         self.qr_code.storage.delete(self.qr_code.name)

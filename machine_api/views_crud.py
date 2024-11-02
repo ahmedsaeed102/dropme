@@ -18,6 +18,7 @@ class Machines(generics.ListCreateAPIView):
         filters_serializer = FilterSerializer(data=self.request.query_params)
         filters_serializer.is_valid(raise_exception=True)
         machines = machine_list(filters=filters_serializer.validated_data)
+        machines = machines.order_by("-ordering")
         return machines
 
     def get_permissions(self):
