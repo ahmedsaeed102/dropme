@@ -260,10 +260,6 @@ class OAuthRegisterLogin(generics.GenericAPIView):
             unique_id = serializer.validated_data['unique_id']
             medium = serializer.validated_data['medium']
             fcm_data = request.data.get("fcm_data", None)
-            if medium == 'google':
-                payload = jwt.decode(jwt=token,options={"verify_signature": False}, audience="851033294233-3n144jdfadc2adqheoqbukpo3hehppt4.apps.googleusercontent.com", algorithms=["ES256"])
-                if payload['email'] != email:
-                    return Response("invalid request", status=status.HTTP_400_BAD_REQUEST)
             if(UserModel.objects.filter(email=email).exists()):
                 user=UserModel.objects.get(email=email)
                 refresh = RefreshToken.for_user(user)
@@ -313,6 +309,8 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                 fcm_serializer = FCMDeviceSerializer(data=fcm_data, context={"request": self.request})
                 if fcm_serializer.is_valid():
                     fcm_serializer.save(user=user, name=user.username)
+                else:
+                    raise ValidationError(fcm_serializer.errors)
                 phone = PhoneNumber.objects.filter(phone_number=phone_number).first()
                 if phone:
                     user.total_points += phone.points
