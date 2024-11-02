@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.utils import timezone
+from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from rest_framework import viewsets, status, generics, permissions, exceptions
@@ -262,6 +263,14 @@ class OAuthRegisterLogin(generics.GenericAPIView):
             fcm_data = request.data.get("fcm_device", {})
             if(UserModel.objects.filter(email=email).exists()):
                 user=UserModel.objects.get(email=email)
+                if not user.is_active:
+                    otp = random.randint(1000, 9999)
+                    otp_expiration = timezone.now() + timedelta(minutes=5)
+                    user.otp = otp
+                    user.otp_expiration = otp_expiration
+                    user.save()
+                    send_otp(user)
+                    return {"is_verified": False, "id": self.user.id}
                 refresh = RefreshToken.for_user(user)
                 user.oauth_medium = medium
                 user.save()

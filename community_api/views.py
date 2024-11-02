@@ -259,7 +259,7 @@ class ApproveMessageView(APIView):
         Message.new_message_notification_send(request=request, room_type=room.channel_type, room=room)
         return Response({"detail": "Message approved successfully."}, status=status.HTTP_200_OK)
 
-@extend_schema(methods=["PATCH"], exclude=True)
+@extend_schema(methods=["PATCH"], exclude=True, request={"multipart/form-data": {"type": "object", "properties": {"content": {"type": "string", "format": "string"},"img": {"type": "string", "format": "binary"},"video": {"type": "string", "format": "binary"}, "gif": {"type": "string", "format": "binary"}, "file": {"type": "string", "format": "binary"}}}})
 class EditMessage(UpdateAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = MessagesModel.objects.all()
