@@ -63,6 +63,8 @@ class RecycleLog(models.Model):
     is_complete = models.BooleanField(default=False)
 
     def __str__(self):
+        if not self.user:
+            return self.machine_name + " " + str(self.phone.phone_number)
         return self.machine_name + " " + str(self.user.username)
 
 class PhoneNumber(models.Model):
