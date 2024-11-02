@@ -54,7 +54,8 @@ class MachinePage(APIView):
         machines_seriazlizer = self.serializer_class(self.get_queryset(), many=True)
         current_location = Point(float(long), float(lat), srid=4326)
         for machine in machines_seriazlizer.data:
-            data = claculate_travel_distance_and_time(current_location.tuple, machine.location.tuple)
+            machine_object = Machine.objects.get(id=machine["id"])
+            data = claculate_travel_distance_and_time(current_location.tuple, machine_object.location.tuple)
             machine["distance meters"] = data["distance"]
             machine["timebyfoot"] = data["timebyfoot"]
             machine["timebycar"] = data["timebycar"]
