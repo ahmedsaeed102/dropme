@@ -259,7 +259,7 @@ class OAuthRegisterLogin(generics.GenericAPIView):
             token = serializer.validated_data['token']
             unique_id = serializer.validated_data['unique_id']
             medium = serializer.validated_data['medium']
-            fcm_data = request.data.get("fcm_data", None)
+            fcm_data = request.data.get("fcm_device", {})
             if(UserModel.objects.filter(email=email).exists()):
                 user=UserModel.objects.get(email=email)
                 refresh = RefreshToken.for_user(user)
