@@ -167,7 +167,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
 """
     PROFILE UPDATE SERIALIZERS
 """
-class UserProfileSerializer(UserSerializer):
+class UserProfileSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=False)
 
     class Meta:
