@@ -12,7 +12,7 @@ class Notifications(GenericAPIView, ListModelMixin, RetrieveModelMixin, UpdateMo
     lookup_field = 'pk'
 
     def get_queryset(self):
-        return Notification.objects.filter(user=self.request.user)
+        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
 
     def get(self, request, *args, **kwargs):
         if 'pk' in kwargs:
