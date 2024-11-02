@@ -270,7 +270,7 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                     user.otp_expiration = otp_expiration
                     user.save()
                     send_otp(user)
-                    return {"is_verified": False, "id": self.user.id}
+                    return {"is_verified": False, "id": user.id}
                 refresh = RefreshToken.for_user(user)
                 user.oauth_medium = medium
                 user.save()
