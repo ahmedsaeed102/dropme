@@ -6,6 +6,7 @@ register_converter(converts.FloatUrlParameterConverter, "float")
 
 crud = [
     path("machines/list/", Machines.as_view(), name="machines"),
+    path("machinespage/<float:long>/<float:lat>/", MachinePage.as_view(), name="machines_page"),
     path("machines/<int:pk>/", MachineDetail.as_view(), name="retrive_machine"),
     path("machines/delete/<int:pk>/", MachineDelete.as_view(), name="delete_machine"),
     path("recyclelog/user/<int:pk>/", RetrieveRecycleLog.as_view(), name="recycle_log"),

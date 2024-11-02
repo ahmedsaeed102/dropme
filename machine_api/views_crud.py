@@ -5,7 +5,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from notification.services import notification_send_all
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import Point
+from .utlis import claculate_travel_distance_and_time
+
 from .services import machine_list
 from .serializers import MachineSerializer, RecycleLogSerializer, FilterSerializer
 from .models import Machine, RecycleLog
@@ -32,6 +35,36 @@ class Machines(generics.ListCreateAPIView):
                                OpenApiParameter(name="place",location=OpenApiParameter.QUERY,description="machine address",required=False,type=str)])
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+
+class MachinePage(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MachineSerializer
+
+    def get_queryset(self):
+        filters_serializer = FilterSerializer(data=self.request.query_params)
+        filters_serializer.is_valid(raise_exception=True)
+        machines = machine_list(filters=filters_serializer.validated_data)
+        machines = machines.order_by("-ordering")
+        return machines
+
+    @extend_schema(parameters=[OpenApiParameter(name="identification_name", location=OpenApiParameter.QUERY, description="machine name", required=False,type=str),
+                               OpenApiParameter(name="city",location=OpenApiParameter.QUERY,description="machine city",required=False,type=str),
+                               OpenApiParameter(name="place",location=OpenApiParameter.QUERY,description="machine address",required=False,type=str)])
+    def get(self, request, long, lat, *args, **kwargs):
+        machines_seriazlizer = self.serializer_class(self.get_queryset(), many=True)
+        for machine in machines_seriazlizer.data:
+            data = claculate_travel_distance_and_time(current_location.tuple, machine.location.tuple)
+            machine["distance meters"] = data["distance"]
+            machine["timebyfoot"] = data["timebyfoot"]
+            machine["timebycar"] = data["timebycar"]
+            machine["timebybike"] = data["timebybike"]
+        current_location = Point(float(long), float(lat), srid=4326)
+        nearest_machine = (Machine.objects.annotate(distance=Distance("location", current_location, spheroid=True)).order_by("distance").first())
+        nearest_machine_serializer = MachineSerializer(nearest_machine)
+        return Response({
+                "machines": machines_seriazlizer.data,
+                "nearest_machine": nearest_machine_serializer.data
+            }, status=200)
 
 class MachineDetail(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
