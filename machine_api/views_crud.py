@@ -52,13 +52,13 @@ class MachinePage(APIView):
                                OpenApiParameter(name="place",location=OpenApiParameter.QUERY,description="machine address",required=False,type=str)])
     def get(self, request, long, lat, *args, **kwargs):
         machines_seriazlizer = self.serializer_class(self.get_queryset(), many=True)
+        current_location = Point(float(long), float(lat), srid=4326)
         for machine in machines_seriazlizer.data:
             data = claculate_travel_distance_and_time(current_location.tuple, machine.location.tuple)
             machine["distance meters"] = data["distance"]
             machine["timebyfoot"] = data["timebyfoot"]
             machine["timebycar"] = data["timebycar"]
             machine["timebybike"] = data["timebybike"]
-        current_location = Point(float(long), float(lat), srid=4326)
         nearest_machine = (Machine.objects.annotate(distance=Distance("location", current_location, spheroid=True)).order_by("distance").first())
         nearest_machine_serializer = MachineSerializer(nearest_machine)
         return Response({
