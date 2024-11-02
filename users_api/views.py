@@ -258,9 +258,10 @@ class OAuthRegisterLogin(generics.GenericAPIView):
             token = serializer.validated_data['token']
             unique_id = serializer.validated_data['unique_id']
             medium = serializer.validated_data['medium']
-            # payload = jwt.decode(jwt=token,options={"verify_signature": False}, audience="851033294233-3n144jdfadc2adqheoqbukpo3hehppt4.apps.googleusercontent.com", algorithms=["ES256"])
-            # if payload['email'] != email:
-            #     return Response("invalid request", status=status.HTTP_400_BAD_REQUEST)
+            if medium == 'google':
+                payload = jwt.decode(jwt=token,options={"verify_signature": False}, audience="851033294233-3n144jdfadc2adqheoqbukpo3hehppt4.apps.googleusercontent.com", algorithms=["ES256"])
+                if payload['email'] != email:
+                    return Response("invalid request", status=status.HTTP_400_BAD_REQUEST)
             if(UserModel.objects.filter(email=email).exists()):
                 user=UserModel.objects.get(email=email)
                 refresh = RefreshToken.for_user(user)
@@ -290,9 +291,10 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                 }, status=status.HTTP_200_OK)
             else:
                 phone_number = request.data.get('phone_number')
-                if not phone_number:
-                    return Response("Phone number is required", status=status.HTTP_400_BAD_REQUEST)
-                user=UserModel.objects.create(email=email, username=email.split('@')[0], phone_number=phone_number, is_active=True, oauth_medium=medium)
+                if phone_number:
+                    user = UserModel.objects.create(email=email, username=email.split('@')[0], phone_number=phone_number, oauth_medium=medium)
+                else:
+                    user = UserModel.objects.create(email=email, username=email.split('@')[0], oauth_medium=medium)
                 user.set_password(''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)))
                 user.save()
                 send_welcome_email(email)

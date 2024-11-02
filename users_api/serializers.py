@@ -168,15 +168,20 @@ class SetNewPasswordSerializer(serializers.Serializer):
     PROFILE UPDATE SERIALIZERS
 """
 class UserProfileSerializer(UserSerializer):
+    old_password = serializers.CharField(required=False)
+
     class Meta:
         model = UserModel
-        fields = ["username", "phone_number", "age", "email", "password1", "password2", "profile_photo", "gender", "address", "preferred_language", "country_code"]
+        fields = ["username", "phone_number", "age", "email", "password1", "password2", "profile_photo", "gender", "address", "preferred_language", "country_code", 'old_password']
 
     def update(self, instance, val_data):
         """update profile for User"""
+        old_password = val_data.pop("old_password", None)
         password = val_data.pop("password1", None)
         user = super().update(instance, val_data)
-        if password:
+        if password and old_password:
+            if not user.check_password(old_password):
+                raise ValidationError({"detail": _("Invalid password")})
             user.set_password(password)
             user.save()
         return user
