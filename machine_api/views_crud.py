@@ -29,7 +29,6 @@ class Machines(generics.ListCreateAPIView):
     @extend_schema(parameters=[OpenApiParameter(name="identification_name", location=OpenApiParameter.QUERY, description="machine name", required=False,type=str),
                                OpenApiParameter(name="city",location=OpenApiParameter.QUERY,description="machine city",required=False,type=str),
                                OpenApiParameter(name="place",location=OpenApiParameter.QUERY,description="machine address",required=False,type=str)])
-    @method_decorator(cache_page(60 * 60 * 2))
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
