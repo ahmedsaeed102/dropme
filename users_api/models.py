@@ -32,7 +32,7 @@ def generate_referral_code(user):
 class UserModel(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=50)
     email = models.EmailField(unique=True, null=False, blank=False, max_length=50, validators=[validate_email], verbose_name=_("Email"))
-    phone_number = models.CharField(unique=True, null=True, blank=True, max_length=11, validators=[validate_phone_number])
+    phone_number = models.CharField(null=True, blank=True, max_length=11, validators=[validate_phone_number])
     country_code = models.CharField(max_length=50, default="+20")
 
     otp = models.CharField(max_length=4)
@@ -47,7 +47,7 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     profile_photo = models.ImageField(upload_to=upload_to, default="upload_to/default.png")
     age = models.IntegerField(null=True, blank=True)
     GENDER = Choices("male", "female")
-    gender = models.CharField(choices=GENDER, default=GENDER.male, max_length=20)
+    gender = models.CharField(choices=GENDER, null=True, blank=True, max_length=20)
     total_points = models.PositiveIntegerField(default=0)
     address = models.ForeignKey(LocationModel, on_delete=models.CASCADE, null=True, blank=True, related_name="address_name")
     referral_code = models.CharField(max_length=15, unique=True, null=True, blank=True)
