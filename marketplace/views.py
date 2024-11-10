@@ -47,6 +47,7 @@ class ProductsList(generics.ListAPIView):
         products = product_list(filters=filters_serializer.validated_data)
         return products
 
+    @method_decorator(cache_page(60 * 60 * 24))
     @extend_schema(parameters=[OpenApiParameter(name="price_points", location=OpenApiParameter.QUERY, description="product price points", required=False, type=int,),OpenApiParameter(name="category__category_name", location=OpenApiParameter.QUERY, description="product category", required=False, type=str,),],)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
