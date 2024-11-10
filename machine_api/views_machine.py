@@ -18,6 +18,7 @@ from notification.services import notification_send, fcmdevice_get
 from .serializers import QRCodeSerializer, UpdateRecycleLog
 from .models import Machine, RecycleLog, PhoneNumber
 from .utlis import update_user_points, calculate_points
+from notification.models import NotificationImage
 
 class MachineQRCode(APIView):
     permission_classes = [HasAPIKey | IsAuthenticated]
@@ -62,6 +63,10 @@ class MachineIsFull(APIView):
 
         admin_users = UserModel.objects.filter(is_staff=True)
         devices = fcmdevice_get(user__in=admin_users)
+        if NotificationImage.objects.filter(name="full_machine").exists():
+            image = NotificationImage.objects.filter(name="full_machine").first().image
+        else:
+            image = None
         notification_send(
             devices=devices,
             users = admin_users,
@@ -69,6 +74,7 @@ class MachineIsFull(APIView):
             body=f"{name} machine is full empty it!",
             title_ar="الماكينة ممتلئة",
             body_ar=f" ماكينة {name} ممتلئة قم بتفريغها!",
+            image=image
         )
 
         subject = "Machine is full"

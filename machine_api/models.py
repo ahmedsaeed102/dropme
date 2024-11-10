@@ -5,6 +5,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from notification.services import notification_send_all
+from notification.models import NotificationImage
 from users_api.models import UserModel
 
 STATUS = (
@@ -42,12 +43,17 @@ class Machine(models.Model):
 
 @receiver(post_save, sender=Machine)
 def machine_created(sender, instance, created, **kwargs):
+    if NotificationImage.objects.filter(name="new_machine").exists():
+        image = NotificationImage.objects.filter(name="new_machine").first().image
+    else:
+        image = None
     if created:
         notification_send_all(
             title="New Machine", 
             body="New Machine has been added",
             title_ar="ماكينة جديدة",
-            body_ar="تم أضافة ماكينة جديدة."
+            body_ar="تم أضافة ماكينة جديدة.",
+            image=image
         )
 
 class RecycleLog(models.Model):

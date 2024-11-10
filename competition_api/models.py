@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from users_api.models import UserModel
+from notification.models import NotificationImage
 from notification.services import notification_send_all
 
 class Competition(models.Model):
@@ -30,12 +31,17 @@ class Competition(models.Model):
 
 @receiver(post_save, sender=Competition)
 def Competition_created(sender, instance, created, **kwargs):
+    if NotificationImage.objects.filter(name="new_competition").exists():
+        image = NotificationImage.objects.filter(name="new_Competition").first().image
+    else:
+        image = None
     if created:
         notification_send_all(
             title="New Competition", 
             body="New competition created check it out!",
             title_ar="مسابقة جديدة",
-            body_ar="تم إنشاء مسابقة جديدة، تحقق منها!"
+            body_ar="تم إنشاء مسابقة جديدة، تحقق منها!",
+            image=image
         )
 
 class CompetitionRanking(models.Model):

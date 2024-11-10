@@ -111,7 +111,8 @@ class AddPeopleToChannel(APIView):
             title="Community Invitation",
             body=f"user {request.user.username} added you in {room_name} channel",
             title_ar="دعوة إلى المجتمع",
-            body_ar=f"قام المستخدم {request.user.username} بإضافتك إلى قناة {room.room_name_ar}"
+            body_ar=f"قام المستخدم {request.user.username} بإضافتك إلى قناة {room.room_name_ar}",
+            image = request.user.profile_photo
         )
         return Response("Successfully added users")
 
@@ -240,7 +241,7 @@ class SendMessage(APIView):
             new_message.approved = True
             new_message.save()
             Message.new_message_send(room_name=room_name, message=new_message, message_type="message")
-            Message.new_message_notification_send(request=request, room_type=room.channel_type, room=room)
+            Message.new_message_notification_send(request=request, room_type=room.channel_type, room=room, image=request.user.profile_photo)
             return Response("message sent successfully", status=status.HTTP_201_CREATED)
         return Response("Message sent successfully, pending admin approval.", status=status.HTTP_201_CREATED)
 
@@ -256,7 +257,7 @@ class ApproveMessageView(APIView):
         message.save()
         new_message = MessagesSerializer(message).data
         Message.new_message_send(room_name=room_name, message=new_message, message_type="message")
-        Message.new_message_notification_send(request=request, room_type=room.channel_type, room=room)
+        Message.new_message_notification_send(request=request, room_type=room.channel_type, room=room, image=message.user_model.profile_photo)
         return Response({"detail": "Message approved successfully."}, status=status.HTTP_200_OK)
 
 @extend_schema(methods=["PUT"], exclude=True, request={"multipart/form-data": {"type": "object", "properties": {"content": {"type": "string", "format": "string"},"img": {"type": "string", "format": "binary"},"video": {"type": "string", "format": "binary"}, "gif": {"type": "string", "format": "binary"}, "file": {"type": "string", "format": "binary"}}}})
@@ -306,7 +307,8 @@ class SendReaction(APIView):
                 title=f"Reaction on your comment",
                 body=f"{request.user.username} reacted to your message.",
                 title_ar = "رد على تعليقك",
-                body_ar = f"{request.user.username} قام بالتفاعل مع تعليقك."
+                body_ar = f"{request.user.username} قام بالتفاعل مع تعليقك.",
+                image = request.user.profile_photo
             )
         else:
             message_id = serializer.data["message_id"]
@@ -319,7 +321,8 @@ class SendReaction(APIView):
                 title=f"Reaction on your message",
                 body=f"{request.user.username} reacted to your message.",
                 title_ar = "رد على رسالتك",
-                body_ar = f"{request.user.username} قام بالتفاعل مع رسالتك."
+                body_ar = f"{request.user.username} قام بالتفاعل مع رسالتك.",
+                image = request.user.profile_photo
             )
         Message.new_message_send(room_name=room_name, message=serializer_data, message_type="reaction")
         return Response("Reaction added successfully", status=status.HTTP_200_OK)

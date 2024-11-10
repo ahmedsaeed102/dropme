@@ -38,7 +38,7 @@ class Message:
     @transaction.atomic
     @staticmethod
     def new_message_create(*, request, room: ChannelsModel, message_content: str) -> MessagesModel:
-        new_message = MessagesModel.objects.create(user_model=request.user, content=message_content, img=request.FILES.get("img", None), video=request.FILES.get("video", None))
+        new_message = MessagesModel.objects.create(user_model=request.user, content=message_content, img=request.FILES.get("img", None), video=request.FILES.get("video", None), gif=request.FILES.get("gif", None), file=request.FILES.get("file", None))
         room.messages.add(new_message)
         room.save()
         return new_message
@@ -52,7 +52,7 @@ class Message:
             raise APIException(str(e))
 
     @staticmethod
-    def new_message_notification_send(*, request, room_type, room) -> None:
+    def new_message_notification_send(*, request, room_type, room, image=None) -> None:
         if room_type == "public":
             notification_off_users = ChannelsModel.objects.values_list('notification_off_users', flat=True).distinct()
             devices = fcmdevice_get_all().exclude(user__id__in=notification_off_users).exclude(user=request.user.pk)
@@ -66,7 +66,8 @@ class Message:
             title="New message",
             body=f"""You have a new message in '{room.room_name}' community channel""",
             title_ar="رسالة جديدة",
-            body_ar=f"لديك رسالة جديدة في قناة المجتمع '{room.room_name_ar}'"
+            body_ar=f"لديك رسالة جديدة في قناة المجتمع '{room.room_name_ar}'",
+            image=image
         )
 
     @staticmethod

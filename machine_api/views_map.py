@@ -8,6 +8,7 @@ from notification.services import notification_send_all
 from .utlis import claculate_travel_distance_and_time, get_directions
 from .serializers import MachineSerializer, MachineCoordinatesSerializer
 from .models import Machine
+from notification.models import NotificationImage
 
 class MachinesByCity(APIView):
     permission_classes = [IsAuthenticated]
@@ -37,19 +38,25 @@ class SetMachineCoordinates(APIView):
             raise NotFound(detail="Error 404, Machine not found", code=404)
         longitude = request.data.get("longitude", 0)
         latitude = request.data.get("latitude", 0)
+        if NotificationImage.objects.filter(name="machine_relocation").exists():
+            image = NotificationImage.objects.filter(name="machine_relocation").first().image
+        else:
+            image = None
         if machine.location:
             notification_send_all(
                 title="Machine location changed",
                 body=f"A machine moved to a new location check it out!",
                 title_ar="تم تغيير موقع الآلة",
-                body_ar=f"""تم نقل آلة إلى موقع جديد، اطلع عليها!"""
+                body_ar=f"""تم نقل آلة إلى موقع جديد، اطلع عليها!""",
+                image=image
             )
         else:
             notification_send_all(
                 title="A new Machine location added",
                 body="New recycle machine added check it out!",
                 title_ar="إضافة موقع جديد للآلة",
-                body_ar=f"""تمت إضافة آلة جديدة، اطلع عليها!"""
+                body_ar=f"""تمت إضافة آلة جديدة، اطلع عليها!""",
+                image=image
             )
         pnt = Point(float(longitude), float(latitude))
         machine.location = pnt

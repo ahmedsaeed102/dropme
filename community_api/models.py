@@ -5,6 +5,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from users_api.models import UserModel
+from notification.models import NotificationImage
 from notification.services import notification_send_all
 
 def messages_upload_to_imgs(instance, filename):
@@ -101,12 +102,17 @@ class ChannelsModel(models.Model):
 
 @receiver(post_save, sender=ChannelsModel)
 def channel_created(sender, instance, created, **kwargs):
+    if NotificationImage.objects.filter(name="new_community").exists():
+        image = NotificationImage.objects.filter(name="new_community").first().image
+    else:
+        image = None
     if created:
         notification_send_all(
             title="New community channel",
             body=f"""A new community channel '{instance.room_name}' has been created. Check it out!""",
             title_ar="قناة جديدة في المجتمع",
-            body_ar=f"""لقد تم إنشاء قناة جديدة باسم '{instance.room_name_ar}'. انضم للمحادثة واستمتع بالتواصل!"""
+            body_ar=f"""لقد تم إنشاء قناة جديدة باسم '{instance.room_name_ar}'. انضم للمحادثة واستمتع بالتواصل!""",
+            image=image
         )
 
 class ReportModel(models.Model):
