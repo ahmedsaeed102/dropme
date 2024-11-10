@@ -32,7 +32,7 @@ class Competition(models.Model):
 @receiver(post_save, sender=Competition)
 def Competition_created(sender, instance, created, **kwargs):
     if NotificationImage.objects.filter(name="new_competition").exists():
-        image = NotificationImage.objects.filter(name="new_Competition").first().image
+        image = NotificationImage.objects.filter(name="new_competition").first().image
     else:
         image = None
     if created:
