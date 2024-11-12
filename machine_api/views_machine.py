@@ -99,14 +99,25 @@ class UpdateRecycle(APIView):
         log.cans += cans
         log.save()
         channel_layer = get_channel_layer()
+        if bottles == 0 and cans == 0:
+            message = "you have not thrown any bottle or can"
+            message_ar = "لم تقم برمي أي زجاجة أو علبة"
+        elif bottles != 0 and cans == 0:
+            message = f"you have thrown {bottles} bottles with points {total_points}" 
+            message_ar = f"لقد قمت برمي {bottles} زجاجة بنقاط {total_points}"
+        elif bottles == 0 and cans != 0:
+            message = f"you have thrown {cans} cans with points {total_points}"
+            message_ar = f"لقد قمت برمي {cans} علبة بنقاط {total_points}"
+        else:
+            message = f"you have thrown {bottles} bottles and {cans} cans with points {total_points}"
+            message_ar = f"لقد قمت برمي {bottles} زجاجة و {cans} علبة بنقاط {total_points}"
         try:
             async_to_sync(channel_layer.send)(
                 log.channel_name,
                 {
                     "type": "receive.update",
-                    "bottles": bottles,
-                    "cans": cans,
-                    "points": total_points,
+                    "message": message,
+                    "message_ar": message_ar,
                 }
             )
         except Exception as e:
@@ -135,7 +146,7 @@ class FinishRecycle(APIView):
             async_to_sync(channel_layer.send)(
                 log.channel_name,
                 {
-                    "type": "receive.finish",
+                    "type": "receive.update",
                     "bottles": log.bottles,
                     "cans": log.cans,
                     "points": log.points,
