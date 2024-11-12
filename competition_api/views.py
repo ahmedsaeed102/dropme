@@ -84,6 +84,7 @@ class leaveCompetition(APIView):
         competition_ranking = CompetitionRanking.objects.get(user=user, competition=competition)
         points = competition_ranking.points
         user.total_points += points
+        user.save()
         competition.users.remove(request.user.pk)
         competition_ranking.delete()
         return Response("Left competition successfully", status = 200)

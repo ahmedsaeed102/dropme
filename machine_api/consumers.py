@@ -30,33 +30,20 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
                 "message_ar": "نحن في انتظارك لرمي الزجاجة أو العلبة",
             })
         await asyncio.sleep(1)
-        await self.send_json(
-            {
-                "status": "success",
-                "message": "Test message",
-                "message_ar": "نحن في انتظارك لرمي الزجاجة أو العلبة",
-            })
 
-    async def receive_json(self, event):
-        if "points" in event:
-            await self.send_json({
-                "status": "success",
-                "message": f"you have thrown {event['bottles']} bottles and {event['cans']} cans",
-                "message_ar": f"لقد قمت برمي {event['bottles']} زجاجة و {event['cans']} علبة",
-                "points": event["points"],
-            })
-        else:
-            await self.send_json({
-                "status": "error",
-                "message": "Unrecognized message format",
-            })
+    async def receive_update(self, event):
+        await self.send_json({
+            "status": "success",
+            "message": f"you have thrown {event['bottles']} bottles and {event['cans']} cans",
+            "message_ar": f"لقد قمت برمي {event['bottles']} زجاجة و {event['cans']} علبة",
+        })
         print("received", event)
 
     async def disconnect(self, close_code):
         await database_sync_to_async(self.delete_incomplete_logs)()
         print("disconnected", close_code)
 
-    async def receive_update(self, event):
+    async def receive_finish(self, event):
         await self.send_json(
             {
                 "status": "success",
@@ -64,5 +51,5 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
                 "message_ar": f"{event['bottles']} زجاجة و{event['cans']} علبة",
                 "points": event["points"],
             })
-        print("received update", event)
+        print("received finish", event)
         await self.close()

@@ -103,7 +103,7 @@ class UpdateRecycle(APIView):
             async_to_sync(channel_layer.send)(
                 log.channel_name,
                 {
-                    "type": "receive.json",
+                    "type": "receive.update",
                     "bottles": bottles,
                     "cans": cans,
                     "points": total_points,
@@ -135,7 +135,7 @@ class FinishRecycle(APIView):
             async_to_sync(channel_layer.send)(
                 log.channel_name,
                 {
-                    "type": "receive.update",
+                    "type": "receive.finish",
                     "bottles": log.bottles,
                     "cans": log.cans,
                     "points": log.points,
