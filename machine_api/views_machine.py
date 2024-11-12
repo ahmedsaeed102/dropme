@@ -143,6 +143,7 @@ class FinishRecycle(APIView):
         update_user_points(log.user.id, total_points)
         channel_layer = get_channel_layer()
         try:
+            print("here finish")
             async_to_sync(channel_layer.send)(
                 log.channel_name,
                 {
