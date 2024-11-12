@@ -29,6 +29,13 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
                 "message": "we are waiting for you to throw your bottle or can",
                 "message_ar": "نحن في انتظارك لرمي الزجاجة أو العلبة",
             })
+        await asyncio.sleep(1)
+        await self.send_json(
+            {
+                "status": "success",
+                "message": "Test message",
+                "message_ar": "نحن في انتظارك لرمي الزجاجة أو العلبة",
+            })
 
     async def receive_json(self, event):
         if "points" in event:

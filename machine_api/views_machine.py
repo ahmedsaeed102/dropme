@@ -84,7 +84,7 @@ class MachineIsFull(APIView):
         return Response({"message": "Admin notified successfully"})
 
 class UpdateRecycle(APIView):
-    permission_classes = [HasAPIKey]
+    permission_classes = [HasAPIKey | IsAdminUser]
     serializer_class = UpdateRecycleLog
 
     def post(self, request, name):
@@ -114,7 +114,7 @@ class UpdateRecycle(APIView):
         return Response({"message": "success", "points": total_points})
 
 class FinishRecycle(APIView):
-    permission_classes = [HasAPIKey]
+    permission_classes = [HasAPIKey | IsAdminUser]
 
     def post(self, request, name):
         log = (RecycleLog.objects.filter(machine_name=name, in_progess=True).order_by("-created_at").first())
