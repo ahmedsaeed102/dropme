@@ -37,8 +37,9 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
         await database_sync_to_async(self.delete_incomplete_logs)()
 
     async def receive_update(self, event):
-        print("prereceived")
+        print("pre received")
         if event.get("message"):
+            print("received uodate", event)
             await self.send_json(
                 {
                     "status": "error",
@@ -46,6 +47,7 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
                     "message_ar": event["message_ar"],
                 })
         else:
+            print("received finish", event)
             await self.send_json(
                 {
                     "status": "success",
