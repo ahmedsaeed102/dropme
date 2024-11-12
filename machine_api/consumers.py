@@ -36,7 +36,7 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
     async def disconnect(self, close_code):
         await database_sync_to_async(self.delete_incomplete_logs)()
 
-    async def receive_finish(self, event):
+    async def receive_update(self, event):
         if not event.get("bottles") and not event.get("cans"):
             await self.send_json(
                 {
