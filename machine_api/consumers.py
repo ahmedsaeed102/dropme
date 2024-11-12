@@ -39,16 +39,13 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
     async def receive_update(self, event):
         print("prereceived")
         if event.get("message"):
-            print("prereceived update", event)
             await self.send_json(
                 {
                     "status": "error",
                     "message": event["message"],
                     "message_ar": event["message_ar"],
                 })
-            print("received update", event)
         else:
-            print("prereceived finish", event)
             await self.send_json(
                 {
                     "status": "success",
@@ -56,5 +53,4 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
                     "message_ar": f"{event['bottles']} زجاجة و{event['cans']} علبة",
                     "points": event["points"],
                 })
-            print("received finish", event)
             await self.close()
