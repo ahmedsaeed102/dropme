@@ -89,8 +89,8 @@ class CheckRecycle(APIView):
     def get(self, request, name):
         log = (RecycleLog.objects.filter(machine_name=name, in_progess=True).order_by("-created_at").first())
         if log:
-            return True
-        return False
+            return Response({"log": True}, status=200)
+        return Response({"log": False}, status=200)
 
 class UpdateRecycle(APIView):
     permission_classes = [HasAPIKey | IsAdminUser]
