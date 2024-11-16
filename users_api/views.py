@@ -50,13 +50,10 @@ class UserViewSet(viewsets.ModelViewSet):
             return super().list(request, *args, **kwargs)
         return Response("Not allowed", status=status.HTTP_403_FORBIDDEN)
 
-    def destroy(self, request, *args, **kwargs):
-        if self.get_object().id != request.user.id:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        return super().destroy(request, *args, **kwargs)
-
     @action(methods=["delete"], detail=False)
     def delete(self, request):
+        if not request.user:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         User.objects.filter(id=request.user.id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

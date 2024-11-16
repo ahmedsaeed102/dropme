@@ -25,6 +25,10 @@ def update_user_points(user_pk, points):
         user.total_points += points + special_points
         user.save()
 
+def claculate_travel_distance(userlocation, machinelocation):
+    timebyfoot = requests.get(f"https://routing.openstreetmap.de/routed-foot/route/v1/driving/{userlocation[0]},{userlocation[1]};{machinelocation[0]},{machinelocation[1]}").json()
+    return timebyfoot["routes"][0]["distance"] if timebyfoot.get("routes") else 0
+
 def claculate_travel_distance_and_time(userlocation, machinelocation):
     data = {}
     timebyfoot = requests.get(f"https://routing.openstreetmap.de/routed-foot/route/v1/driving/{userlocation[0]},{userlocation[1]};{machinelocation[0]},{machinelocation[1]}").json()
