@@ -238,6 +238,8 @@ class TopUserSerializer(serializers.ModelSerializer):
 
 class SocialLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
+    name = serializers.CharField(required=False)
+    profile_photo = serializers.ImageField(required=False)
     token = serializers.CharField()
     unique_id = serializers.CharField()
     medium = serializers.ChoiceField(choices=['google', 'apple', 'facebook'])

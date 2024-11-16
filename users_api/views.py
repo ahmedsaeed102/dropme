@@ -307,10 +307,12 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                 }, status=status.HTTP_200_OK)
             else:
                 phone_number = request.data.get('phone_number')
+                username = request.data.get('username', email.split('@')[0])
+                profile_photo = request.data.get('profile_photo', 'upload_to/default.png')
                 if phone_number:
-                    user = UserModel.objects.create(email=email, username=email.split('@')[0], phone_number=phone_number, oauth_medium=medium, password_set=False)
+                    user = UserModel.objects.create(email=email, username=username, phone_number=phone_number, oauth_medium=medium, password_set=False, profile_photo=profile_photo)
                 else:
-                    user = UserModel.objects.create(email=email, username=email.split('@')[0], oauth_medium=medium, password_set=False)
+                    user = UserModel.objects.create(email=email, username=username, oauth_medium=medium, password_set=False, profile_photo=profile_photo)
                 user.save()
                 send_welcome_email(email)
                 fcm_serializer = FCMDeviceSerializer(data=fcm_data, context={"request": self.request})
