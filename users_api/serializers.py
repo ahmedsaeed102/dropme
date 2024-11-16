@@ -196,6 +196,7 @@ class UserProfileSerializer(UserSerializer):
             if password != confirm_password:
                 raise ValidationError({"detail": _("Passwords don't match")})
             user.set_password(password) 
+            user.password_set = True
             user.save()
         return user
 
