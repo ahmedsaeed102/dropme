@@ -83,6 +83,15 @@ class MachineIsFull(APIView):
         send_mail(subject, f"Machine {name} is full", email_from, recipient_list)
         return Response({"message": "Admin notified successfully"})
 
+class CheckRecycle(APIView):
+    permission_classes = [HasAPIKey | IsAdminUser]
+
+    def get(self, request, name):
+        log = (RecycleLog.objects.filter(machine_name=name, in_progess=True).order_by("-created_at").first())
+        if log:
+            return True
+        return False
+
 class UpdateRecycle(APIView):
     permission_classes = [HasAPIKey | IsAdminUser]
     serializer_class = UpdateRecycleLog

@@ -24,6 +24,7 @@ machine = [
     path("machines/qrcode/<str:name>/", MachineQRCode.as_view(), name="retrive_qrcode"),
     path("machines/isbusy/<str:name>/", IsMachineBusy.as_view(), name="is_machine_busy"),
     path("machines/full/<str:name>/", MachineIsFull.as_view(), name="machine_full"),
+    path("machines/recycle/check/<str:name>/", CheckRecycle.as_view(), name="check_recycle"),
     path("machines/recycle/update/<str:name>/", UpdateRecycle.as_view(), name="update_recycle"),
     path("machines/recycle/finish/<str:name>/", FinishRecycle.as_view(), name="update_recycle"),
     path("machines/recycle/add/<str:name>/<str:phone_number>/", RecycleWithPhoneNumber.as_view(), name="update_recycle_phone"),
