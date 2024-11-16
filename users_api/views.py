@@ -187,7 +187,7 @@ class CurrentUserDetailsView(generics.GenericAPIView):
             "email": user.email, 
             "phone_number": user.phone_number,
             "country_code": user.country_code,
-            "profile_photo": user.profile_photo.url if user.profile_photo else None,
+            "profile_photo": user.profile_photo.url,
             "age": user.age,
             "gender": user.gender,
             "address": user.address,
@@ -294,7 +294,7 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                     "email": user.email, 
                     "phone_number": user.phone_number,
                     "country_code": user.country_code,
-                    "profile_photo": user.profile_photo.url if user.profile_photo else None,
+                    "profile_photo": user.profile_photo.url,
                     "age": user.age,
                     "gender": user.gender,
                     "address": user.address,
@@ -311,21 +311,11 @@ class OAuthRegisterLogin(generics.GenericAPIView):
             else:
                 phone_number = request.data.get('phone_number')
                 username = request.data.get('username', email.split('@')[0])
-                profile_photo = request.data.get('profile_photo', None)
-                if profile_photo:
-                    try:
-                        response = requests.get(profile_photo)
-                        if response.status_code == 200:
-                            filename = os.path.basename(profile_photo.split("?")[0])
-                            profile_photo_file = ContentFile(response.content, name=filename)
-                        else:
-                            profile_photo_file = 'upload_to/default.png'
-                    except requests.exceptions.RequestException:
-                        profile_photo_file = 'upload_to/default.png'
+                # profile_photo = request.data.get('profile_photo', None)
                 if phone_number:
-                    user = UserModel.objects.create(email=email, username=username, phone_number=phone_number, oauth_medium=medium, password_set=False, profile_photo=profile_photo_file)
+                    user = UserModel.objects.create(email=email, username=username, phone_number=phone_number, oauth_medium=medium, password_set=False)
                 else:
-                    user = UserModel.objects.create(email=email, username=username, oauth_medium=medium, password_set=False, profile_photo=profile_photo)
+                    user = UserModel.objects.create(email=email, username=username, oauth_medium=medium, password_set=False)
                 user.save()
                 send_welcome_email(email)
                 fcm_serializer = FCMDeviceSerializer(data=fcm_data, context={"request": self.request})
