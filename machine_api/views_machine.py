@@ -172,7 +172,8 @@ class RecycleWithPhoneNumber(APIView):
     def post(self, request, name, phone_number):
         bottles = request.data.get("bottles", 0)
         cans = request.data.get("cans", 0)
-        phone, created = PhoneNumber.objects.get_or_create(phone_number=phone_number)
+        number = phone_number.lstrip("0")
+        phone, created = PhoneNumber.objects.get_or_create(phone_number=number)
         _, _, total_points = calculate_points(bottles, cans)
         user = UserModel.objects.filter(phone_number=phone).first()
         if user:
