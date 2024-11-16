@@ -10,10 +10,10 @@ class MachineSerializer(serializers.ModelSerializer):
         if location:
             if current_location:
                 data = claculate_travel_distance_and_time(current_location.tuple, location.tuple)
-                representation["distance"] = int(data["distance"])
-                representation["timebyfoot"] = int(data["timebyfoot"])
-                representation["timebycar"] = int(data["timebycar"])
-                representation["timebybike"] = int(data["timebybike"])
+                representation["distance"] = data["distance"]
+                representation["timebyfoot"] = data["timebyfoot"]
+                representation["timebycar"] = data["timebycar"]
+                representation["timebybike"] = data["timebybike"]
             location = [coord for coord in location]
             representation["location"] = {"longitude": location[0],"latitude": location[1],}
         return representation

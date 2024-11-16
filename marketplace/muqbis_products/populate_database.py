@@ -5,12 +5,11 @@ from ..models import Product, Category
 
 BASE_DIR = Path(__file__).resolve().parent
 
-
 def populate():
     category = Category.objects.get(category_name="Muqbis")
     with open(BASE_DIR / "products.csv", encoding="utf8") as f:
         reader = csv.reader(f)
-        next(reader, None)  # skip the headers
+        next(reader, None)
         i = 1
         for row in reader:
             img_location = rf"{BASE_DIR}/imgs/{i}.jpg"

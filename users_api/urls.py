@@ -33,7 +33,7 @@ urlpatterns = [
     path("home_page_data/", views.HomePageView.as_view(), name="home_page_data",),
     path("users_points", views.UsersPointsView.as_view(), name="users_points"),
     # address list
-    path("list_address/", views.LocationList.as_view(), name="create_address"),
+    # path("list_address/", views.LocationList.as_view(), name="create_address"),
     # user feedback
     path("feedbacks/list/", views.FeedbacksList.as_view(), name="list_feedback"),
     path("feedbacks/create/", views.FeedbackCreate.as_view(), name="create_feedback"),

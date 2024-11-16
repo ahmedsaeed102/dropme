@@ -1,13 +1,27 @@
 import requests
+from PIL import Image
+import csv
+from pathlib import Path
 
-with open("links.txt", 'r') as f:
-    i = 0
-    for line in f:
-        image_url = line
+BASE_DIR = Path(__file__).resolve().parent
 
-        img_data = requests.get(image_url.strip()).content
+with open(BASE_DIR / "products.csv", encoding="utf8") as f:
+    reader = csv.reader(f)
+    next(reader, None)
+    i = 1
+    for row in reader:
+        image_url = row[4]
+        img_data = requests.get(image_url).content
+        image_path = BASE_DIR / f"imgs/temp_{i}.jpg"
 
-        with open(f'{8+i}.jpg', 'wb') as handler:
+        with open(image_path, 'wb') as handler:
             handler.write(img_data)
-        
-        i+= 1
+
+        thumbnail_path = BASE_DIR / f"imgs/{i}.jpg"
+        with Image.open(image_path) as img:
+            if img.mode == 'RGBA':
+                img = img.convert('RGB')
+            img.save(thumbnail_path, format="JPEG", quality=50, optimize=True)
+
+        image_path.unlink()
+        i += 1

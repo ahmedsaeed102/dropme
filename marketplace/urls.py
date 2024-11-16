@@ -26,5 +26,5 @@ urlpatterns = [
     # wallet page data
     path("wallet_page_data/", views.WalletPageView.as_view(), name="wallet_page_data",),
     # populate data
-    # path("marketplace/populate/", views.PopulateData.as_view())
+    path("marketplace/populate/", views.PopulateData.as_view())
 ]

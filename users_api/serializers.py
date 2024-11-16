@@ -101,7 +101,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["profile_photo"] = self.user.profile_photo.url if self.user.profile_photo else None
         data["age"] = self.user.age
         data["gender"] = self.user.gender
-        data["address"] = self.user.address.address if self.user.address else None
+        data["address"] = self.user.address
         data["referral_code"] = self.user.referral_code
         data["referral_usage_count"] = self.user.referral_usage_count
         data["preferred_language"] = self.user.preferred_language
@@ -173,18 +173,27 @@ class UserProfileSerializer(UserSerializer):
 
     class Meta:
         model = UserModel
-        fields = ["username", "phone_number", "age", "email", "password1", "profile_photo", "gender", "address", "preferred_language", "country_code", 'old_password']
+        fields = ["username", "phone_number", "age", "email", "password1", "password2", "profile_photo", "gender", "address", "preferred_language", "country_code", 'old_password']
 
     def update(self, instance, val_data):
         """update profile for User"""
         old_password = val_data.pop("old_password", None)
         password = val_data.pop("password1", None)
+        confirm_password = val_data.pop("password2", None)
         user = super().update(instance, val_data)
-        if password and old_password:
+        if user.password_set:
+            if not password or not old_password:
+                raise ValidationError({"detail": _("old_password, password1 are required")})
             if not user.check_password(old_password):
                 raise ValidationError({"detail": _("Invalid password")})
             user.set_password(password)
             user.save()
+        else:
+            if not password or not confirm_password:
+               raise ValidationError({"detail": _("password1, password2 are required")})
+            if password != confirm_password:
+                raise ValidationError({"detail": _("Passwords don't match")})
+            user.set_password(password) 
         return user
 
 class PreferredLanguageSerializer(serializers.ModelSerializer):

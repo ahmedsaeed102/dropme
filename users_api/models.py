@@ -49,11 +49,12 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     GENDER = Choices("male", "female")
     gender = models.CharField(choices=GENDER, null=True, blank=True, max_length=20)
     total_points = models.PositiveIntegerField(default=0)
-    address = models.ForeignKey(LocationModel, on_delete=models.CASCADE, null=True, blank=True, related_name="address_name")
+    address = models.CharField(max_length=225, null=True, blank=True)
     referral_code = models.CharField(max_length=15, unique=True, null=True, blank=True)
     referral_usage_count = models.PositiveIntegerField(default=0)
     preferred_language = models.CharField(max_length=10, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
     oauth_medium = models.CharField(max_length=50, null=True, blank=True)
+    password_set = models.BooleanField(default=True)
 
     objects = UserManager()
     USERNAME_FIELD = "email"

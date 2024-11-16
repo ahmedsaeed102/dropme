@@ -190,7 +190,7 @@ class CurrentUserDetailsView(generics.GenericAPIView):
             "profile_photo": user.profile_photo.url,
             "age": user.age,
             "gender": user.gender,
-            "address": user.address.address if user.address else None,
+            "address": user.address,
             "referral_code": user.referral_code,
             "referral_usage_count": user.referral_usage_count,
             "preferred_language": user.preferred_language,
@@ -296,7 +296,7 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                     "profile_photo": user.profile_photo.url,
                     "age": user.age,
                     "gender": user.gender,
-                    "address": user.address.address if user.address else None,
+                    "address": user.address,
                     "referral_code": user.referral_code,
                     "referral_usage_count": user.referral_usage_count,
                     "preferred_language": user.preferred_language,
@@ -309,10 +309,9 @@ class OAuthRegisterLogin(generics.GenericAPIView):
             else:
                 phone_number = request.data.get('phone_number')
                 if phone_number:
-                    user = UserModel.objects.create(email=email, username=email.split('@')[0], phone_number=phone_number, oauth_medium=medium)
+                    user = UserModel.objects.create(email=email, username=email.split('@')[0], phone_number=phone_number, oauth_medium=medium, password_set=False)
                 else:
-                    user = UserModel.objects.create(email=email, username=email.split('@')[0], oauth_medium=medium)
-                user.set_password(''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)))
+                    user = UserModel.objects.create(email=email, username=email.split('@')[0], oauth_medium=medium, password_set=False)
                 user.save()
                 send_welcome_email(email)
                 fcm_serializer = FCMDeviceSerializer(data=fcm_data, context={"request": self.request})

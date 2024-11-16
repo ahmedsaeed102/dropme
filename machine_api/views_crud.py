@@ -54,7 +54,7 @@ class MachinePage(APIView):
         current_location = Point(float(long), float(lat), srid=4326)
         machines_seriazlizer = self.serializer_class(self.get_queryset(), many=True, context={"current_location": current_location})
         nearest_machine = (Machine.objects.annotate(distance=Distance("location", current_location, spheroid=True)).order_by("distance").first())
-        nearest_machine_serializer = MachineSerializer(nearest_machine)
+        nearest_machine_serializer = MachineSerializer(nearest_machine, context={"current_location": current_location})
         return Response({
             "machines": machines_seriazlizer.data,
             "nearest_machine": nearest_machine_serializer.data
