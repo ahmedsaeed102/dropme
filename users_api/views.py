@@ -198,7 +198,8 @@ class CurrentUserDetailsView(generics.GenericAPIView):
             "total_recycled_items": get_total_recycled_items(user.id), 
             "unread_notifications": unread_notifications,
             "unread_notifications_count": count,
-            "is_admin": user.is_staff
+            "is_admin": user.is_staff,
+            "password_set": user.password_set
         }, status=status.HTTP_200_OK)
 
 class FeedbacksList(generics.ListAPIView):
@@ -304,7 +305,8 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                     "total_recycled_items": get_total_recycled_items(user.id), 
                     "unread_notifications": unread_notifications,
                     "unread_notifications_count": count,
-                    "is_admin": user.is_staff
+                    "is_admin": user.is_staff,
+                    "password_set": user.password_set
                 }, status=status.HTTP_200_OK)
             else:
                 phone_number = request.data.get('phone_number')

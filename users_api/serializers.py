@@ -110,6 +110,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["unread_notifications"] = unread_notifications
         data["unread_notifications_count"] = count
         data["is_admin"] = self.user.is_staff
+        data["password_set"] = self.user.password_set
         return data
 
 """
@@ -170,6 +171,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
 """
 class UserProfileSerializer(UserSerializer):
     old_password = serializers.CharField(required=False)
+    password2 = serializers.CharField(required=False)
 
     class Meta:
         model = UserModel
@@ -181,19 +183,20 @@ class UserProfileSerializer(UserSerializer):
         password = val_data.pop("password1", None)
         confirm_password = val_data.pop("password2", None)
         user = super().update(instance, val_data)
-        if user.password_set:
-            if not password or not old_password:
+        if user.password_set and password:
+            if not old_password:
                 raise ValidationError({"detail": _("old_password, password1 are required")})
             if not user.check_password(old_password):
                 raise ValidationError({"detail": _("Invalid password")})
             user.set_password(password)
             user.save()
-        else:
-            if not password or not confirm_password:
+        elif not user.password_set and password:
+            if not confirm_password:
                raise ValidationError({"detail": _("password1, password2 are required")})
             if password != confirm_password:
                 raise ValidationError({"detail": _("Passwords don't match")})
             user.set_password(password) 
+            user.save()
         return user
 
 class PreferredLanguageSerializer(serializers.ModelSerializer):
