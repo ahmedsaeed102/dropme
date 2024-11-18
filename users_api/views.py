@@ -40,6 +40,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def perform_create(self, serializer):
+        print("register-data", self.request.data)
         user = serializer.save()
         fcm_data = self.request.data.get("fcm_device", {})
         fcm_serializer = FCMDeviceSerializer(data=fcm_data, context={"request": self.request})
@@ -255,6 +256,7 @@ class OAuthRegisterLogin(generics.GenericAPIView):
     serializer_class = SocialLoginSerializer
 
     def post(self, request):
+        print("oauth", request.data)
         serializer = SocialLoginSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']

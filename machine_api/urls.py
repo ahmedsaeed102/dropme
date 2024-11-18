@@ -29,7 +29,6 @@ machine = [
     path("machines/recycle/update/<str:name>/", UpdateRecycle.as_view(), name="update_recycle"),
     path("machines/recycle/finish/<str:name>/", FinishRecycle.as_view(), name="update_recycle"),
     path("machines/recycle/add/<str:name>/<str:phone_number>/", RecycleWithPhoneNumber.as_view(), name="update_recycle_phone"),
-    path("ai-recognition/", AiRecognition.as_view(), name="ai_recognition"),
 ]
 
 urlpatterns = []

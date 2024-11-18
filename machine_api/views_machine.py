@@ -12,9 +12,6 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework_api_key.permissions import HasAPIKey
-from inference_sdk import InferenceHTTPClient
-import base64
-import os
 
 from users_api.models import UserModel
 from users_api.serializers import UserSerializer
@@ -197,33 +194,3 @@ class RecycleWithPhoneNumber(APIView):
             phone.points += total_points
             phone.save()
         return Response({"message": "success", "points": total_points})
-
-class AiRecognition(APIView):
-    permission_classes = [HasAPIKey | IsAdminUser]
-
-    def post(self, request, name):
-        try:
-            data = request.POST.get("image_data")
-            if not data:
-                return Response({"error": "No image data provided."}, status=400)
-            if "," in data:
-                _, base64_content = data.split(",", 1)
-            else:
-                return Response({"error": "Invalid base64 format."}, status=400)
-            image_data = base64.b64decode(base64_content)
-
-            fixed_filename = "captured_img.png"
-            image_path = os.path.join(settings.MEDIA_ROOT, fixed_filename)
-            with open(image_path, "wb") as image_file:
-                image_file.write(image_data)
-
-            INFERENCE_CLIENT = InferenceHTTPClient(api_url="https://detect.roboflow.com",api_key="tYGlsTAa2bqHb1RvtgjA")
-            result = INFERENCE_CLIENT.infer(image_path, model_id="trash-detection-mgjmm/1")
-            if len(result['predictions']) > 0:
-                best_confidence_result = max(result['predictions'], key=lambda d: d['confidence'])
-                x = best_confidence_result['class']
-            else:
-                x = "OTHER"
-            return Response({"result": x}, status=200)
-        except Exception as e:
-            return Response({"error": str(e)}, status=400)
