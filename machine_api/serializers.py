@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Machine, RecycleLog
+from .models import Machine, RecycleLog, MachineVideo
 from .utlis import claculate_travel_distance
 
 class MachineSerializer(serializers.ModelSerializer):
@@ -43,3 +43,8 @@ class UpdateRecycleLog(serializers.ModelSerializer):
     class Meta:
         model = RecycleLog
         fields = ["bottles", "cans"]
+
+class MachineVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MachineVideo
+        fields = ["video"]

@@ -3,10 +3,14 @@ from core.validators import validate_phone_number
 from django.contrib.gis.db.models import PointField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.validators import FileExtensionValidator
 
 from notification.services import notification_send_all
 from notification.models import NotificationImage
 from users_api.models import UserModel
+
+def upload_to_videos(instance, filename):
+    return f"machine/videos/{filename}"
 
 STATUS = (
     ("available", "available"),
@@ -79,3 +83,14 @@ class PhoneNumber(models.Model):
 
     def __str__(self):
         return self.phone_number
+
+class MachineVideo(models.Model):
+    name = models.CharField(max_length=200)
+    video = models.FileField(upload_to=upload_to_videos, validators=[FileExtensionValidator(allowed_extensions=["MOV", "avi", "mp4", "webm", "mkv"])])
+
+    def delete(self, using=None, keep_parents=False):
+        self.video.storage.delete(self.video.name)
+        super().delete()
+
+    def __str__(self):
+        return self.name

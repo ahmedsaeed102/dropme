@@ -22,6 +22,7 @@ map_ = [
 
 machine = [
     path("machines/qrcode/<str:name>/", MachineQRCode.as_view(), name="retrive_qrcode"),
+    path("machines/videos/", MachineVideos.as_view(), name="retrive_qrcode"),
     path("machines/isbusy/<str:name>/", IsMachineBusy.as_view(), name="is_machine_busy"),
     path("machines/full/<str:name>/", MachineIsFull.as_view(), name="machine_full"),
     path("machines/recycle/check/<str:name>/", CheckRecycle.as_view(), name="check_recycle"),

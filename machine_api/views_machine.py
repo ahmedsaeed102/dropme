@@ -15,8 +15,8 @@ from rest_framework_api_key.permissions import HasAPIKey
 from users_api.models import UserModel
 from users_api.serializers import UserSerializer
 from notification.services import notification_send, fcmdevice_get
-from .serializers import QRCodeSerializer, UpdateRecycleLog
-from .models import Machine, RecycleLog, PhoneNumber
+from .serializers import QRCodeSerializer, UpdateRecycleLog, MachineVideoSerializer
+from .models import Machine, RecycleLog, PhoneNumber, MachineVideo
 from .utlis import update_user_points, calculate_points
 from notification.models import NotificationImage
 
@@ -38,6 +38,15 @@ class MachineQRCode(APIView):
         qrcode_img.save(buffer, "PNG")
         machine.qr_code.save(fname, File(buffer), save=True)
         return HttpResponse(machine.qr_code, content_type="image/png")
+
+class MachineVideos(APIView):
+    permission_classes = [HasAPIKey | IsAuthenticated]
+    serializer_class = MachineVideoSerializer
+
+    def get(self, request):
+        videos = MachineVideo.objects.all()
+        serializer = self.serializer_class(videos, many=True)
+        return Response(serializer.data)
 
 class IsMachineBusy(APIView):
     permission_classes = [HasAPIKey]
