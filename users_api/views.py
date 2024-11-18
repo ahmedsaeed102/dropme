@@ -310,14 +310,14 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                 }, status=status.HTTP_200_OK)
             else:
                 phone_number = request.data.get('phone_number')
-                username = request.data.get('username', email.split('@')[0])
+                # username = request.data.get('username', email.split('@')[0])
+                username = email.split('@')[0]
                 # profile_photo = request.data.get('profile_photo', None)
                 if phone_number:
                     user = UserModel.objects.create(email=email, username=username, phone_number=phone_number, oauth_medium=medium, password_set=False)
                 else:
                     user = UserModel.objects.create(email=email, username=username, oauth_medium=medium, password_set=False)
                 user.save()
-                send_welcome_email(email)
                 fcm_serializer = FCMDeviceSerializer(data=fcm_data, context={"request": self.request})
                 if fcm_serializer.is_valid():
                     fcm_serializer.save(user=user, name=user.username)
@@ -328,12 +328,19 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                     user.total_points += phone.points
                     RecycleLog.objects.filter(phone=phone).update(user=user)
                     phone.delete()
+                otp = random.randint(1000, 9999)
+                otp_expiration = timezone.now() + timedelta(minutes=5)
+                user.otp = otp
+                user.otp_expiration = otp_expiration
+                user.save()
+                send_otp(user)
                 return Response({
                     "id": user.id,
                     "username": user.username,
                     "phone_number": user.phone_number,
                     "email": user.email,
-                    "country_code": user.country_code
+                    "country_code": user.country_code,
+                    "is_verified": False
                 },status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
