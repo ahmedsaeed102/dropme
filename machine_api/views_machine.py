@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework_api_key.permissions import HasAPIKey
-from inference import INFERENCE_CLIENT
+from inference_sdk import InferenceHTTPClient
 import base64
 import os
 
@@ -217,6 +217,7 @@ class AiRecognition(APIView):
             with open(image_path, "wb") as image_file:
                 image_file.write(image_data)
 
+            INFERENCE_CLIENT = InferenceHTTPClient(api_url="https://detect.roboflow.com",api_key="tYGlsTAa2bqHb1RvtgjA")
             result = INFERENCE_CLIENT.infer(image_path, model_id="trash-detection-mgjmm/1")
             if len(result['predictions']) > 0:
                 best_confidence_result = max(result['predictions'], key=lambda d: d['confidence'])
