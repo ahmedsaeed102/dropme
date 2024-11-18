@@ -104,4 +104,4 @@ uritemplate==4.1.1
 urllib3==1.26.15
 zope.event==4.6
 zope.interface==5.5.2
-inference-sdk==0.27.0
+inference-sdk
