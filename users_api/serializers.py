@@ -42,6 +42,7 @@ class UserSerializer(serializers.ModelSerializer):
         if referral_code:
             try:
                 UserModel.objects.get(referral_code=referral_code)
+                print("referral_code", referral_code)
             except UserModel.DoesNotExist:
                 raise serializers.ValidationError(_("Invalid referral code"))
         return data
@@ -57,7 +58,10 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(val_data["password1"])
         referral_code = val_data.get("referral_code")
         if referral_code:
+            print("add referal")
             referring_user = UserModel.objects.get(referral_code=referral_code)
+            print("referring_user", referring_user)
+            print(int((10*referring_user.total_points)/100) if referring_user.total_points > 0 else 10)
             referring_user.total_points += int((10*referring_user.total_points)/100) if referring_user.total_points > 0 else 10
             referring_user.referral_usage_count += 1
             referring_user.save()
