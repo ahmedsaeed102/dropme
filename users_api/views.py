@@ -11,22 +11,15 @@ from fcm_django.api.rest_framework import FCMDeviceSerializer
 from rest_framework.exceptions import ValidationError
 from faker import Faker
 from fcm_django.models import FCMDevice
-import jwt
-import string
 import random
 from datetime import date
-import os
-import requests
-from django.core.files.base import ContentFile
 
 from machine_api.models import PhoneNumber, RecycleLog
 from .models import LocationModel, Feedback, UserModel, generate_referral_code, TermsAndCondition, FAQ
 from competition_api.models import Resource
 from competition_api.models import Competition
-from marketplace.models import SpecialOffer
 from .services import send_otp, send_reset_password_email, send_welcome_email, otp_set, unread_notification
 from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer, TermsAndConditionSerializer, FAQsSerializer, SocialLoginSerializer
-from marketplace.serializers import SpecialOfferSerializer
 from competition_api.serializers import CompetitionSerializer, ResourcesSerializer
 from machine_api.utlis import get_total_recycled_items
 
@@ -43,11 +36,10 @@ class UserViewSet(viewsets.ModelViewSet):
         print("register-data", self.request.data)
         user = serializer.save()
         fcm_data = self.request.data.get("fcm_device", {})
-        fcm_serializer = FCMDeviceSerializer(data=fcm_data, context={"request": self.request})
-        if fcm_serializer.is_valid():
-            fcm_serializer.save(user=user, name=user.username)
-        else:
-            raise ValidationError(fcm_serializer.errors)
+        fcm_registration_id = fcm_data.get("registration_id")
+        fcm_device_type = fcm_data.get("type")
+        if fcm_registration_id and fcm_device_type:
+            FCMDevice.objects.update_or_create(registration_id=fcm_registration_id, defaults={"user": user, "name": user.username, "type": fcm_device_type})
 
     def list(self, request, *args, **kwargs):
         if request.user.is_staff:
@@ -256,7 +248,6 @@ class OAuthRegisterLogin(generics.GenericAPIView):
     serializer_class = SocialLoginSerializer
 
     def post(self, request):
-        print("oauth", request.data)
         serializer = SocialLoginSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
@@ -264,6 +255,8 @@ class OAuthRegisterLogin(generics.GenericAPIView):
             unique_id = serializer.validated_data['unique_id']
             medium = serializer.validated_data['medium']
             fcm_data = request.data.get("fcm_device", {})
+            fcm_registration_id = fcm_data.get("registration_id")
+            fcm_device_type = fcm_data.get("type")
             if(UserModel.objects.filter(email=email).exists()):
                 user=UserModel.objects.get(email=email)
                 if not user.is_active:
@@ -278,8 +271,6 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                 user.oauth_medium = medium
                 user.save()
                 unread_notifications, count = unread_notification(user)
-                fcm_registration_id = fcm_data.get("registration_id")
-                fcm_device_type = fcm_data.get("type")
                 # Register or update FCM device
                 if fcm_registration_id and fcm_device_type:
                     fcm_device, created = FCMDevice.objects.get_or_create(user=user, defaults={"registration_id": fcm_registration_id, "type": fcm_device_type, "name": user.username})
@@ -312,19 +303,15 @@ class OAuthRegisterLogin(generics.GenericAPIView):
                 }, status=status.HTTP_200_OK)
             else:
                 phone_number = request.data.get('phone_number')
-                # username = request.data.get('username', email.split('@')[0])
-                username = email.split('@')[0]
+                username = request.data.get('username', email.split('@')[0])
                 # profile_photo = request.data.get('profile_photo', None)
                 if phone_number:
                     user = UserModel.objects.create(email=email, username=username, phone_number=phone_number, oauth_medium=medium, password_set=False)
                 else:
                     user = UserModel.objects.create(email=email, username=username, oauth_medium=medium, password_set=False)
                 user.save()
-                fcm_serializer = FCMDeviceSerializer(data=fcm_data, context={"request": self.request})
-                if fcm_serializer.is_valid():
-                    fcm_serializer.save(user=user, name=user.username)
-                else:
-                    raise ValidationError(fcm_serializer.errors)
+                if fcm_registration_id and fcm_device_type:
+                    FCMDevice.objects.update_or_create(registration_id=fcm_registration_id, defaults={"user": user, "name": user.username, "type": fcm_device_type})
                 phone = PhoneNumber.objects.filter(phone_number=phone_number).first()
                 if phone:
                     user.total_points += phone.points
