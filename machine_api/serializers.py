@@ -47,4 +47,4 @@ class UpdateRecycleLog(serializers.ModelSerializer):
 class MachineVideoSerializer(serializers.ModelSerializer):
     class Meta:
         model = MachineVideo
-        fields = ["video"]
+        fields = ["video", "id"]

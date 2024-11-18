@@ -217,7 +217,7 @@ class AiRecognition(APIView):
             with open(image_path, "wb") as image_file:
                 image_file.write(image_data)
 
-            result = INFERENCE_CLIENT.infer("C:\\Users\\Sayed Nimo\\Pictures\\capture.jpg", model_id="trash-detection-mgjmm/1")
+            result = INFERENCE_CLIENT.infer(image_path, model_id="trash-detection-mgjmm/1")
             if len(result['predictions']) > 0:
                 best_confidence_result = max(result['predictions'], key=lambda d: d['confidence'])
                 x = best_confidence_result['class']
