@@ -8,15 +8,17 @@ from .utlis import update_user_points, calculate_points
 class StartRecycle(AsyncJsonWebsocketConsumer):
     def complete_logs(self):
         log = RecycleLog.objects.filter(in_progess=True, channel_name=self.channel_name).first()
-        bottles = log.bottles
-        cans = log.cans
-        _, _, total_points = calculate_points(bottles, cans)
-        log.points = total_points
-        log.in_progess = False
-        log.is_complete = True
-        log.save()
-        update_user_points(log.user.id, total_points)
-        return bottles, cans, total_points
+        if log:
+            bottles = log.bottles
+            cans = log.cans
+            _, _, total_points = calculate_points(bottles, cans)
+            log.points = total_points
+            log.in_progess = False
+            log.is_complete = True
+            log.save()
+            update_user_points(log.user.id, total_points)
+            return bottles, cans, total_points
+        return 0, 0, 0
 
     def create_log(self):
         RecycleLog.objects.create(machine_name=self.machine_name, user=self.user, channel_name=self.channel_name, in_progess=True)
