@@ -6,19 +6,6 @@ from .utlis import update_user_points, calculate_points
 
 
 class StartRecycle(AsyncJsonWebsocketConsumer):
-    def complete_logs(self):
-        RecycleLog.objects.filter(in_progess=True, channel_name=self.channel_name).delete()
-        # if log:
-        #     bottles = log.bottles
-        #     cans = log.cans
-        #     _, _, total_points = calculate_points(bottles, cans)
-        #     log.points = total_points
-        #     log.in_progess = False
-        #     log.is_complete = True
-        #     log.save()
-        #     update_user_points(log.user.id, total_points)
-        #     return bottles, cans, total_points
-        # return 0, 0, 0
 
     def create_log(self):
         RecycleLog.objects.create(machine_name=self.machine_name, user=self.user, channel_name=self.channel_name, in_progess=True)
@@ -46,14 +33,13 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
             await self.close()
 
     async def disconnect(self, close_code):
-        await database_sync_to_async(self.complete_logs)()
-        # await self.send_json(
-        #     {
-        #         "status": "success",
-        #         "message": f"{bottles} bottles and {cans} cans",
-        #         "message_ar": f"{bottles} زجاجة و{cans} علبة",
-        #         "points": total_points,
-        #     })
+        await database_sync_to_async(self.delete_incomplete_logs)()
+        print("disconnected", close_code)
+
+    def delete_incomplete_logs(self):
+        RecycleLog.objects.filter(
+            in_progess=True, channel_name=self.channel_name
+        ).delete()
 
     async def receive_update(self, event):
         print("pre received")
