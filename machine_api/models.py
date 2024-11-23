@@ -23,6 +23,7 @@ STATUS_AR = (
 
 class Machine(models.Model):
     identification_name = models.CharField(max_length=200,unique=True,)
+    name_en = models.CharField(max_length=200, blank=True, null=True)
     name_ar = models.CharField(max_length=200, blank=True, null=True)
     location = PointField(null=True, srid=4326, blank=True)
     city = models.CharField(max_length=50, null=True)

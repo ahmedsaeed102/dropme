@@ -13,6 +13,7 @@ class MachineSerializer(serializers.ModelSerializer):
                 representation["distance"] = data
             location = [coord for coord in location]
             representation["location"] = {"longitude": location[0],"latitude": location[1],}
+            representation["identification_name"] = instance.name_en
         return representation
 
     class Meta:
