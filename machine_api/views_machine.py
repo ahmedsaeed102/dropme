@@ -175,6 +175,38 @@ class FinishRecycle(APIView):
             return Response({"message": "error in sending update to user mobile phone"})
         return Response({"message": "success", "points": total_points})
 
+class AddRecycle(APIView):
+    permission_classes = [HasAPIKey | IsAdminUser]
+
+    def post(self, request, name):
+        log = (RecycleLog.objects.filter(machine_name=name, in_progess=True).order_by("-created_at").first())
+        if not log:
+            raise NotFound(detail="Error 404, log not found", code=404)
+
+        bottles = request.data.get("bottles", 0)
+        cans = request.data.get("cans", 0)
+
+        _, _, total_points = calculate_points(bottles, cans)
+        log.points = total_points
+        log.in_progess = False
+        log.is_complete = True
+        log.save()
+        update_user_points(log.user.id, total_points)
+        channel_layer = get_channel_layer()
+        try:
+            print("start finish")
+            async_to_sync(channel_layer.send)(
+                log.channel_name,
+                {
+                    "type": "receive.update",
+                    "bottles": log.bottles,
+                    "cans": log.cans,
+                    "points": log.points,
+                })
+        except Exception as e:
+            return Response({"message": "error in sending update to user mobile phone"})
+        return Response({"message": "success", "points": total_points})
+
 class RecycleWithPhoneNumber(APIView):
     permission_classes = [HasAPIKey | IsAdminUser]
     serializer_class = UpdateRecycleLog
