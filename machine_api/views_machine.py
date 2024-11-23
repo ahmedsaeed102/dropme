@@ -188,6 +188,7 @@ class UpdateRecycle(APIView):
     serializer_class = UpdateRecycleLog
 
     def post(self, request, name):
+        print("starting update")
         bottles = request.data.get("bottles", 0)
         cans = request.data.get("cans", 0)
         log = (
@@ -211,7 +212,9 @@ class UpdateRecycle(APIView):
 
         update_user_points(log.user.id, total_points)
 
+        print("done update")
         try:
+            print("send to app")
             async_to_sync(channel_layer.send)(
                 log.channel_name,
                 {
@@ -221,6 +224,7 @@ class UpdateRecycle(APIView):
                     "points": log.points,
                 },
             )
+            print("done syncing")
 
         except Exception as e:
             return Response({"message": "error in sending update to user mobile phone"})
