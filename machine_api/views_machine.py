@@ -227,6 +227,7 @@ class UpdateRecycle(APIView):
             print("done syncing")
 
         except Exception as e:
+            print("error in sending update to user mobile phone", e)
             return Response({"message": "error in sending update to user mobile phone"})
 
         return Response({"message": "success", "points": total_points})
