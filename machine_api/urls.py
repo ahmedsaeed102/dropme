@@ -26,9 +26,10 @@ machine = [
     path("machines/isbusy/<str:name>/", IsMachineBusy.as_view(), name="is_machine_busy"),
     path("machines/full/<str:name>/", MachineIsFull.as_view(), name="machine_full"),
     path("machines/recycle/check/<str:name>/", CheckRecycle.as_view(), name="check_recycle"),
-    path("machines/recycle/update/<str:name>/", UpdateRecycle.as_view(), name="update_recycle"),
+    path("machines/recycle/update/V2/<str:name>/", UpdateV2Recycle.as_view(), name="update_v2_recycle"),
     path("machines/recycle/finish/<str:name>/", FinishRecycle.as_view(), name="finish_recycle"),
-    path("machines/recycle/add/<str:name>/", AddRecycle.as_view(), name="add_recycle"),
+    path("machines/recycle/add/<str:name>/", UpdateRecycle.as_view(), name="update_recycle"),
+    path("machines/recycle/update/<str:name>/", UpdateRecycle.as_view(), name="update_recycle"),
     path("machines/recycle/add/<str:name>/<str:phone_number>/", RecycleWithPhoneNumber.as_view(), name="update_recycle_phone"),
 ]
 
