@@ -184,7 +184,7 @@ class UpdateRecycle(APIView):
     }
     """
 
-    permission_classes = [HasAPIKey]
+    permission_classes = [HasAPIKey | IsAdminUser]
     serializer_class = UpdateRecycleLog
 
     def post(self, request, name):
