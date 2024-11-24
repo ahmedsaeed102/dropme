@@ -380,9 +380,14 @@ class RemoveReaction(APIView):
             return Response("Reaction removed successfully", status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class CommentsPagination(LimitOffsetPagination):
+    default_limit = 5
+    max_limit = 100
+
 @extend_schema(request={"multipart/form-data": {"type": "object", "properties": {"content": {"type": "string", "format": "string"},"img": {"type": "string", "format": "binary"},"video": {"type": "string", "format": "binary"}}}})
 class CommentListCreateView(generics.ListCreateAPIView):
     serializer_class = CommentsSerializer
+    pagination_class = CommentsPagination
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):

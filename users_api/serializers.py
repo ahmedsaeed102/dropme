@@ -62,10 +62,10 @@ class UserSerializer(serializers.ModelSerializer):
             referring_user = UserModel.objects.get(referral_code=referral_code)
             print("referring_user", referring_user)
             print(int((10*referring_user.total_points)/100) if referring_user.total_points > 0 else 10)
-            referring_user.total_points += int((10*referring_user.total_points)/100) if referring_user.total_points > 0 else 10
+            referring_user.total_points += int((10*referring_user.total_points)/100) if referring_user.total_points > 0 else 5
             referring_user.referral_usage_count += 1
             referring_user.save()
-            user.total_points += 10
+            user.total_points += 5
         user.save()
         send_otp(user)
         return user
