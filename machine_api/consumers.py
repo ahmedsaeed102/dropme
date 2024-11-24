@@ -2,6 +2,7 @@ import asyncio
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import RecycleLog, Machine
+from users_api.models import UserModel
 
 
 class StartRecycle(AsyncJsonWebsocketConsumer):
@@ -36,13 +37,26 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
             await self.close()
 
     async def disconnect(self, close_code):
-        await database_sync_to_async(self.delete_incomplete_logs)()
+        bool = await database_sync_to_async(self.delete_incomplete_logs)()
+        if not bool:
+            points = await database_sync_to_async(self.get_user_points)()
+            await self.send_json(
+                {
+                    "status": "success",
+                    "points": points,
+                })
         print("disconnected", close_code)
 
     def delete_incomplete_logs(self):
-        RecycleLog.objects.filter(
-            in_progess=True, channel_name=self.channel_name
-        ).delete()
+        recyclelog = RecycleLog.objects.filter(in_progess=True, channel_name=self.channel_name)
+        if recyclelog:
+            recyclelog.delete()
+            return True
+        return False
+
+    def get_user_points(self):
+        recyclelog = RecycleLog.objects.filter(channel_name=self.channel_name, is_complete=True).last()
+        return recyclelog.points
 
     async def receive_update(self, event):
         print("pre received")
