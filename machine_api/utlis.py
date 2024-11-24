@@ -75,11 +75,15 @@ def get_total_recycled_items(userid: int) -> int:
         return 0
     total_bottles = user_recycle_logs.aggregate(Sum("bottles"))["bottles__sum"]
     total_cans = user_recycle_logs.aggregate(Sum("cans"))["cans__sum"]
+    print("recycled items:", total_bottles, total_cans)
     user = user_get(id=userid)
-    phone_recycle_logs = RecycleLog.objects.filter(phone__phone_number=user.phone_number)
-    if phone_recycle_logs:
-        total_bottles += phone_recycle_logs.aggregate(Sum("bottles"))["bottles__sum"]
-        total_cans += phone_recycle_logs.aggregate(Sum("cans"))["cans__sum"]
+    if user.phone_number:
+        phone_recycle_logs = RecycleLog.objects.filter(phone__phone_number=user.phone_number)
+        if phone_recycle_logs:
+            print(phone_recycle_logs)
+            print("phone recycled items:", phone_recycle_logs.aggregate(Sum("bottles"))["bottles__sum"], phone_recycle_logs.aggregate(Sum("cans"))["cans__sum"])
+            total_bottles += phone_recycle_logs.aggregate(Sum("bottles"))["bottles__sum"]
+            total_cans += phone_recycle_logs.aggregate(Sum("cans"))["cans__sum"]
     return total_bottles + total_cans
 
 def get_user_logs(userid: int) -> dict:
