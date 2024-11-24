@@ -7,6 +7,6 @@ class NotificationSerializer(ModelSerializer):
         model = Notification
         fields = "__all__"
 
-class NotificationUpdateSerializer(ModelSerializer):
+class NotificationUpdateSerializer(serializers.Serializer):
     all_notifications = serializers.BooleanField(required=False)
     list_notifications = serializers.ListField(child=serializers.IntegerField(), required=False)
