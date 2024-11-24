@@ -247,13 +247,14 @@ class RecycleWithPhoneNumber(APIView):
         cans = request.data.get("cans", 0)
         phone_number = phone_number.lstrip("0")
         phone, created = PhoneNumber.objects.get_or_create(phone_number=phone_number)
+        machine = Machine.objects.filter(identification_name=self.machine_name).first()
         _, _, total_points = calculate_points(bottles, cans)
         user = UserModel.objects.filter(phone_number=phone_number).first()
         if user:
-            RecycleLog.objects.create(machine_name=name, user=user, bottles=bottles, cans=cans, points=total_points, is_complete=True)
+            RecycleLog.objects.create(machine_name=name, user=user, bottles=bottles, cans=cans, points=total_points, is_complete=True, machine=machine)
             update_user_points(user.id, total_points)
         else:
-            RecycleLog.objects.create(machine_name=name, phone=phone, bottles=bottles, cans=cans, points=total_points, is_complete=True)
+            RecycleLog.objects.create(machine_name=name, phone=phone, bottles=bottles, cans=cans, points=total_points, is_complete=True, machine=machine)
             phone.points += total_points
             phone.save()
         return Response({"message": "success", "points": total_points})
