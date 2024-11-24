@@ -27,6 +27,12 @@ class FilterSerializer(serializers.Serializer):
         place = serializers.CharField(required=False)
 
 class RecycleLogSerializer(serializers.ModelSerializer):
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["machine_name"] = instance.machine.name_en
+        return representation
+
     class Meta:
         model = RecycleLog
         fields = ["machine_name", "bottles", "cans", "points", "created_at"]

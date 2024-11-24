@@ -63,6 +63,7 @@ def machine_created(sender, instance, created, **kwargs):
 
 class RecycleLog(models.Model):
     machine_name = models.CharField(max_length=200)
+    machine = models.ForeignKey(Machine, on_delete=models.CASCADE, default="Egypt's International Exhibition Center RVM 1")
     user = models.ForeignKey(UserModel,null=True,blank=True,on_delete=models.CASCADE,related_name="user_logs")
     phone = models.ForeignKey("PhoneNumber", null=True, blank=True, on_delete=models.CASCADE)
     bottles = models.IntegerField(default=0,blank=True)
