@@ -1,14 +1,17 @@
 import asyncio
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
-from .models import RecycleLog
-from .utlis import update_user_points, calculate_points
+from .models import RecycleLog, Machine
 
 
 class StartRecycle(AsyncJsonWebsocketConsumer):
 
     def create_log(self):
-        RecycleLog.objects.create(machine_name=self.machine_name, user=self.user, channel_name=self.channel_name, in_progess=True)
+        machine = Machine.objects.filter(identification_name=self.machine_name).first()
+        if not machine:
+            RecycleLog.objects.create(machine_name=self.machine_name, user=self.user, channel_name=self.channel_name, in_progess=True)
+        else:
+            RecycleLog.objects.create(machine_name=self.machine_name, user=self.user, channel_name=self.channel_name, in_progess=True, machine=machine)
 
     async def connect(self):
         try:
