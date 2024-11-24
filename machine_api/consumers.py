@@ -38,6 +38,7 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
 
     async def disconnect(self, close_code):
         bool = await database_sync_to_async(self.delete_incomplete_logs)()
+        print("deleted", bool)
         if not bool:
             points = await database_sync_to_async(self.get_user_points)()
             await self.send_json(
@@ -55,7 +56,9 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
         return False
 
     def get_user_points(self):
+        print("get user data")
         recyclelog = RecycleLog.objects.filter(channel_name=self.channel_name, is_complete=True).last()
+        print(recyclelog)
         return recyclelog.points
 
     async def receive_update(self, event):
