@@ -19,8 +19,9 @@ class Migration(migrations.Migration):
             name="machine",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                default="Egypt's International Exhibition Center RVM 1",
-                to="machine_api.Machine",
+                null=True,
+                blank=True,
+                to="machine_api.machine",
             ),
         ),
     ]
