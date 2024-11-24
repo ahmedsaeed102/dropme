@@ -21,21 +21,6 @@ from .models import Machine, RecycleLog, PhoneNumber, MachineVideo
 from .utlis import update_user_points, calculate_points
 from notification.models import NotificationImage
 
-import time
-
-def send_message_with_retries(channel_layer, group_name, message, retries=3):
-    for attempt in range(retries):
-        try:
-            async_to_sync(channel_layer.group_send)(group_name, message)
-            print("Message sent successfully")
-            return True
-        except Exception as e:
-            print(f"Attempt {attempt + 1} failed: {e}")
-            if attempt < retries - 1:
-                time.sleep(2 ** attempt)  # Exponential backoff
-    print("Failed to send message after retries")
-    return False
-
 class MachineQRCode(APIView):
     permission_classes = [HasAPIKey | IsAuthenticated]
     serializer_class = QRCodeSerializer
@@ -228,33 +213,24 @@ class UpdateRecycle(APIView):
         update_user_points(log.user.id, total_points)
 
         print("done update")
-        group_name = f"machine_{name}"
-        # try:
-        #     print("send to app")
-        #     async_to_sync(channel_layer.send)(
-        #         log.channel_name,
-        #         {
-        #             "type": "receive.update",
-        #             "bottles": log.bottles,
-        #             "cans": log.cans,
-        #             "points": log.points,
-        #         },
-        #     )
-        #     print("done syncing")
-
-        # except Exception as e:
-        #     print("error in sending update to user mobile phone", e)
-        #     return Response({"message": "error in sending update to user mobile phone"})
-        send_message_with_retries(
-            channel_layer,
-            group_name,
-            {
-                "type": "receive.update",
-                "bottles": log.bottles,
-                "cans": log.cans,
-                "points": log.points,
-            },
-        )
+        # try 3 times
+        for i in range(3):
+            try:
+                print("send to app")
+                async_to_sync(channel_layer.send)(
+                    log.channel_name,
+                    {
+                        "type": "receive.update",
+                        "bottles": log.bottles,
+                        "cans": log.cans,
+                        "points": log.points,
+                    },
+                )
+                print("done syncing")
+            except Exception as e:
+                print("error in sending update to user mobile phone", e)
+                if i == 0:
+                    return Response({"message": "error in sending update to user mobile phone"})
 
         return Response({"message": "success", "points": total_points})
 
