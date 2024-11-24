@@ -161,18 +161,22 @@ class FinishRecycle(APIView):
         log.save()
         update_user_points(log.user.id, total_points)
         channel_layer = get_channel_layer()
-        try:
-            print("start finish")
-            async_to_sync(channel_layer.send)(
-                log.channel_name,
-                {
-                    "type": "receive.update",
-                    "bottles": log.bottles,
-                    "cans": log.cans,
-                    "points": log.points,
-                })
-        except Exception as e:
-            return Response({"message": "error in sending update to user mobile phone"})
+        for i in range(3):
+            try:
+                print("start finish")
+                async_to_sync(channel_layer.send)(
+                    log.channel_name,
+                    {
+                        "type": "receive.update",
+                        "bottles": log.bottles,
+                        "cans": log.cans,
+                        "points": log.points,
+                    })
+                print("done syncing")
+            except Exception as e:
+                print("error in sending update to user mobile phone", e)
+                if i == 0:
+                    return Response({"message": "error in sending update to user mobile phone"})
         return Response({"message": "success", "points": total_points})
 
 class UpdateRecycle(APIView):
