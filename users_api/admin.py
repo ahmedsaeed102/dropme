@@ -3,7 +3,7 @@ from .models import UserModel, LocationModel, Feedback, TermsAndCondition, FAQ
 
 @admin.register(UserModel)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ("id", "email", "username", "phone_number", "total_points", "address", "registered_at")
+    list_display = ("email", "username", "phone_number", "total_points", "address", "registered_at")
     search_fields = ("email", "phone_number", "username")
     list_filter = ("is_staff",)
     ordering = ("-registered_at",)

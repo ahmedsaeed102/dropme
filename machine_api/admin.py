@@ -12,7 +12,10 @@ class RecycleLogAdmin(admin.ModelAdmin):
 class MachineVideoAdmin(admin.ModelAdmin):
     list_display = ["id", "video"]
 
+class PhoneNumberAdmin(admin.ModelAdmin):
+    list_display = ["phone_number", "points"]
+
 admin.site.register(Machine, MachineAdmin)
 admin.site.register(RecycleLog, RecycleLogAdmin)
-admin.site.register(PhoneNumber)
+admin.site.register(PhoneNumber, PhoneNumberAdmin)
 admin.site.register(MachineVideo, MachineVideoAdmin)
