@@ -41,6 +41,7 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
         print("deleted", bool)
         if not bool:
             points = await database_sync_to_async(self.get_user_points)()
+            print(points)
             await self.send_json(
                 {
                     "status": "success",
