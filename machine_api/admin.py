@@ -7,7 +7,7 @@ class MachineAdmin(admin.ModelAdmin):
     exclude = ["longitude", "latitdue"]
 
 class RecycleLogAdmin(admin.ModelAdmin):
-    list_display = ["user", "machine", "bottles", "cans", "points", "created_at"]
+    list_display = ["user", "phone" "machine", "bottles", "cans", "points", "in_progess", "is_complete", "created_at"]
 
 class MachineVideoAdmin(admin.ModelAdmin):
     list_display = ["id", "video"]
