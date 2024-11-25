@@ -10,6 +10,7 @@ from fcm_django.models import FCMDevice
 from fcm_django.api.rest_framework import FCMDeviceSerializer
 from .models import UserModel, LocationModel, Feedback, LanguageChoices, TermsAndCondition, FAQ
 from .services import send_otp, unread_notification
+from machine_api.models import PhoneNumber
 from machine_api.utlis import get_total_recycled_items
 
 """
@@ -186,7 +187,17 @@ class UserProfileSerializer(UserSerializer):
         old_password = val_data.pop("old_password", None)
         password = val_data.pop("password1", None)
         confirm_password = val_data.pop("password2", None)
+        phone_number = val_data.get("phone_number", None)
         user = super().update(instance, val_data)
+        if phone_number:
+            print("phone_number", phone_number)
+            phone = PhoneNumber.objects.filter(phone_number=phone_number).first()
+            print(phone)
+            if phone:
+                instance.total_points += phone.points
+                RecycleLog.objects.filter(phone=phone).update(user=instance)
+                phone.delete()
+            instance.save()
         if user.password_set and password:
             if not old_password:
                 raise ValidationError({"detail": _("old_password, password1 are required")})
