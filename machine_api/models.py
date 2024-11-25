@@ -73,11 +73,19 @@ class RecycleLog(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     in_progess = models.BooleanField(default=False)
     is_complete = models.BooleanField(default=False)
+    current_total_points = models.IntegerField(default=0)
 
     def __str__(self):
         if not self.user:
             return self.machine_name + " " + str(self.phone.phone_number)
         return self.machine_name + " " + str(self.user.username)
+
+@receiver(post_save, sender=RecycleLog)
+def update_current_total_points(sender, instance, created, **kwargs):
+    if instance.user:
+        instance.current_total_points = instance.user.total_points
+    elif instance.phone:
+        instance.current_total_points = instance.phone.points
 
 class PhoneNumber(models.Model):
     phone_number = models.CharField(unique=True,max_length=11,validators=[validate_phone_number],)
