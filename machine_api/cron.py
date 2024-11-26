@@ -35,7 +35,7 @@ def send_weekly_recycle_summary_email():
         send_mail(subject, None, from_email, [user.email], fail_silently=False, html_message=template)
     print("Weekly Summary Emails Sent")
 
-@kronos.register("0 10 * * *")
+@kronos.register("22 10 * * *")
 def send_app_email():
     from_email = f'DropMe <{settings.EMAIL_HOST_USER}>'
     context = {"testing_link": "https://play.google.com/apps/testing/com.dropme.recycling", "support_email": "hello@dropmeeg.com"}
