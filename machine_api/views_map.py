@@ -48,7 +48,9 @@ class SetMachineCoordinates(APIView):
                 body=f"A machine moved to a new location check it out!",
                 title_ar="تم تغيير موقع الآلة",
                 body_ar=f"""تم نقل آلة إلى موقع جديد، اطلع عليها!""",
-                image=image
+                image=image,
+                type="machine",
+                extra_data={"room_name": None, "id": machine.id}
             )
         else:
             notification_send_all(
@@ -56,7 +58,9 @@ class SetMachineCoordinates(APIView):
                 body="New recycle machine added check it out!",
                 title_ar="إضافة موقع جديد للآلة",
                 body_ar=f"""تمت إضافة آلة جديدة، اطلع عليها!""",
-                image=image
+                image=image,
+                type="machine",
+                extra_data={"room_name": None, "id": machine.id}
             )
         pnt = Point(float(longitude), float(latitude))
         machine.location = pnt

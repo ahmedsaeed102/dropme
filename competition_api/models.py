@@ -41,7 +41,9 @@ def Competition_created(sender, instance, created, **kwargs):
             body="New competition created check it out!",
             title_ar="مسابقة جديدة",
             body_ar="تم إنشاء مسابقة جديدة، تحقق منها!",
-            image=image
+            image=image,
+            type="competition",
+            extra_data={"room_name": None, "id": instance.id}
         )
 
 class CompetitionRanking(models.Model):

@@ -21,6 +21,9 @@ def message_get(*, message_id: int) -> MessagesModel:
 def comment_get(*, comment_id: int) -> CommentsModel:
     return get_object_or_404(CommentsModel, pk=comment_id)
 
+def get_message_from_comment(*, comment_id: int) -> MessagesModel:
+    return MessagesModel.objects.filter(comments__id=comment_id).first()
+
 def user_reaction_get(*, model, user_id):
     reactions = model.reactions
     for reaction, value in reactions.items():
@@ -52,7 +55,7 @@ class Message:
             raise APIException(str(e))
 
     @staticmethod
-    def new_message_notification_send(*, request, room_type, room, image=None) -> None:
+    def new_message_notification_send(*, request, room_type, room, image=None, message_id=None) -> None:
         if room_type == "public":
             notification_off_users = ChannelsModel.objects.values_list('notification_off_users', flat=True).distinct()
             devices = fcmdevice_get_all().exclude(user__id__in=notification_off_users).exclude(user=request.user.pk)
@@ -67,7 +70,9 @@ class Message:
             body=f"""You have a new message in '{room.room_name}' community channel""",
             title_ar="رسالة جديدة",
             body_ar=f"لديك رسالة جديدة في قناة المجتمع '{room.room_name_ar}'",
-            image=image
+            image=image,
+            type="community",
+            extra_data={"room_name": room.room_name, "id": message_id}
         )
 
     @staticmethod

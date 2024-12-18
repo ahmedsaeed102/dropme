@@ -58,7 +58,9 @@ def machine_created(sender, instance, created, **kwargs):
             body="New Machine has been added",
             title_ar="ماكينة جديدة",
             body_ar="تم أضافة ماكينة جديدة.",
-            image=image
+            image=image,
+            type="machine",
+            extra_data={"room_name": None, "id": instance.id}
         )
 
 class RecycleLog(models.Model):

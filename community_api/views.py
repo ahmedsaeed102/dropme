@@ -16,7 +16,7 @@ from rest_framework import generics
 from notification.services import notification_send_by_name, notification_send, fcmdevice_get
 from users_api.services import email_send, user_list
 from .models import ChannelsModel, MessagesModel, Invitations
-from .services import community_get, Message, message_get, report_create, comment_get, Comment
+from .services import community_get, Message, message_get, report_create, comment_get, Comment, get_message_from_comment
 from .serializers import *
 
 User = get_user_model()
@@ -112,7 +112,9 @@ class AddPeopleToChannel(APIView):
             body=f"user {request.user.username} added you in {room_name} channel",
             title_ar="دعوة إلى المجتمع",
             body_ar=f"قام المستخدم {request.user.username} بإضافتك إلى قناة {room.room_name_ar}",
-            image = request.user.profile_photo
+            image = request.user.profile_photo,
+            type="community",
+            extra_data={"room_name": room_name, "id": None}
         )
         return Response("Successfully added users")
 
@@ -241,9 +243,23 @@ class SendMessage(APIView):
             new_message.approved = True
             new_message.save()
             Message.new_message_send(room_name=room_name, message=new_message, message_type="message")
-            Message.new_message_notification_send(request=request, room_type=room.channel_type, room=room, image=request.user.profile_photo)
+            Message.new_message_notification_send(request=request, room_type=room.channel_type, room=room, image=request.user.profile_photo, message_id=new_message.id)
             return Response("message sent successfully", status=status.HTTP_201_CREATED)
-        return Response("Message sent successfully, pending admin approval.", status=status.HTTP_201_CREATED)
+        else:
+            admin_users = UserModel.objects.filter(is_staff=True)
+            devices = fcmdevice_get(user__in=admin_users)
+            notification_send(
+                devices=devices,
+                users = admin_users,
+                title="New message needs approval",
+                body=f"""User {request.user.username} sent a new message in '{room_name}' community channel, needs approval""",
+                title_ar=" رسالة جديدة تحتاج للموافقة",
+                body_ar=f" المستخدم {request.user.username} قام بإرسال رسالة جديدة في قناة '{room.room_name_ar}' تحتاج للموافقة",
+                image=request.user.profile_photo,
+                type="community",
+                extra_data={"room_name": room_name, "id": new_message.id}
+            )
+            return Response("Message sent successfully, pending admin approval.", status=status.HTTP_201_CREATED)
 
 class ApproveMessageView(APIView):
     permission_classes = [IsAdminUser]
@@ -257,7 +273,7 @@ class ApproveMessageView(APIView):
         message.save()
         new_message = MessagesSerializer(message).data
         Message.new_message_send(room_name=room_name, message=new_message, message_type="message")
-        Message.new_message_notification_send(request=request, room_type=room.channel_type, room=room, image=message.user_model.profile_photo)
+        Message.new_message_notification_send(request=request, room_type=room.channel_type, room=room, image=message.user_model.profile_photo, message_id=message.id)
         return Response({"detail": "Message approved successfully."}, status=status.HTTP_200_OK)
 
 @extend_schema(methods=["PUT"], exclude=True, request={"multipart/form-data": {"type": "object", "properties": {"content": {"type": "string", "format": "string"},"img": {"type": "string", "format": "binary"},"video": {"type": "string", "format": "binary"}, "gif": {"type": "string", "format": "binary"}, "file": {"type": "string", "format": "binary"}}}})
@@ -301,6 +317,7 @@ class SendReaction(APIView):
             comment = comment_get(comment_id=comment_id)
             comment = Comment.comment_reaction_add(emoji=emoji, comment=comment, user_id=user_id)
             comment_user = comment.user_model.username
+            message = get_message_from_comment(comment_id=comment_id)
             serializer_data = CommentReactionSerializer(comment).data
             notification_send_by_name(
                 name=comment_user,
@@ -308,7 +325,9 @@ class SendReaction(APIView):
                 body=f"{request.user.username} reacted to your message.",
                 title_ar = "رد على تعليقك",
                 body_ar = f"{request.user.username} قام بالتفاعل مع تعليقك.",
-                image = request.user.profile_photo
+                image = request.user.profile_photo,
+                type="community",
+                extra_data={"room_name": room_name, "id": message.id}
             )
         else:
             message_id = serializer.data["message_id"]
@@ -322,7 +341,9 @@ class SendReaction(APIView):
                 body=f"{request.user.username} reacted to your message.",
                 title_ar = "رد على رسالتك",
                 body_ar = f"{request.user.username} قام بالتفاعل مع رسالتك.",
-                image = request.user.profile_photo
+                image = request.user.profile_photo,
+                type="community",
+                extra_data={"room_name": room_name, "id": message_id}
             )
         Message.new_message_send(room_name=room_name, message=serializer_data, message_type="reaction")
         return Response("Reaction added successfully", status=status.HTTP_200_OK)
