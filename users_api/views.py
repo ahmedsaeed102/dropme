@@ -248,6 +248,7 @@ class OAuthRegisterLogin(generics.GenericAPIView):
     serializer_class = SocialLoginSerializer
 
     def post(self, request):
+        print("request.data", request.data)
         serializer = SocialLoginSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']

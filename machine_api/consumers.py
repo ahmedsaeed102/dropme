@@ -44,7 +44,7 @@ class StartRecycle(AsyncJsonWebsocketConsumer):
             print(points)
             await self.send_json(
                 {
-                    "status": "success",
+                    "status": "success disconnect",
                     "points": points,
                 })
         print("disconnected", close_code)

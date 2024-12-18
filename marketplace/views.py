@@ -162,7 +162,7 @@ class WalletPageView(generics.GenericAPIView):
     def get(self, request):
         user = request.user
         user_points = user.total_points
-        logs = RecycleLog.objects.filter(user=request.user.id, is_complete=True).order_by('-created_at')
+        logs = RecycleLog.objects.filter(user=request.user.id, is_complete=True).order_by('created_at')
         log_serializer = RecycleLogSerializer(logs, many=True, context={"request": request}).data
         return Response(
             {
