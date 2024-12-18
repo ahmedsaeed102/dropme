@@ -14,7 +14,8 @@ def notification_create(*, users, title, body, title_ar, body_ar, image=None, ty
     NotificaitonModel.objects.bulk_create([NotificaitonModel(user=user, title_en=title, body_en=body, title_ar=title_ar, body_ar=body_ar, image=image, type=type, extra_data=extra_data) for user in users])
 
 def notification_send_all(*, title, body, title_ar, body_ar, image=None, type=None, extra_data=None) -> None:
-    FCMDevice.objects.send_message(Message(notification=Notification(title=title, body=body)))
+    devices = fcmdevice_get_all()
+    devices.send_message(Message(notification=Notification(title=title, body=body)))
     users = UserModel.objects.all()
     notification_create(users=users, title=title, body=body, title_ar=title_ar, body_ar=body_ar, image=image, type=type, extra_data=extra_data)
 
