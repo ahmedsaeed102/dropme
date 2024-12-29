@@ -43,34 +43,36 @@ class MachineOverview(APIView):
                     all_days[day]["total_bottles"] = entry["total_bottles"] or 0
                     all_days[day]["total_recycled_items"] = entry["total_recycled_items"] or 0
 
-            users = {
-                "title": "Users",
-                "value": sum(d["unique_users"] for d in all_days.values()),
-                "interval": "Last 30 days",
-                "trend": "up",
-                "data": [d["unique_users"] for d in all_days.values()],
-            }
-            bottles = {
-                "title": "Bottles",
-                "value": sum(d["total_bottles"] for d in all_days.values()),
-                "interval": "Last 30 days",
-                "trend": "up",
-                "data": [d["total_bottles"] for d in all_days.values()],
-            }
-            cans = {
-                "title": "Cans",
-                "value": sum(d["total_cans"] for d in all_days.values()),
-                "interval": "Last 30 days",
-                "trend": "up",
-                "data": [d["total_cans"] for d in all_days.values()],
-            }
-            total_items = {
-                "title": "Total Items",
-                "value": sum(d["total_recycled_items"] for d in all_days.values()),
-                "interval": "Last 30 days",
-                "trend": "up",
-                "data": [d["total_recycled_items"] for d in all_days.values()],
-            }
-            return Response({users, bottles, cans, total_items}, status=200)
+            response_data = [
+                {
+                    "title": "Users",
+                    "value": sum(d["unique_users"] for d in all_days.values()),
+                    "interval": "Last 30 days",
+                    "trend": "up",
+                    "data": [d["unique_users"] for d in all_days.values()],
+                },
+                {
+                    "title": "Bottles",
+                    "value": sum(d["total_bottles"] for d in all_days.values()),
+                    "interval": "Last 30 days",
+                    "trend": "up",
+                    "data": [d["total_bottles"] for d in all_days.values()],
+                },
+                {
+                    "title": "Cans",
+                    "value": sum(d["total_cans"] for d in all_days.values()),
+                    "interval": "Last 30 days",
+                    "trend": "up",
+                    "data": [d["total_cans"] for d in all_days.values()],
+                },
+                {
+                    "title": "Total Items",
+                    "value": sum(d["total_recycled_items"] for d in all_days.values()),
+                    "interval": "Last 30 days",
+                    "trend": "up",
+                    "data": [d["total_recycled_items"] for d in all_days.values()],
+                }
+            ]
+            return Response(response_data, status=200)
         except Machine.DoesNotExist:
             return Response({"error": "Machine not found"}, status=404)
