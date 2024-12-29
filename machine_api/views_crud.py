@@ -28,7 +28,7 @@ class Machines(generics.ListCreateAPIView):
         self.action = self.request.method
         if self.action.lower() == "post":
             return [IsAdminUser()]
-        return [IsAuthenticated()]
+        return []
 
     @extend_schema(parameters=[OpenApiParameter(name="identification_name", location=OpenApiParameter.QUERY, description="machine name", required=False,type=str),
                                OpenApiParameter(name="city",location=OpenApiParameter.QUERY,description="machine city",required=False,type=str),
