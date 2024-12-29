@@ -14,7 +14,7 @@ from .serializers import MachineSerializer, RecycleLogSerializer, FilterSerializ
 from .models import Machine, RecycleLog
 
 class Machines(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     serializer_class = MachineSerializer
 
     def get_queryset(self):
