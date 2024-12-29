@@ -14,7 +14,7 @@ class MachineOverview(APIView):
 
     def get(self, request, name):
         try:
-            machine = Machine.objects.get(name=name)
+            machine = Machine.objects.get(identification_name=name)
             thirty_days_ago = now() - timedelta(days=30)
             recycle_logs_last_30_days = RecycleLog.objects.filter(machine=machine,created_at__gte=thirty_days_ago)
 
