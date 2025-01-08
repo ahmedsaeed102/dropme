@@ -21,6 +21,7 @@ urlpatterns = [
     path("community/<str:room_name>/previously_invited/",PrevioulyInvited.as_view()),
     # list, send, approve, update and delete messages
     path("community/<str:room_name>/messages/",ChannelMessages.as_view(),name="room_messages"),
+    path("community/<str:room_name>/messages/<int:pk>/",MessageDetail.as_view(),name="message_detail"),
     path("community/<str:room_name>/send/",SendMessage.as_view(),name="send_message"),
     path('community/<str:room_name>/messages/<int:pk>/approve/', ApproveMessageView.as_view(), name='approve-message'),
     path("community/messages/<int:pk>/update/",EditMessage.as_view(),name="edit_message"),

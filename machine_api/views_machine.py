@@ -86,7 +86,7 @@ class MachineIsFull(APIView):
             body_ar=f" ماكينة {name} ممتلئة قم بتفريغها!",
             image=image,
             type="machine",
-            extra_data={"room_name": None, "id": machine.id}
+            extra_data={"room_name": None, "id": machine.id, "extra":None}
         )
 
         subject = "Machine is full"

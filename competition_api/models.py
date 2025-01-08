@@ -43,7 +43,7 @@ def Competition_created(sender, instance, created, **kwargs):
             body_ar="تم إنشاء مسابقة جديدة، تحقق منها!",
             image=image,
             type="competition",
-            extra_data={"room_name": None, "id": instance.id}
+            extra_data={"room_name": None, "id": instance.id, "extra":None}
         )
 
 class CompetitionRanking(models.Model):

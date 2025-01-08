@@ -72,7 +72,7 @@ class Message:
             body_ar=f"لديك رسالة جديدة في قناة المجتمع '{room.room_name_ar}'",
             image=image,
             type="community",
-            extra_data={"room_name": room.room_name, "id": message_id}
+            extra_data={"room_name": room.room_name, "id": message_id, "extra":None}
         )
 
     @staticmethod

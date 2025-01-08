@@ -114,7 +114,7 @@ def channel_created(sender, instance, created, **kwargs):
             body_ar=f"""لقد تم إنشاء قناة جديدة باسم '{instance.room_name_ar}'. انضم للمحادثة واستمتع بالتواصل!""",
             image=image,
             type="community",
-            extra_data={"room_name": instance.room_name, "id": None}
+            extra_data={"room_name": instance.room_name, "id": None, "extra":None}
         )
 
 class ReportModel(models.Model):

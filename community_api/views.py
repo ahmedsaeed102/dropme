@@ -114,7 +114,7 @@ class AddPeopleToChannel(APIView):
             body_ar=f"قام المستخدم {request.user.username} بإضافتك إلى قناة {room.room_name_ar}",
             image = request.user.profile_photo,
             type="community",
-            extra_data={"room_name": room_name, "id": None}
+            extra_data={"room_name": room_name, "id": None, "extra":None}
         )
         return Response("Successfully added users")
 
@@ -222,6 +222,12 @@ class ChannelMessages(ListAPIView):
         data["description_ar"] = self.description_ar
         return Response(data)
 
+class MessageDetail(RetrieveAPIView):
+    queryset = MessagesModel.objects.all()
+    serializer_class = MessagesSerializer
+    permission_classes = (IsAuthenticated,)
+    lookup_url_kwarg = "pk"
+
 @extend_schema(request={"multipart/form-data": {"type": "object", "properties": {"content": {"type": "string", "format": "string"},"img": {"type": "string", "format": "binary"},"video": {"type": "string", "format": "binary"}, "gif": {"type": "string", "format": "binary"}, "file": {"type": "string", "format": "binary"}}}})
 class SendMessage(APIView):
     serializer_class = SendMessageSerializer
@@ -257,7 +263,7 @@ class SendMessage(APIView):
                 body_ar=f" المستخدم {request.user.username} قام بإرسال رسالة جديدة في قناة '{room.room_name_ar}' تحتاج للموافقة",
                 image=request.user.profile_photo,
                 type="community",
-                extra_data={"room_name": room_name, "id": new_message.id}
+                extra_data={"room_name": room_name, "id": new_message.id, "extra":None}
             )
             return Response("Message sent successfully, pending admin approval.", status=status.HTTP_201_CREATED)
 
@@ -327,7 +333,7 @@ class SendReaction(APIView):
                 body_ar = f"{request.user.username} قام بالتفاعل مع تعليقك.",
                 image = request.user.profile_photo,
                 type="community",
-                extra_data={"room_name": room_name, "id": message.id}
+                extra_data={"room_name": room_name, "id": message.id, "extra": comment_id}
             )
         else:
             message_id = serializer.data["message_id"]
@@ -343,7 +349,7 @@ class SendReaction(APIView):
                 body_ar = f"{request.user.username} قام بالتفاعل مع رسالتك.",
                 image = request.user.profile_photo,
                 type="community",
-                extra_data={"room_name": room_name, "id": message_id}
+                extra_data={"room_name": room_name, "id": message_id, "extra":None}
             )
         Message.new_message_send(room_name=room_name, message=serializer_data, message_type="reaction")
         return Response("Reaction added successfully", status=status.HTTP_200_OK)
