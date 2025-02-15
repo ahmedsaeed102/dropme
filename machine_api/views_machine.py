@@ -111,6 +111,7 @@ class UpdateV2Recycle(APIView):
     def post(self, request, name):
         bottles = request.data.get("bottles", 0)
         cans = request.data.get("cans", 0)
+        print("UpdateV2Recycle", name, bottles, cans, request.data)
         log = (RecycleLog.objects.filter(machine_name=name, in_progess=True).order_by("-created_at").first())
         if not log:
             raise NotFound(detail="Error 404, log not found", code=404)
@@ -149,6 +150,7 @@ class FinishRecycle(APIView):
     permission_classes = [HasAPIKey | IsAdminUser]
 
     def post(self, request, name):
+        print("FinishRecycle", request.data)
         log = (RecycleLog.objects.filter(machine_name=name, in_progess=True).order_by("-created_at").first())
         if not log:
             raise NotFound(detail="Error 404, log not found", code=404)
@@ -197,6 +199,7 @@ class UpdateRecycle(APIView):
         print("starting update")
         bottles = request.data.get("bottles", 0)
         cans = request.data.get("cans", 0)
+        print("UpdateRecycle", name, bottles, cans, request.data)
         log = (
             RecycleLog.objects.filter(machine_name=name, in_progess=True)
             .order_by("-created_at")
@@ -248,6 +251,7 @@ class RecycleWithPhoneNumber(APIView):
         bottles = request.data.get("bottles", 0)
         cans = request.data.get("cans", 0)
         phone_number = phone_number.lstrip("0")
+        print("RecycleWithPhoneNumber", phone_number, bottles, cans)
         phone, created = PhoneNumber.objects.get_or_create(phone_number=phone_number)
         machine = Machine.objects.filter(identification_name=name).first()
         _, _, total_points = calculate_points(bottles, cans)
