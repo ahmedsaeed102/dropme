@@ -31,6 +31,7 @@ def claculate_travel_distance(userlocation, machinelocation):
 
 def claculate_travel_distance_and_time(userlocation, machinelocation):
     data = {}
+    print(f"timebycar12:")
     timebyfoot = requests.get(f"https://routing.openstreetmap.de/routed-foot/route/v1/driving/{userlocation[0]},{userlocation[1]};{machinelocation[0]},{machinelocation[1]}").json()
     timebycar = requests.get(f"https://routing.openstreetmap.de/routed-car/route/v1/driving/{userlocation[0]},{userlocation[1]};{machinelocation[0]},{machinelocation[1]}").json()
     timebybike = requests.get(f"https://routing.openstreetmap.de/routed-bike/route/v1/driving/{userlocation[0]},{userlocation[1]};{machinelocation[0]},{machinelocation[1]}").json()
@@ -41,6 +42,7 @@ def claculate_travel_distance_and_time(userlocation, machinelocation):
     data["timebycar"] = timebycar["routes"][0]["duration"] / 60 if timebycar.get("routes") else 0
     data["timebybike"] = timebybike["routes"][0]["duration"] / 60 if timebybike.get("routes") else 0
     data["timebymotorcycle"] = timebymotorcycle["routes"][0]["duration"] / 60 if timebymotorcycle.get("routes") else 0
+    print(f"timebycar:")
     return data
 
 def get_directions(userlocation, machinelocation):
