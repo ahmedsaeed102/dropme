@@ -101,7 +101,7 @@ NOTIFICATION_SCHEDULE = [
     },
     {
         "date": "28-03",
-        "time": "08:00",
+        "time": "08:20",
         "title_en": "Ramadan’s Last Friday: Earn Double Rewards! 🌙♻",
         "title_ar": "آخر جمعة في رمضان: اربح ضعف المكافآت! 🌙♻",
         "message_en": "A blessed Friday for good deeds! Recycle today & earn double points as we approach Eid. Small action, big impact! 💚♻",
