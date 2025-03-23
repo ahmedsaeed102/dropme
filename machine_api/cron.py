@@ -7,12 +7,11 @@ from .utlis import get_user_logs, get_remaining_points
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
-@kronos.register("53 17 * * *")
-# @kronos.register("0 8 * * 5")
+@kronos.register("0 8 * * 5")
 def send_weekly_recycle_summary_email():
     from_email = f'DropMe <{settings.EMAIL_HOST_USER}>'
 
-    for user in UserModel.objects.filter(email="suhailaahmedbk@gmail.com"):
+    for user in UserModel.objects.filter(is_active=True):
         data = get_user_logs(user.id)
         remaining_points = get_remaining_points(user)
         context = {"username": user.username, "rank":user.ranking, "remaining_points": remaining_points, "total_points": user.total_points}
@@ -52,7 +51,7 @@ NOTIFICATION_SCHEDULE = [
     #     ),
     # },
     {
-        "time": "5 18 23 3 *",
+        "time": "15 18 23 3 *",
         "title_en": "9 Days to Eid: Let’s Go Green! 🎉",
         "title_ar": "9 أيام حتى العيد: لنصبح أكثر صداقة للبيئة! 🎉",
         "message_en": "Eid is around the corner! Start your journey to rewards—recycle today & get 10+ bonus points per day! 🎊♻",
@@ -140,8 +139,6 @@ def send_email(user, title_en, title_ar, message_en, message_ar):
 for notification in NOTIFICATION_SCHEDULE:
     @kronos.register(notification['time'])
     def scheduled_email(notification=notification):
-        print("heree scheduled_email 0")
-        print(UserModel.objects.filter(email="suhailaahmedbk@gmail.com"))
-        for user in UserModel.objects.filter(email="suhailaahmedbk@gmail.com"):
+        for user in UserModel.objects.filter(is_active=True):
             print("heree scheduled_email")
             send_email(user, notification["title_en"], notification["title_ar"], notification["message_en"], notification["message_ar"])
