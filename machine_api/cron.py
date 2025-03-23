@@ -118,7 +118,7 @@ NOTIFICATION_SCHEDULE = [
 
 def send_email(user, title_en, title_ar, message_en, message_ar):
     from_email = f'DropMe <{settings.EMAIL_HOST_USER}>'
-    if user.preferred_language == "ar":
+    if user.preferred_language == LanguageChoices.ARABIC:
         title = title_ar
         message = message_ar
         language = "ar"
