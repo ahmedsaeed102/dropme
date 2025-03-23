@@ -52,7 +52,7 @@ NOTIFICATION_SCHEDULE = [
     #     ),
     # },
     {
-        "time": "0 8 23 3 *",
+        "time": "5 18 23 3 *",
         "title_en": "9 Days to Eid: Let’s Go Green! 🎉",
         "title_ar": "9 أيام حتى العيد: لنصبح أكثر صداقة للبيئة! 🎉",
         "message_en": "Eid is around the corner! Start your journey to rewards—recycle today & get 10+ bonus points per day! 🎊♻",
