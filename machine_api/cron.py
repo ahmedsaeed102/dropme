@@ -39,7 +39,7 @@ def send_weekly_recycle_summary_email():
 NOTIFICATION_SCHEDULE = [
     {
         "date": "21-03",
-        "time": "08:00",
+        "time": "12:35",
         "title_en": "A Gift for Mother Earth – Recycle & Win! 🌱",
         "title_ar": "هدية لكوكب الأرض – قم بإعادة التدوير واربح! 🌱",
         "message_en": (
@@ -53,7 +53,7 @@ NOTIFICATION_SCHEDULE = [
     },
     {
         "date": "23-03",
-        "time": "08:00",
+        "time": "12:35",
         "title_en": "9 Days to Eid: Let’s Go Green! 🎉",
         "title_ar": "9 أيام حتى العيد: لنصبح أكثر صداقة للبيئة! 🎉",
         "message_en": "Eid is around the corner! Start your journey to rewards—recycle today & get 10+ bonus points per day! 🎊♻",
@@ -61,7 +61,7 @@ NOTIFICATION_SCHEDULE = [
     },
     {
         "date": "24-03",
-        "time": "08:00",
+        "time": "12:35",
         "title_en": "Surprise Monday: Mystery Bonus Awaits! 🎁♻",
         "title_ar": "الإثنين المفاجئ: مكافأة غامضة بانتظارك! 🎁♻",
         "message_en": "Recycle today & unlock a mystery reward in your wallet! What will it be? Only one way to find out! 🎁♻",
@@ -69,7 +69,7 @@ NOTIFICATION_SCHEDULE = [
     },
     {
         "date": "25-03",
-        "time": "08:00",
+        "time": "12:35",
         "title_en": "Green Habits Challenge: Can You Go 3 Days? 🌱",
         "title_ar": "تحدي العادات الخضراء: هل يمكنك الاستمرار 3 أيام؟ 🌱",
         "message_en": "A habit takes 3 days to form! Recycle today, tomorrow & the next day to unlock a special streak reward! 🌍♻",
@@ -77,7 +77,7 @@ NOTIFICATION_SCHEDULE = [
     },
     {
         "date": "26-03",
-        "time": "08:00",
+        "time": "12:35",
         "title_en": "Ramadan’s Last Wednesday: Make It Count! 🌟",
         "title_ar": "آخر أربعاء في رمضان: اجعله مميزًا! 🌟",
         "message_en": "Small actions, big rewards! Recycle today & get a 1.5x points boost—only for today! Let’s make it a habit. ♻🌟",
@@ -85,7 +85,7 @@ NOTIFICATION_SCHEDULE = [
     },
     {
         "date": "27-03",
-        "time": "08:00",
+        "time": "12:35",
         "title_en": "Eid Leaderboard: Are You on It? 🏆",
         "title_ar": "لوحة الصدارة للعيد: هل أنت من المتصدرين؟ 🏆",
         "message_en": "The top recyclers before Eid win a grand reward! Check your points & keep recycling to climb the leaderboard! 🏆♻",
@@ -93,7 +93,7 @@ NOTIFICATION_SCHEDULE = [
     },
     {
         "date": "27-03",
-        "time": "18:00",
+        "time": "12:35",
         "title_en": "Last Call Before Friday’s Big Boost! 🚀",
         "title_ar": "آخر فرصة قبل زيادة النقاط الكبيرة يوم الجمعة! 🚀",
         "message_en": "Tomorrow is Ramadan’s Last Friday! Warm up today & get 15+ bonus points. Tomorrow, we go BIG! 🚀♻",
@@ -101,7 +101,7 @@ NOTIFICATION_SCHEDULE = [
     },
     {
         "date": "28-03",
-        "time": "08:20",
+        "time": "12:35",
         "title_en": "Ramadan’s Last Friday: Earn Double Rewards! 🌙♻",
         "title_ar": "آخر جمعة في رمضان: اربح ضعف المكافآت! 🌙♻",
         "message_en": "A blessed Friday for good deeds! Recycle today & earn double points as we approach Eid. Small action, big impact! 💚♻",
@@ -109,7 +109,7 @@ NOTIFICATION_SCHEDULE = [
     },
     {
         "date": "29-03",
-        "time": "08:00",
+        "time": "12:35",
         "title_en": "Eid Prep: Clean Up & Earn Rewards! 🎊♻",
         "title_ar": "استعداد العيد: نظّف مكانك واربح المكافآت! 🎊♻",
         "message_en": "Getting ready for Eid? Declutter your space & drop off recyclables at Maadi Club to earn an extra Eid bonus! Let’s make it a green celebration. 🌍🎉",
@@ -117,7 +117,7 @@ NOTIFICATION_SCHEDULE = [
     },
     {
         "date": "31-03",
-        "time": "08:00",
+        "time": "12:35",
         "title_en": "Eid Mubarak! 🎊 A Special Gift Awaits You! 🎁",
         "title_ar": "عيد مبارك! 🎊 مكافأة خاصة في انتظارك! 🎁",
         "message_en": "Your sustainability efforts deserve a reward! 🎉 Check your Drop Me wallet for an exclusive Eid surprise gift. Thank you for making a difference! 💚♻",
@@ -154,6 +154,7 @@ for notification in NOTIFICATION_SCHEDULE:
 
     @kronos.register(cron_time)
     def scheduled_email(notification=notification):
+        print("heree scheduled_email 0")
         print(UserModel.objects.filter(email="suhailaahmedbk@gmail.com"))
         for user in UserModel.objects.filter(email="suhailaahmedbk@gmail.com"):
             print("heree scheduled_email")
