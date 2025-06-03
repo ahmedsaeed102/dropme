@@ -1,74 +1,174 @@
 <html>
-
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.5;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        .content {
+            margin-bottom: 40px;
+        }
+        .stats-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #8BC34A;
+        }
+        .reward-section {
+            background-color: #fff3cd;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #CDDC39;
+        }
+        .tip-section {
+            background-color: #f0f8f0;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        .footer {
+            border-top: 2px solid #e9ecef;
+            padding-top: 20px;
+            margin-top: 30px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .footer-links {
+            margin: 15px 0 20px 0;
+        }
+        .footer-links a {
+            color: #8BC34A;
+            text-decoration: none;
+            margin-right: 20px;
+        }
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        .logo {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: #8BC34A;
+            border-radius: 6px;
+            margin-right: 10px;
+            vertical-align: middle;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .company-info {
+            font-size: 12px;
+            color: #868e96;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+        hr {
+            border: none;
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 25px 0;
+        }
+    </style>
+</head>
 <body>
-    <p><b>Dear {{username}},</b></p>
+    <div class="content">
+        <p><b>Dear {{username}},</b></p>
+        
+        <p>
+            We're excited to share your latest recycling achievements! Here's how you contributed to a cleaner, 
+            more sustainable future this past week:
+        </p>
 
-    <p>
-        We're excited to share your latest recycling achievements! Here's how you contributed to a cleaner, 
-        more sustainable future this past week:
-    </p>
+        <hr>
 
-    <hr>
+        <div class="stats-section">
+            <p><strong>Your Recycling Impact:</strong></p>
+            <ul>
+                <li><b>Plastic Bottles Recycled:</b> {{ bottles_number }} bottles</li>
+                <li><b>Aluminum Cans Recycled:</b> {{ cans_number }} cans</li>
+                <li><b>Other Materials (Rejected):</b> 0 </li>
+            </ul>
+        </div>
 
-    <p><strong>Your Recycling Impact:</strong></p>
-    <ul>
-        <li><b>Plastic Bottles Recycled:</b> {{ bottles_number }} bottles</li>
-        <li><b>Aluminum Cans Recycled:</b> {{ cans_number }} cans</li>
-        <li><b>Other Materials (Rejected):</b> 0 </li>
-    </ul>
+        <hr>
 
-    <hr>
+        <p><b>Points Earned:</b> {{ total_points }} 🏅</p>
+        <p><b>Current Leaderboard Rank:</b> {{ rank  }} </p>
+        
+        <p>
+            You're making a real difference, and it's great to see your progress. Every bottle and can counts 
+            toward creating a greener tomorrow!
+        </p>
 
-    <p><b>Points Earned:</b> {{ total_points }} 🏅</p>
-    <p><b>Current Leaderboard Rank:</b> {{ rank  }} </p>
+        <hr>
 
-    <p>
-        You're making a real difference, and it's great to see your progress. Every bottle and can counts 
-        toward creating a greener tomorrow!
-    </p>
+        <div class="reward-section">
+            <p><strong>Competitions & Rewards</strong></p>
+            {% if remaining_points == 0 %}
+                <p>Congratulations! You've unlocked your next reward! 🎉 Check the app to claim it.</p>
+            {% else %}
+                <p>You're {{ remaining_points }} points away from unlocking your next reward! Don't forget to check the app for the latest competitions and chances to earn bonus points.</p>
+            {% endif %}
+        </div>
 
-    <hr>
+        <hr>
 
-    <p><strong>Competitions & Rewards</strong></p>
-    {% if remaining_points == 0 %}
-        <p>Congratulations! You've unlocked your next reward! 🎉 Check the app to claim it.</p>
-    {% else %}
-        <p>You're {{ remaining_points }} points away from unlocking your next reward! Don't forget to check the app for the latest competitions and chances to earn bonus points.</p>
-    {% endif %}
+        <div class="tip-section">
+            <p><strong>Pro Tip for Next Week:</strong></p>
+            <p>Earn more points by recycling during off-peak hours! You'll make an even bigger impact and climb the leaderboard faster.</p>
+        </div>
 
-    <hr>
+        <hr>
 
-    <p><strong>Pro Tip for Next Week:</strong></p>
-    <p>Earn more points by recycling during off-peak hours! You'll make an even bigger impact and climb the leaderboard faster.</p>
+        <p>
+            Thank you for being part of Drop Me's mission to reduce waste and make recycling second nature. 
+            Let's keep up the great work and aim for even greater results next week!
+        </p>
+        
+        <p>
+            If you have any questions or suggestions, feel free to reach out—we're always here to help.
+        </p>
+        
+        <p>
+            Together, we can create a cleaner, greener world! 🌍
+        </p>
+        
+        <p><b>Best regards,</b></p>
+        <p>Drop Me Team</p>
+    </div>
 
-    <hr>
+    <div class="footer">
+        <div class="footer-links">
+            <a href="mailto:hello@dropmeeg.com">Contact Support</a>
+            <a href="https://play.google.com/store/apps/details?id=com.dropme.recycling&pcampaignid=web_share&pli=1">Download App</a>
+            <a href="https://dropmeeg.wixsite.com/dropme">Visit Website</a>
+            <a href="https://linktr.ee/dropme.eg">Social Media</a>
+        </div>
 
-    <p>
-        Thank you for being part of Drop Me's mission to reduce waste and make recycling second nature. 
-        Let's keep up the great work and aim for even greater results next week!
-    </p>
-
-    <p>
-        If you have any questions or suggestions, feel free to reach out—we're always here to help.
-    </p>
-    <p>
-        Together, we can create a cleaner, greener world! 🌍
-    </p>
-
-    <p><b>Best regards,</b></p>
-    <p>Drop Me Team</p>
-
-    <p>
-        <a href="mailto:hello@dropmeeg.com">Contact Information</a> | 
-        <a href="https://linktr.ee/dropme.eg">Follow us on Social Media</a>
-    </p>
-
-    <hr>
-
-    <p>
-        <b>Track Your Progress Anytime:</b> <a href="app_link">App Link</a><br>
-        <b>Stay Connected for Updates & Competitions:</b> <a href="website_link">Website Link</a>
-    </p>
+        <div class="company-info">
+            <p>
+                <span class="logo">♻</span>
+                <strong style="color: #8BC34A;">DropMe Egypt</strong><br>
+                AI-driven Recycling Solutions<br>
+                Operating Hours: Sunday - Thursday, 9:00 AM - 6:00 PM
+            </p>
+            
+            <p style="margin-top: 10px;">
+                <a href="[UNSUBSCRIBE_LINK]" style="color: #868e96;">Unsubscribe</a> | 
+                <a href="[PRIVACY_POLICY]" style="color: #868e96;">Privacy Policy</a>
+            </p>
+        </div>
+    </div>
 </body>
-
 </html>
