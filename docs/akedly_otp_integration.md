@@ -140,20 +140,3 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 
 ---
 
-## 📝 Commit Message Example
-
-```txt
-refactor(auth): integrate Akedly OTP verification into user registration and verification flows
-
-- Replaced internal OTP generation with Akedly's transaction-based OTP API
-- Added `akedly_transaction_id` and `akedly_request_id` to `UserModel`
-- Updated `UserSerializer.create()` to send and activate OTP via Akedly
-- Refactored `verify_otp` view to use Akedly's verify endpoint
-- Cleaned unused OTP fields and ensured migration order
-```
-
----
-
-## 🔚 Summary
-
-This refactor externalizes OTP handling to Akedly, simplifying backend logic, improving UX with multi-channel OTP delivery, and reducing the security and performance overhead of managing it in-house.
