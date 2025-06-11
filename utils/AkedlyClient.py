@@ -20,7 +20,7 @@ def create_otp_transaction(phone, email):
         raise Exception(f"Akedly OTP error: {response.text}")
 
 def activate_otp_transaction(transactionID):
-    res=requests.post(f"{AKEDLY_API_URL}activate/{transactionID}")
+    res=requests.post(f"{AKEDLY_API_URL}/activate/{transactionID}")
     data = res.json()
     if res.status_code == 201:
         return data["data"]["_id"]

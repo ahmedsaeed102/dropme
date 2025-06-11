@@ -43,7 +43,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = serializer.save()
         try:
-            transaction_id = create_otp_transaction(user.email, user.phone_number)
+            transaction_id = create_otp_transaction( user.phone_number,user.email)
             request_id = activate_otp_transaction(transaction_id)
             user.transaction_id = transaction_id
             user.request_id = request_id
@@ -63,26 +63,34 @@ class UserViewSet(viewsets.ModelViewSet):
         User.objects.filter(id=request.user.id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
     @action(detail=True, methods=["PATCH"], serializer_class=OTPOnlySerializer)
     def verify_otp(self, request, pk=None):
-        """to check if the user entered the correct otp or if he/she is already verified (is_active=True)"""
         instance = self.get_object()
-        if not instance.is_active and instance.otp_expiration and instance.otp == request.data.get(
-                "otp") and timezone.now() < instance.otp_expiration:
+        otp = request.data.get("otp")
+
+        if instance.is_active:
+            return Response("User already verified.", status=400)
+
+        if not instance.akedly_request_id:
+            return Response("No verification session found.", status=400)
+
+        if verify_otp(instance.akedly_request_id, otp):
             instance.is_active = True
-            instance.otp_expiration = None
-            instance.max_otp_try = settings.MAX_OTP_TRY
-            instance.max_otp_out = None
+            instance.akedly_transaction_id = None
+            instance.akedly_request_id = None
             send_welcome_email(instance.email)
-            # check if user phone number was used to recycle before and add the points to user account
+
             phone = PhoneNumber.objects.filter(phone_number=instance.phone_number).first()
             if phone:
                 instance.total_points += phone.points
                 RecycleLog.objects.filter(phone=phone).update(user=instance)
                 phone.delete()
+
             instance.save()
-            return Response("Successfully verfied the user.", status=status.HTTP_200_OK)
-        return Response(_("User already verfied or OTP is incorrect."), status=status.HTTP_400_BAD_REQUEST, )
+            return Response("User verified successfully", status=200)
+
+        return Response("Invalid OTP", status=400)
 
     @action(detail=True, methods=["GET"])
     def regenerate_otp(self, request, pk=None):
