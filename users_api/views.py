@@ -13,7 +13,7 @@ from faker import Faker
 from fcm_django.models import FCMDevice
 import random
 from datetime import date
-
+from utils.AkedlyClient import create_otp_transaction, activate_otp_transaction, verify_otp
 from machine_api.models import PhoneNumber, RecycleLog
 from .models import LocationModel, Feedback, UserModel, generate_referral_code, TermsAndCondition, FAQ
 from competition_api.models import Resource
@@ -32,14 +32,24 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    #def perform_create(self, serializer):
+       # print("register-data", self.request.data)
+       # user = serializer.save()
+       # fcm_data = self.request.data.get("fcm_device", {})
+       # fcm_registration_id = fcm_data.get("registration_id")
+       # fcm_device_type = fcm_data.get("type")
+       # if fcm_registration_id and fcm_device_type:
+         #   FCMDevice.objects.update_or_create(registration_id=fcm_registration_id, defaults={"user": user, "name": user.username, "type": fcm_device_type})
     def perform_create(self, serializer):
-        print("register-data", self.request.data)
         user = serializer.save()
-        fcm_data = self.request.data.get("fcm_device", {})
-        fcm_registration_id = fcm_data.get("registration_id")
-        fcm_device_type = fcm_data.get("type")
-        if fcm_registration_id and fcm_device_type:
-            FCMDevice.objects.update_or_create(registration_id=fcm_registration_id, defaults={"user": user, "name": user.username, "type": fcm_device_type})
+        try:
+            transaction_id = create_otp_transaction(user.email, user.phone_number)
+            request_id = activate_otp_transaction(transaction_id)
+            user.transaction_id = transaction_id
+            user.request_id = request_id
+            user.save()
+        except Exception as e:
+            raise ValidationError({"error": str(e)})
 
     def list(self, request, *args, **kwargs):
         if request.user.is_staff:
@@ -57,7 +67,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def verify_otp(self, request, pk=None):
         """to check if the user entered the correct otp or if he/she is already verified (is_active=True)"""
         instance = self.get_object()
-        if not instance.is_active and instance.otp_expiration and instance.otp == request.data.get("otp") and timezone.now() < instance.otp_expiration:
+        if not instance.is_active and instance.otp_expiration and instance.otp == request.data.get(
+                "otp") and timezone.now() < instance.otp_expiration:
             instance.is_active = True
             instance.otp_expiration = None
             instance.max_otp_try = settings.MAX_OTP_TRY
@@ -71,7 +82,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 phone.delete()
             instance.save()
             return Response("Successfully verfied the user.", status=status.HTTP_200_OK)
-        return Response(_("User already verfied or OTP is incorrect."), status=status.HTTP_400_BAD_REQUEST,)
+        return Response(_("User already verfied or OTP is incorrect."), status=status.HTTP_400_BAD_REQUEST, )
 
     @action(detail=True, methods=["GET"])
     def regenerate_otp(self, request, pk=None):

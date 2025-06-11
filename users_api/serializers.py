@@ -12,6 +12,7 @@ from .models import UserModel, LocationModel, Feedback, LanguageChoices, TermsAn
 from .services import send_otp, unread_notification
 from machine_api.models import PhoneNumber
 from machine_api.utlis import get_total_recycled_items
+from utils.AkedlyClient import create_otp_transaction, activate_otp_transaction, verify_otp
 
 """
     SIGN UP SERIALIZERS
@@ -21,54 +22,52 @@ class CustomFCMDeviceSerializer(serializers.Serializer):
     registration_id = serializers.CharField(required=False, allow_blank=True)
 
 class UserSerializer(serializers.ModelSerializer):
-    password1 = serializers.CharField(write_only=True, min_length=settings.MIN_PASSWORD_LENGTH, error_messages={"min_length": _("Password must be longer than 8 length")})
-    password2 = serializers.CharField(write_only=True, min_length=settings.MIN_PASSWORD_LENGTH, error_messages={"min_length": _("Password must be longer than 8 length")})
+    password1 = serializers.CharField(write_only=True)
     referral_code = serializers.CharField(write_only=True, required=False)
-    phone_number = serializers.CharField(required=False, allow_blank=True)
-    fcm_device = CustomFCMDeviceSerializer(required=False)
-
 
     class Meta:
         model = UserModel
-        fields = ["id", "username", "phone_number", "email", "password1", "password2", "referral_code", "country_code", "fcm_device"]
+        fields = (
+            "username", "email", "phone_number", "country_code",
+            "password1", "referral_code"
+        )
 
-    # to check password validation in sign up form
-    def validate(self, data):
-        password1 = data.get("password1")
-        password2 = data.get("password2")
-        if password2:
-            if password1 != password2:
-                raise serializers.ValidationError(_("Passwords don't match"))
-        referral_code = data.get("referral_code")
-        if referral_code:
-            try:
-                UserModel.objects.get(referral_code=referral_code)
-                print("referral_code", referral_code)
-            except UserModel.DoesNotExist:
-                raise serializers.ValidationError(_("Invalid referral code"))
-        return data
-
-    # create and return user with encrybted password
     def create(self, val_data):
-        otp = random.randint(1000, 9999)
-        otp_expiration = timezone.now() + timedelta(minutes=5)
-        if val_data.get("phone_number"):
-            user = UserModel(username=val_data["username"], phone_number=val_data["phone_number"], email=val_data["email"], otp=otp, otp_expiration=otp_expiration, max_otp_try=settings.MAX_OTP_TRY, country_code=val_data["country_code"])
-        else:
-            user = UserModel(username=val_data["username"], email=val_data["email"], otp=otp, otp_expiration=otp_expiration, max_otp_try=settings.MAX_OTP_TRY, country_code=val_data["country_code"])
+        user = UserModel(
+            username=val_data["username"],
+            email=val_data["email"],
+            phone_number=val_data.get("phone_number"),
+            country_code=val_data.get("country_code", "+20"),
+        )
         user.set_password(val_data["password1"])
+
+        # Handle referral
         referral_code = val_data.get("referral_code")
         if referral_code:
-            print("add referal")
-            referring_user = UserModel.objects.get(referral_code=referral_code)
-            print("referring_user", referring_user)
-            print(int((10*referring_user.total_points)/100) if referring_user.total_points > 0 else 10)
-            referring_user.total_points += int((10*referring_user.total_points)/100) if referring_user.total_points > 0 else 5
-            referring_user.referral_usage_count += 1
-            referring_user.save()
-            user.total_points += 5
+            try:
+                referring_user = UserModel.objects.get(referral_code=referral_code)
+                reward = int((10 * referring_user.total_points) / 100) if referring_user.total_points > 0 else 5
+                referring_user.total_points += reward
+                referring_user.referral_usage_count += 1
+                referring_user.save()
+                user.total_points += 5
+            except UserModel.DoesNotExist:
+                raise serializers.ValidationError(_("Invalid referral code."))
+
         user.save()
-        send_otp(user)
+
+        # Send OTP via Akedly
+        try:
+            full_phone = f"{user.country_code}{user.phone_number}"
+            transaction_id = create_otp_transaction(user.email, full_phone)
+            request_id = activate_otp_transaction(transaction_id)
+            user.akedly_transaction_id = transaction_id
+            user.akedly_request_id = request_id
+            user.save()
+        except Exception as e:
+            user.delete()
+            raise serializers.ValidationError({"otp": _(f"Aledgedly OTP failed: {str(e)}")})
+
         return user
 
 """
