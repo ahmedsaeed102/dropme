@@ -4,41 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تقرير Drop Me الأسبوعي</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-KY4W1bAqj6z7uO4Er2T2rnk0CeoO9QReYbkPzYxLbkRW+i4jRzRv2cLZAwX6J9Zp5iwA8EdPPJHT3R8WkN+bFg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* Base Styles */
+        /* Reset and Base Styles for Email Clients */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, table, td, p, a, li, blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        /* Main Body Styles */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.5;
-            color: #000000;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f4f4f4;
             direction: rtl;
             text-align: right;
+            margin: 0;
+            padding: 0;
+            width: 100% !important;
+            min-width: 100%;
         }
 
-        /* Content Sections */
-        .content {
-            margin-bottom: 40px;
+        /* Container */
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
         }
-        .social-links a img {
-            transition: transform 0.2s ease;
 
-        }
-        .social-links a{
-            margin-right: 5px;
-        }
-        .social-links a:hover img {
-            transform: scale(1.1);
+        /* Content Styles */
+        .main-content {
+            padding: 30px 25px;
+            font-size: 16px;
+            line-height: 1.6;
+            text-align: right !important;
         }
 
         .section {
             padding: 20px;
-            border-radius: 6px;
-            margin: 20px 0;
-            border-right: 4px solid;
+            border-radius: 8px;
+            margin: 25px 0;
+            border-right: 5px solid;
         }
 
         .stats-section {
@@ -56,35 +82,141 @@
             border-right-color: #4CAF50;
         }
 
+        .section ul {
+            margin: 10px 0;
+            padding-right: 20px;
+        }
+
+        .section li {
+            margin: 8px 0;
+        }
+
         hr {
             border: none;
-            height: 1px;
+            height: 2px;
             background-color: #e9ecef;
-            margin: 25px 0;
+            margin: 30px 0;
         }
 
-
-
-        .app-button img {
-            width: 70px;
-            border-radius: 4px;
+        /* Footer Styles */
+        .footer {
+            background-color: #f8f9fa;
+            border-top: 3px solid #8BC34A;
+            padding: 0;
         }
 
-        .footer-links a {
+        .footer-content {
+            padding: 25px 20px;
+        }
+
+        .footer-section {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .footer-section h3 {
+            font-size: 18px;
+            color: #333333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        /* Social Media Icons */
+        .social-links {
+            margin: 15px 0;
+        }
+
+        .social-links a {
+            display: inline-block;
+            margin: 5px;
+            transition: transform 0.2s ease;
+        }
+
+        .social-links a:hover {
+            transform: scale(1.1);
+        }
+
+        .social-links img {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+        }
+
+        .app-buttons {
+            margin: 15px 0;
+            display: flex;           /* Force one line */
+            gap: 10px;               /* Add space between buttons */
+            justify-content: start;  /* Align buttons to the start (LTR) or right (RTL) */
+            direction: rtl;          /* Prevent RTL from stacking images */
+        }
+
+        .app-buttons img {
+            width: 140px;
+            height: auto;
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .app-buttons a:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Company Logo */
+        .company-logo {
+            text-align: center;
+            padding: 20px 15px;
+        }
+
+        .company-logo img {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+        }
+
+        .company-tagline {
+            color: #6c757d;
+            font-size: 14px;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        /* Contact Links */
+        .contact-links {
+            margin: 10px 0;
+        }
+
+        .contact-links a {
+            display: block;
             color: #8BC34A;
             text-decoration: none;
-            font-size: 11px;
+            font-size: 16px;
             font-weight: 500;
+            margin: 8px 0;
+            padding: 5px 0;
+            transition: color 0.2s ease;
         }
 
-        .footer-links a:hover {
-            text-decoration: underline;
+        .contact-links a:hover {
             color: #7CB342;
+            text-decoration: underline;
         }
 
+        /* Footer Bottom */
+        .links
+        {
+            color:#868e96;
+            text-decoration:none;
+            transition: color 0.2s ease;
+        }
+        .links:hover
+        {
+            color: #7CB342;
+            font-weight: bold;
+            text-decoration: underline;
+        }
 
         .footer-bottom p {
-            margin: 3px 0;
+            margin: 5px 0;
         }
 
         .footer-bottom a {
@@ -97,154 +229,232 @@
         }
 
         /* Responsive Design */
-        @media (max-width: 480px) {
-            .social-links a img {
-                width: 20px;
-                height: 20px;
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
             }
 
-            .app-button img {
-                width: 60px;
+            .main-content {
+                padding: 20px 15px !important;
             }
+
+            .footer-content {
+                padding: 20px 10px !important;
+            }
+
+            .footer-section {
+                padding: 10px !important;
+            }
+
+            .social-links img {
+                width: 40px !important;
+                height: 40px !important;
+            }
+
+            .app-buttons img {
+                width: 120px !important;
+            }
+
+            .company-logo img {
+                width: 100px !important;
+                height: 100px !important;
+            }
+
+            .section {
+                padding: 15px !important;
+                margin: 15px 0 !important;
+            }
+        }
+
+        @media only screen and (max-width: 480px) {
+            .main-content {
+                font-size: 14px !important;
+                padding: 15px 10px !important;
+            }
+
+            .footer-section h3 {
+                font-size: 16px !important;
+            }
+
+            .contact-links a {
+                font-size: 14px !important;
+            }
+
+            .social-links img {
+                width: 35px !important;
+                height: 35px !important;
+            }
+
+            .app-buttons img {
+                width: 110px !important;
+            }
+        }
+
+        /* Outlook specific fixes */
+        .outlook-fix {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+            border-collapse: collapse;
         }
     </style>
 </head>
 <body>
-<div class="content">
-    <p><b>عزيزي/عزيزتي {{username}},</b></p>
-
-    <p>
-        نحن متحمسون لمشاركة إنجازاتك الأخيرة في إعادة التدوير! إليك كيف ساهمت في مستقبل أنظف وأكثر استدامة خلال الأسبوع الماضي:
-    </p>
-
-    <hr>
-
-    <div class="section stats-section">
-        <p><strong>تأثيرك في إعادة التدوير:</strong></p>
-        <ul>
-            <li><b>عدد زجاجات البلاستيك المُعاد تدويرها:</b> {{ bottles_number }} زجاجة</li>
-            <li><b>عدد علب الألمنيوم المُعاد تدويرها:</b> {{ cans_number }} علبة</li>
-            <li><b>مواد أخرى (مرفوضة):</b> 0</li>
-        </ul>
-    </div>
-
-    <hr>
-
-    <p><b>النقاط المكتسبة:</b> {{ total_points }} 🏅</p>
-    <p><b>ترتيبك الحالي في لوحة المتصدرين:</b> {{ rank }}</p>
-
-    <p>
-        أنت تُحدث فرقًا حقيقيًا، ومن الرائع رؤية تقدمك. كل زجاجة وعلبة تُحدث فرقًا في خلق غد أكثر خضرة!
-    </p>
-
-    <hr>
-
-    <div class="section reward-section">
-        <p><strong>المسابقات والمكافآت</strong></p>
-        {% if remaining_points == 0 %}
-            <p>تهانينا! لقد حصلت على مكافأتك التالية! 🎉 تحقق من التطبيق لاستلامها.</p>
-        {% else %}
-            <p>أنت على بُعد {{ remaining_points }} نقطة من الحصول على مكافأتك التالية! لا تنس التحقق من التطبيق لآخر المسابقات وفرص كسب نقاط إضافية.</p>
-        {% endif %}
-    </div>
-
-    <hr>
-
-    <div class="section tip-section">
-        <p><strong>نصيحة احترافية للأسبوع القادم:</strong></p>
-        <p>احصل على المزيد من النقاط من خلال إعادة التدوير خلال ساعات الذروة المنخفضة! ستحقق تأثيرًا أكبر وتتسلق لوحة المتصدرين بشكل أسرع.</p>
-    </div>
-
-    <hr>
-
-    <p>
-        شكرًا لك لكونك جزءًا من مهمة Drop Me لتقليل النفايات وجعل إعادة التدوير طبيعة ثانية.
-        دعنا نواصل العمل الرائع ونهدف لنتائج أعظم الأسبوع القادم!
-    </p>
-
-    <p>
-        إذا كان لديك أي أسئلة أو اقتراحات، لا تتردد في التواصل معنا - نحن هنا دائمًا للمساعدة.
-    </p>
-
-    <p>
-        معًا، يمكننا إنشاء عالم أنظف وأكثر خضرة! 🌍
-    </p>
-
-    <p><b>أطيب التحيات،</b> </p>
-    <p>فريق Drop Me</p>
-</div>
-
-<!-- START FOOTER -->
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8f9fa; border-top:2px solid #e9ecef; padding:20px 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size:12px; color:#333; direction: rtl; text-align: right;">
+<table width="100%" cellpadding="0" cellspacing="0" class="outlook-fix">
     <tr>
         <td align="center">
-            <table width="600" cellpadding="0" cellspacing="0" style="width:100%; max-width:600px;">
-                <tr>
-                    <!-- Social + App Links -->
-                    <td width="33%" valign="top" style="padding:10px;">
-                        <strong style="display:block; font-size:13px; margin-bottom:6px;">تابعنا</strong>
-                        <table cellpadding="0" cellspacing="0">
-                            <tr>
-                                <td><a href="https://facebook.com/dropmeeg" target="_blank"><img src="https://cdn-icons-png.flaticon.com/24/733/733547.png" alt="Facebook" width="24" height="24" style="margin:2px;"></a></td>
-                                <td><a href="https://www.instagram.com/dropme.eg/" target="_blank"><img src="https://cdn-icons-png.flaticon.com/24/2111/2111463.png" alt="Instagram" width="24" height="24" style="margin:2px;"></a></td>
-                                <td><a href="https://linkedin.com/company/dropmeeg" target="_blank"><img src="https://cdn-icons-png.flaticon.com/24/174/174857.png" alt="LinkedIn" width="24" height="24" style="margin:2px;"></a></td>
-                                <td><a href="https://dropmeeg.wixsite.com/dropme" target="_blank"><img src="https://cdn-icons-png.flaticon.com/24/900/900782.png" alt="Website" width="24" height="24" style="margin:2px;"></a></td>
-                            </tr>
-                        </table>
-                        <strong style="display:block; font-size:13px; margin:10px 0 6px;">تحميل التطبيق</strong>
-                        <table cellpadding="0" cellspacing="0">
-                            <tr>
-                                <td>
-                                    <a href="#"><img src="https://drop-me-privacy-policy.vercel.app/appstore_button.png" width="70" alt="App Store" style="margin:2px; border-radius:4px;"></a>
-                                </td>
-                                <td>
-                                    <a href="https://play.google.com/store/apps/details?id=com.dropme.recycling&pcampaignid=web_share&pli=1">
-                                        <img src="https://drop-me-privacy-policy.vercel.app/googleplay_button.png" width="76" alt="Google Play" style="margin:2px; border-radius:4px;">
-                                    </a>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
+            <div class="email-container">
+                <!-- Main Content -->
+                <div class="main-content">
+                <p><strong> عزيزي/عزيزتي
+                    ,
+                    {{username}}
+                </strong></p>
 
-                    <!-- Center Logo -->
-                    <td width="34%" align="center" valign="top" style="padding:10px;">
-                        <img src="https://drop-me-privacy-policy.vercel.app/company_logo.png" alt="Drop Me Logo" width="100" height="100" style="display:block; margin: 0 auto;">
-                        <p style="color:#6c757d; font-size:10px; font-style:italic; margin-top:6px;">حلول إعادة التدوير المدعومة بالذكاء الاصطناعي</p>
-                    </td>
+                    <p>
+                        نحن متحمسون لمشاركة إنجازاتك الأخيرة في إعادة التدوير! إليك كيف ساهمت في مستقبل أنظف وأكثر استدامة خلال الأسبوع الماضي
+                    </p>
 
-                    <!-- Contact & Links -->
-                    <td width="33%" valign="top" style="padding:10px;">
-                        <table>
-                            <tr>
-                                <td style="padding: 0 0 6px 0;">
-                                    <a href="mailto:hello@dropmeeg.com" style="color:#8BC34A; text-decoration:none;">راسلنا</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 0 0 6px 0;">
-                                    <a href="https://drop-me-privacy-policy.vercel.app/" style="color:#8BC34A; text-decoration:none;">سياسة الخصوصية</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 0;">
-                                    <a href="#" style="color:#8BC34A; text-decoration:none;">إلغاء الاشتراك</a>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
+                    <hr>
 
-                <!-- Divider -->
-                <tr>
-                    <td colspan="3" style="border-top:1px solid #e9ecef; padding-top:15px; text-align:center; font-size:11px; color:#868e96;">
-                        <p style="margin: 0;">ساعات العمل: الأحد - الخميس، 9:00 صباحًا - 6:00 مساءً</p>
-                        <p style="margin: 4px 0;"> &copy; 2025 DropMe Egypt. جميع الحقوق محفوظة.</p>
-                    </td>
-                </tr>
-            </table>
+                    <div class="section stats-section">
+                        <p><strong>تأثيرك في إعادة التدوير</strong></p>
+                        <ul style="list-style-type: none;">
+                            <li><strong>عدد زجاجات البلاستيك المُعاد تدويرها:</strong> {{ bottles_number }} زجاجة</li>
+                            <li><strong>عدد علب الألمنيوم المُعاد تدويرها:</strong> {{ cans_number }} علبة</li>
+                            <li><strong>مواد أخرى (مرفوضة):</strong> 0</li>
+                        </ul>
+                    </div>
+
+                    <hr>
+
+                    <p><strong>النقاط المكتسبة:</strong> {{ total_points }} 🏅</p>
+                    <p><strong>ترتيبك الحالي في لوحة المتصدرين:</strong> {{ rank }}</p>
+
+                    <p>
+                        أنت تُحدث فرقًا حقيقيًا، ومن الرائع رؤية تقدمك. كل زجاجة وعلبة تُحدث فرقًا في خلق غد أكثر خضرة!
+                    </p>
+
+                    <hr>
+
+                    <div class="section reward-section">
+                        <p><strong>المسابقات والمكافآت</strong></p>
+                        {% if remaining_points == 0 %}
+                            <p>تهانينا! لقد حصلت على مكافأتك التالية! 🎉 تحقق من التطبيق لاستلامها</p>
+                        {% else %}
+                            <p>أنت على بُعد {{ remaining_points }} نقطة من الحصول على مكافأتك التالية! لا تنس التحقق من التطبيق لآخر المسابقات وفرص كسب نقاط إضافية.</p>
+                        {% endif %}
+                    </div>
+
+                    <hr>
+
+                    <div class="section tip-section">
+                        <p><strong>نصيحة احترافية للأسبوع القادم</strong></p>
+                        <p>احصل على المزيد من النقاط من خلال إعادة التدوير خلال ساعات الذروة المنخفضة! ستحقق تأثيرًا أكبر وتتسلق لوحة المتصدرين بشكل أسرع</p>
+                    </div>
+
+                    <hr>
+
+                    <p>
+                        شكرًا لك لكونك جزءًا من مهمة Drop Me لتقليل النفايات وجعل إعادة التدوير طبيعة ثانية.
+                        دعنا نواصل العمل الرائع ونهدف لنتائج أعظم الأسبوع القادم
+                    </p>
+<br>
+                    <p>
+                        إذا كان لديك أي أسئلة أو اقتراحات، لا تتردد في التواصل معنا - نحن هنا دائمًا للمساعدة.
+                        معًا، يمكننا إنشاء عالم أنظف وأكثر خضرة
+                    </p>
+
+                    <p style="text-align: right"><strong>أطيب التحيات</strong></p>
+                    <p style="text-align: right">Drop Me Team</p>
+                </div>
+
+                <!-- Footer -->
+                <div class="footer">
+                    <table width="100%" cellpadding="0" cellspacing="0" class="outlook-fix">
+                        <tr>
+                            <td>
+                                <div class="footer-content">
+                                    <table width="100%" cellpadding="0" cellspacing="0" class="outlook-fix">
+                                        <tr>
+
+                                            <!-- Company Logo Section -->
+                                            <td width="49%" valign="top" class="footer-section company-logo">
+                                                <img src="https://drop-me-privacy-policy.vercel.app/company_logo.png" alt="Drop Me Logo">
+                                                <div class="company-tagline">حلول إعادة التدوير المدعومة بالذكاء الاصطناعي</div>
+                                            </td>
+
+                                            <!-- Social Media & Apps Section -->
+                                            <td width="49%" valign="top" class="footer-section">
+                                                <h3>تابعنا</h3>
+                                                <div class="social-links">
+                                                    <a href="https://facebook.com/dropmeeg" target="_blank">
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6c/Facebook_Logo_2023.png" alt="Facebook">
+                                                    </a>
+                                                    <a href="https://www.instagram.com/dropme.eg/" target="_blank">
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/58/Instagram-Icon.png" alt="Instagram">
+                                                    </a>
+                                                    <a href="https://linkedin.com/company/dropmeeg" target="_blank">
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e8/Linkedin-logo-blue-In-square-40px.png" alt="LinkedIn">
+                                                    </a>
+                                                    <a href="https://dropmeeg.wixsite.com/dropme" target="_blank">
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/ff/PICOL_icon_Globe-Flat.png" alt="Website">
+                                                    </a>
+                                                </div>
+
+                                                <h3>حمل التطبيق</h3>
+                                                <div class="app-buttons">
+                                                    <a href="#" target="_blank">
+                                                        <img src="https://drop-me-privacy-policy.vercel.app/appstore_button.png" alt="App Store">
+                                                    </a>
+
+                                                    <a href="https://play.google.com/store/apps/details?id=com.dropme.recycling&pcampaignid=web_share&pli=1" target="_blank" style="margin-top: 5px">
+                                                        <img src="https://drop-me-privacy-policy.vercel.app/googleplay_button.png" alt="Google Play">
+                                                    </a>
+                                                </div>
+                                            </td>
+
+                                        </tr>
+                                    </table>
+                                </div>
+
+                                <!-- Footer Bottom -->
+                                <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#e9ecef; border-top:1px solid #dee2e6; text-align:center; font-size:14px; color:#868e96; padding: 20px 0;">
+                                    <tr>
+                                        <td align="center" style="padding: 10px 20px;">
+                                            <!-- Contact and Privacy Links -->
+                                            <table cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto;">
+                                                <tr>
+                                                    <td style="padding: 0 5px;">
+                                                        <a href="mailto:hello@dropmeeg.com"  class="links">راسلنا</a>
+                                                    </td>
+                                                    <td style="padding: 0 5px;">|</td>
+                                                    <td style="padding: 0 5px;">
+                                                        <a href="https://drop-me-privacy-policy.vercel.app/" class="links">سياسة الخصوصية</a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="center" style="padding: 5px 20px;">
+                                            <strong>ساعات العمل:</strong> الأحد - الخميس، 9:00 صباحًا - 6:00 مساءً
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="center" style="padding: 5px 20px;">
+                                            &copy; 2025 DropMe. جميع الحقوق محفوظة.
+                                            |
+                                            <a href="#" class="links">إلغاء الاشتراك</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </td>
     </tr>
 </table>
-
 </body>
 </html>
