@@ -29,7 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = UserModel
         fields = (
             "username", "email", "phone_number", "country_code",
-            "password1", "referral_code"
+            "password1", "referral_code","akedly_transaction_id", "akedly_request_id"
         )
 
     def create(self, val_data):
