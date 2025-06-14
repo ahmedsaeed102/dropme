@@ -7,7 +7,7 @@ from .utlis import get_user_logs, get_remaining_points
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
-@kronos.register("0 13 * * 5")
+@kronos.register("0 8 * * 5")
 def send_weekly_recycle_summary_email():
     from_email = f'DropMe <{settings.EMAIL_HOST_USER}>'
 
