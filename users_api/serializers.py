@@ -59,14 +59,14 @@ class UserSerializer(serializers.ModelSerializer):
         # Send OTP via Akedly
         try:
             full_phone = f"{user.country_code}{user.phone_number}"
-            transaction_id = create_otp_transaction(user.email, full_phone)
+            transaction_id = create_otp_transaction(full_phone, user.email)
             request_id = activate_otp_transaction(transaction_id)
             user.akedly_transaction_id = transaction_id
             user.akedly_request_id = request_id
             user.save()
         except Exception as e:
             user.delete()
-            raise serializers.ValidationError({"otp": _(f"Aledgedly OTP failed: {str(e)}")})
+            raise serializers.ValidationError({"otp": _(f"Akedly OTP failed: {str(e)}")})
 
         return user
 

@@ -63,34 +63,39 @@ class UserViewSet(viewsets.ModelViewSet):
         User.objects.filter(id=request.user.id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
     @action(detail=True, methods=["PATCH"], serializer_class=OTPOnlySerializer)
     def verify_otp(self, request, pk=None):
         instance = self.get_object()
         otp = request.data.get("otp")
 
         if instance.is_active:
-            return Response("User already verified.", status=400)
+            return Response("User already verified.", status=status.HTTP_400_BAD_REQUEST)
 
         if not instance.akedly_request_id:
-            return Response("No verification session found.", status=400)
+            return Response("No verification session found.", status=status.HTTP_400_BAD_REQUEST)
 
-        if verify_otp(instance.akedly_request_id, otp):
-            instance.is_active = True
-            instance.akedly_transaction_id = None
-            instance.akedly_request_id = None
-            send_welcome_email(instance.email)
+        success, result = verify_otp(instance.akedly_request_id, otp)
 
-            phone = PhoneNumber.objects.filter(phone_number=instance.phone_number).first()
-            if phone:
-                instance.total_points += phone.points
-                RecycleLog.objects.filter(phone=phone).update(user=instance)
-                phone.delete()
+        if not success:
+            return Response({"error": result}, status=status.HTTP_400_BAD_REQUEST)
 
+        # ✅ Akedly verified the OTP — proceed to activate user
+        instance.is_active = True
+        instance.akedly_transaction_id = None
+        instance.akedly_request_id = None
+        instance.save()
+
+        send_welcome_email(instance.email)
+
+        # ✅ If there's a temporary PhoneNumber record, merge its data
+        phone = PhoneNumber.objects.filter(phone_number=instance.phone_number).first()
+        if phone:
+            instance.total_points += phone.points
+            RecycleLog.objects.filter(phone=phone).update(user=instance)
+            phone.delete()
             instance.save()
-            return Response("User verified successfully", status=200)
 
-        return Response("Invalid OTP", status=400)
+        return Response("User verified successfully.", status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["GET"])
     def regenerate_otp(self, request, pk=None):
