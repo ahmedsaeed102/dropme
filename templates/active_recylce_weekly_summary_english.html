@@ -227,9 +227,8 @@
         .footer-bottom a:hover {
             text-decoration: underline;
         }
-
         /* Responsive Design */
-        @media only screen and (max-width: 600px) {
+        @media (max-width: 600px) {
             .email-container {
                 width: 100% !important;
             }
@@ -247,17 +246,24 @@
             }
 
             .social-links img {
-                width: 40px !important;
-                height: 40px !important;
+                width: 26px !important;
+                height: 26px !important;
             }
 
             .app-buttons img {
-                width: 120px !important;
+                width: 105px !important;
+            }
+            .google-play
+            {
+                margin-top: 5px
             }
 
             .company-logo img {
-                width: 100px !important;
-                height: 100px !important;
+                width: 80px !important;
+                height: 80px !important;
+            }
+            .company-tagline {
+                font-size: 11px;
             }
 
             .section {
@@ -265,31 +271,6 @@
                 margin: 15px 0 !important;
             }
         }
-
-        @media only screen and (max-width: 480px) {
-            .main-content {
-                font-size: 14px !important;
-                padding: 15px 10px !important;
-            }
-
-            .footer-section h3 {
-                font-size: 16px !important;
-            }
-
-            .contact-links a {
-                font-size: 14px !important;
-            }
-
-            .social-links img {
-                width: 35px !important;
-                height: 35px !important;
-            }
-
-            .app-buttons img {
-                width: 110px !important;
-            }
-        }
-
         /* Outlook specific fixes */
         .outlook-fix {
             mso-table-lspace: 0pt;
@@ -334,31 +315,32 @@
                     <hr>
 
                     <div class="section reward-section">
-                        <p><strong>Competitions & Rewards</strong></p>
-                        {% if remaining_points == 0 %}
-                            <p>Congratulations! You've unlocked your next reward! Check the app to claim it.</p>
-                        {% else %}
-                            <p>You're {{ remaining_points }} points away from unlocking your next reward! Don't forget to check the app for the latest competitions and chances to earn bonus points.</p>
-                        {% endif %}
+                        <p><strong>⭐ Keep Earning , Keep Winning</strong></p>
+
+                        <p>Share your referral code with friends: <strong>{{ referral_code }}</strong></p>
+
+                        <p>Each time someone uses your code, you both earn <strong>40 points</strong> 🎁</p>
+
+                        <p>Keep sharing — the more points you collect, the bigger your rewards!</p>
                     </div>
+
 
                     <hr>
 
                     <div class="section tip-section">
-                        <p><strong>Pro Tip for Next Week:</strong></p>
+                        <p><strong>⭐ Pro Tip for Next Week:</strong></p>
                         <p>Earn more points by recycling during off-peak hours! You'll make an even bigger impact and climb the leaderboard faster.</p>
                     </div>
 
                     <hr>
 
-                    <p>
-                        Thank you for being part of Drop Me's mission to reduce waste and make recycling second nature. Let's keep up the great work and aim for even greater results next week!
-                    </p>
+                    <p><strong>💚 Thank you for joining Drop Me!</strong></p>
+                    <p>Together, we reduce waste and make recycling a daily habit. Let’s keep it up and aim even higher next week! 🚀</p>
+
                     <br>
-                    <p>
-                        If you have any questions or suggestions, feel free to reach out—we're always here to help.
-                        Together, we can create a cleaner, greener world! 🌍
-                    </p>
+
+                    <p><strong>📩 Got questions or suggestions?</strong></p>
+                    <p>We’re always here for you — reach out anytime. Hand in hand, we’re building a cleaner, greener world 🌍</p>
 
                     <p style="text-align: left"><strong>Best regards,</strong></p>
                     <p style="text-align: left">Drop Me Team</p>
@@ -402,7 +384,7 @@
                                                         <img src="https://drop-me-privacy-policy.vercel.app/appstore_button.png" alt="App Store">
                                                     </a>
 
-                                                    <a href="https://play.google.com/store/apps/details?id=com.dropme.recycling&pcampaignid=web_share&pli=1" target="_blank" style="margin-top: 5px">
+                                                    <a href="https://play.google.com/store/apps/details?id=com.dropme.recycling&pcampaignid=web_share&pli=1" target="_blank" class="google-play" style="margin-top: 5px">
                                                         <img src="https://drop-me-privacy-policy.vercel.app/googleplay_button.png" alt="Google Play">
                                                     </a>
                                                 </div>

@@ -13,8 +13,7 @@ def send_weekly_recycle_summary_email():
 
     for user in UserModel.objects.filter(is_active=True):
         data = get_user_logs(user.id)
-        remaining_points = get_remaining_points(user)
-        context = {"username": user.username, "rank":user.ranking, "remaining_points": remaining_points, "total_points": user.total_points}
+        context = {"username": user.username, "rank":user.ranking, "referral_code":user.referral_code, "total_points": user.total_points}
         context.update(data)
 
         if data['recycled']:
