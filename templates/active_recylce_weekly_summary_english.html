@@ -295,11 +295,10 @@
                     <hr>
 
                     <div class="section stats-section">
-                        <p><strong>Your Recycling Impact:</strong></p>
+                        <p><strong>💚 Your Recycling Impact:</strong></p>
                         <ul style="list-style-type: none;">
-                            <li><strong>Plastic Bottles Recycled:</strong> {{ bottles_number }} bottles</li>
-                            <li><strong>Aluminum Cans Recycled:</strong> {{ cans_number }} cans</li>
-                            <li><strong>Other Materials (Rejected):</strong> 0</li>
+                            <li><strong>Number of recycled plastic bottles:</strong> {% if bottles_number == 0 %}None{% else %}{{ bottles_number }} bottles{% endif %}</li>
+                            <li><strong>Number of recycled aluminum cans:</strong> {% if cans_number == 0 %}None{% else %}{{ cans_number }} cans{% endif %}</li>
                         </ul>
                     </div>
 

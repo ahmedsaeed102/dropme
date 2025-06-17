@@ -300,9 +300,8 @@
                     <div class="section stats-section">
                         <p><strong> 💚 تأثيرك في إعادة التدوير</strong></p>
                         <ul style="list-style-type: none;">
-                            <li><strong>عدد زجاجات البلاستيك المُعاد تدويرها:</strong> {{ bottles_number }} زجاجة</li>
-                            <li><strong>عدد علب الألمنيوم المُعاد تدويرها:</strong> {{ cans_number }} علبة</li>
-                            <li><strong>مواد أخرى (مرفوضة):</strong> 0</li>
+                           <li><strong>عدد زجاجات البلاستيك المُعاد تدويرها:</strong> {% if bottles_number == 0 %}لا يوجد{% else %}{{ bottles_number }} زجاجة{% endif %}</li>
+                           <li><strong>عدد علب الألمنيوم المُعاد تدويرها:</strong> {% if cans_number == 0 %}لا يوجد{% else %}{{ cans_number }} علبة{% endif %}</li>
                         </ul>
                     </div>
 

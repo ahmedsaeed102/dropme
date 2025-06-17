@@ -1,66 +1,432 @@
+<!DOCTYPE html>
 <html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drop Me - ابدأ رحلة إعادة التدوير</title>
+    <style>
+        /* Reset and Base Styles for Email Clients */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<body dir="rtl">
-    <p><b>عزيزي/عزيزتي {{username}},</b></p>
+        body, table, td, p, a, li, blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
 
-    <p>
-        نحن متحمسون لانضمامك إلينا في Drop Me! قد لا تكون قد بدأت بعد في إعادة التدوير معنا، ولكننا نود أن نوضح لك مدى سهولة المساهمة في الحفاظ على البيئة.
-    </p>
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
 
-    <hr>
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
 
-    <p><strong>لماذا تبدأ بإعادة التدوير مع Drop Me؟</strong></p>
-    <ul>
-        <li><strong>كسب المكافآت:</strong> مع كل عملية إعادة تدوير، ستكسب نقاطًا يمكنك استبدالها بمكافآت!</li>
-        <li><strong>إحداث فرق:</strong> حتى الخطوات البسيطة تسهم في جعل كوكبنا أكثر نظافة.</li>
-        <li><strong>متابعة التقدم:</strong> استخدم تطبيقنا لتتبع التغيير الإيجابي الذي تحدثه، عنصرًا بعد عنصر.</li>
-    </ul>
+        /* Main Body Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f4f4f4;
+            direction: rtl;
+            text-align: right;
+            margin: 0;
+            padding: 0;
+            width: 100% !important;
+            min-width: 100%;
+        }
 
-    <hr>
+        /* Container */
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
 
-    <p><strong>كيفية البدء:</strong></p>
-    <ol>
-        <li>ابحث عن أقرب جهاز Drop Me باستخدام تطبيقنا.</li>
-        <li>ضع المواد القابلة للتدوير (مثل الزجاجات البلاستيكية وعلب الألمنيوم).</li>
-        <li>شاهد نقاطك تنمو واطلع على تأثيرك!</li>
-    </ol>
+        /* Content Styles */
+        .main-content {
+            padding: 30px 25px;
+            font-size: 16px;
+            line-height: 1.6;
+            text-align: right !important;
+        }
 
-    <p>
-        الأمر بهذه السهولة! بالإضافة إلى ذلك، ستحصل على نقاط إضافية كمكافأة ترحيب عند إتمام أول عملية تدوير 🎁.
-    </p>
+        .section {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            border-right: 5px solid;
+        }
 
-    <hr>
+        .benefits-section {
+            background-color: #f8f9fa;
+            border-right-color: #8BC34A;
+        }
 
-    <p><strong>مجتمعك بانتظارك</strong></p>
-    <p>
-        انضم إلى الآلاف من الأشخاص في رحلاتهم لإعادة التدوير. دعونا نعمل سويًا للحد من النفايات وخلق مستقبل أكثر استدامة.
-    </p>
+        .getting-started-section {
+            background-color: #fff3cd;
+            border-right-color: #CDDC39;
+        }
 
-    <hr>
+        .community-section {
+            background-color: #f0f8f0;
+            border-right-color: #4CAF50;
+        }
 
-    <p><strong>تحتاج مساعدة؟</strong></p>
-    <p>
-        فريقنا هنا لإرشادك! فقط قم بالرد على هذا البريد الإلكتروني أو قم بزيارة قسم الأسئلة الشائعة في التطبيق للبدء.
-    </p>
+        .section ul, .section ol {
+            margin: 10px 0;
+            padding-right: 20px;
+        }
 
-    <p>
-        معًا، يمكننا جعل إعادة التدوير عادة يومية تفيدك وتفيد كوكب الأرض! 🌍
-    </p>
+        .section li {
+            margin: 8px 0;
+        }
 
-    <p><b>أطيب التحيات،</b></p>
-    <p>فريق Drop Me</p>
+        hr {
+            border: none;
+            height: 2px;
+            background-color: #e9ecef;
+            margin: 30px 0;
+        }
 
-    <p>
-        <a href="mailto:hello@dropmeeg.com">معلومات الاتصال</a> | 
-        <a href="https://linktr.ee/dropme.eg">روابط وسائل التواصل الاجتماعي</a>
-    </p>
+        /* Footer Styles */
+        .footer {
+            background-color: #f8f9fa;
+            border-top: 3px solid #8BC34A;
+            padding: 0;
+        }
 
-    <hr>
+        .footer-content {
+            padding: 25px 20px;
+        }
 
-    <p>
-        ابدأ الآن: <a href="{{ app_link }}">رابط التطبيق</a><br>
-        تحقق من المواقع القريبة منك: <a href="{{ location_finder_link }}">رابط تحديد المواقع</a>
-    </p>
+        .footer-section {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .footer-section h3 {
+            font-size: 18px;
+            color: #333333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        /* Social Media Icons */
+        .social-links {
+            margin: 15px 0;
+        }
+
+        .social-links a {
+            display: inline-block;
+            margin: 5px;
+            transition: transform 0.2s ease;
+        }
+
+        .social-links a:hover {
+            transform: scale(1.1);
+        }
+
+        .social-links img {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+        }
+
+        .app-buttons {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: start;
+            direction: rtl;
+        }
+
+        .app-buttons img {
+            width: 140px;
+            height: auto;
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .app-buttons a:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Company Logo */
+        .company-logo {
+            text-align: center;
+            padding: 20px 15px;
+        }
+
+        .company-logo img {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+        }
+
+        .company-tagline {
+            color: #6c757d;
+            font-size: 14px;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        /* Contact Links */
+        .contact-links {
+            margin: 10px 0;
+        }
+
+        .contact-links a {
+            display: block;
+            color: #8BC34A;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            margin: 8px 0;
+            padding: 5px 0;
+            transition: color 0.2s ease;
+        }
+
+        .contact-links a:hover {
+            color: #7CB342;
+            text-decoration: underline;
+        }
+
+        /* Footer Bottom */
+        .links
+        {
+            color:#868e96;
+            text-decoration:none;
+            transition: color 0.2s ease;
+        }
+        .links:hover
+        {
+            color: #7CB342;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .footer-bottom p {
+            margin: 5px 0;
+        }
+
+        .footer-bottom a {
+            color: #868e96;
+            text-decoration: none;
+        }
+
+        .footer-bottom a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+            }
+
+            .main-content {
+                padding: 20px 15px !important;
+            }
+
+            .footer-content {
+                padding: 20px 10px !important;
+            }
+
+            .footer-section {
+                padding: 10px !important;
+            }
+
+            .social-links img {
+                width: 26px !important;
+                height: 26px !important;
+            }
+
+            .app-buttons img {
+                width: 105px !important;
+            }
+
+            .company-logo img {
+                width: 80px !important;
+                height: 80px !important;
+            }
+            .company-tagline {
+                font-size: 11px;
+            }
+
+            .section {
+                padding: 15px !important;
+                margin: 15px 0 !important;
+            }
+        }
+        /* Outlook specific fixes */
+        .outlook-fix {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+            border-collapse: collapse;
+        }
+        .section ul, .section ol {
+            list-style: none;
+        }
+    </style>
+</head>
+<body>
+<table width="100%" cellpadding="0" cellspacing="0" class="outlook-fix">
+    <tr>
+        <td align="center">
+            <div class="email-container">
+                <!-- Main Content -->
+                <div class="main-content">
+                    <p><strong>عزيزي/عزيزتي {{username}},</strong></p>
+
+                    <p>
+                        نحن متحمسون لانضمامك إلينا في دروب مي! قد لا تكون قد بدأت بعد في إعادة التدوير معنا، ولكننا نود أن نوضح لك مدى سهولة المساهمة في الحفاظ على البيئة
+                    </p>
+
+                    <hr>
+
+                    <div class="section benefits-section">
+                        <p><strong>لماذا تبدأ بإعادة التدوير مع دروب مي؟ 💚</strong></p>
+                        <ul>
+                            <li><strong>كسب المكافآت:</strong> مع كل عملية إعادة تدوير، ستكسب نقاطًا يمكنك استبدالها بمكافآت!</li>
+                            <li><strong>إحداث فرق:</strong> حتى الخطوات البسيطة تسهم في جعل كوكبنا أكثر نظافة.</li>
+                            <li><strong>متابعة التقدم:</strong> استخدم تطبيقنا لتتبع التغيير الإيجابي الذي تحدثه، عنصرًا بعد عنصر.</li>
+                        </ul>
+                    </div>
+
+                    <hr>
+
+                    <div class="section getting-started-section">
+                        <p><strong>كيفية البدء ⭐</strong></p>
+                        <ol>
+                            <li>ابحث عن أقرب جهاز دروب مي باستخدام تطبيقنا</li>
+                            <li>ضع المواد القابلة للتدوير (مثل الزجاجات البلاستيكية وعلب الألمنيوم)</li>
+                            <li>شاهد نقاطك تنمو واطلع على تأثيرك</li>
+                        </ol>
+
+                        <p>
+                            الأمر بهذه السهولة! بالإضافة إلى ذلك، ستحصل على نقاط إضافية كمكافأة ترحيب عند إتمام أول عملية تدوير
+                        </p>
+                    </div>
+
+                    <hr>
+
+                    <div class="section community-section">
+                        <p><strong> مجتمعك بانتظارك ⭐</strong></p>
+                        <p>
+                            انضم إلى الآلاف من الأشخاص في رحلاتهم لإعادة التدوير. دعونا نعمل سويًا للحد من النفايات وخلق مستقبل أكثر استدامة
+                        </p>
+                    </div>
+
+                    <hr>
+
+                    <p><strong>💚 تحتاج مساعدة؟</strong></p>
+               <p>فريقنا جاهز لمساعدتك! يمكنك الرد على هذا البريد أو زيارة قسم الأسئلة الشائعة في التطبيق للبدء</p>
+
+                    <br>
+
+                    <p><strong>📩 جاهز لإحداث فرق؟</strong></p>
+                    <p>
+                        حمل تطبيقنا وابحث عن أقرب جهاز دروب مي اليوم. يدًا بيد لعالم أنظف وأكثر خضرة</p>
+<br>
+                    <p style="text-align: right"><strong>أطيب التحيات</strong></p>
+                    <p style="text-align: right">Drop Me Team</p>
+                </div>
+
+                <!-- Footer -->
+                <div class="footer">
+                    <table width="100%" cellpadding="0" cellspacing="0" class="outlook-fix">
+                        <tr>
+                            <td>
+                                <div class="footer-content">
+                                    <table width="100%" cellpadding="0" cellspacing="0" class="outlook-fix">
+                                        <tr>
+                                            <!-- Company Logo Section -->
+                                            <td width="49%" valign="top" class="footer-section company-logo">
+                                                <img src="https://drop-me-privacy-policy.vercel.app/company_logo.png" alt="Drop Me Logo">
+                                                <div class="company-tagline">حلول إعادة التدوير المدعومة بالذكاء الاصطناعي</div>
+                                            </td>
+
+                                            <!-- Social Media & Apps Section -->
+                                            <td width="49%" valign="top" class="footer-section">
+                                                <h3>تابعنا</h3>
+                                                <div class="social-links">
+                                                    <a href="https://facebook.com/dropmeeg" target="_blank">
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6c/Facebook_Logo_2023.png" alt="Facebook">
+                                                    </a>
+                                                    <a href="https://www.instagram.com/dropme.eg/" target="_blank">
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/58/Instagram-Icon.png" alt="Instagram">
+                                                    </a>
+                                                    <a href="https://linkedin.com/company/dropmeeg" target="_blank">
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e8/Linkedin-logo-blue-In-square-40px.png" alt="LinkedIn">
+                                                    </a>
+                                                    <a href="https://dropmeeg.wixsite.com/dropme" target="_blank">
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/ff/PICOL_icon_Globe-Flat.png" alt="Website">
+                                                    </a>
+                                                </div>
+
+                                                <h3>حمل التطبيق</h3>
+                                                <div class="app-buttons">
+                                                    <a href="#" target="_blank">
+                                                        <img src="https://drop-me-privacy-policy.vercel.app/appstore_button.png" alt="App Store">
+                                                    </a>
+
+                                                    <a href="https://play.google.com/store/apps/details?id=com.dropme.recycling&pcampaignid=web_share&pli=1" target="_blank" style="margin-top: 5px">
+                                                        <img src="https://drop-me-privacy-policy.vercel.app/googleplay_button.png" alt="Google Play">
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+                                <!-- Footer Bottom -->
+                                <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#e9ecef; border-top:1px solid #dee2e6; text-align:center; font-size:14px; color:#868e96; padding: 20px 0;">
+                                    <tr>
+                                        <td align="center" style="padding: 10px 20px;">
+                                            <!-- Contact and Privacy Links -->
+                                            <table cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto;">
+                                                <tr>
+                                                    <td style="padding: 0 5px;">
+                                                        <a href="mailto:hello@dropmeeg.com" class="links">راسلنا</a>
+                                                    </td>
+                                                    <td style="padding: 0 5px;">|</td>
+                                                    <td style="padding: 0 5px;">
+                                                        <a href="https://drop-me-privacy-policy.vercel.app/" class="links">سياسة الخصوصية</a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="center" style="padding: 5px 20px;">
+                                            <strong>ساعات العمل:</strong> الأحد - الخميس، 9:00 صباحًا - 6:00 مساءً
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="center" style="padding: 5px 20px;">
+                                            &copy; 2025 DropMe. جميع الحقوق محفوظة.
+                                            |
+                                            <a href="#" class="links">إلغاء الاشتراك</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
 </body>
-
 </html>
