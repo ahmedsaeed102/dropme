@@ -19,7 +19,7 @@ from .models import LocationModel, Feedback, UserModel, generate_referral_code, 
 from competition_api.models import Resource
 from competition_api.models import Competition
 from .services import send_otp, send_reset_password_email, send_welcome_email, otp_set, unread_notification
-from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer, TermsAndConditionSerializer, FAQsSerializer, SocialLoginSerializer
+from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer,  FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer, TermsAndConditionSerializer, FAQsSerializer, SocialLoginSerializer
 from competition_api.serializers import CompetitionSerializer, ResourcesSerializer
 from machine_api.utlis import get_total_recycled_items
 
@@ -43,11 +43,14 @@ class UserViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = serializer.save()
         try:
-            transaction_id = create_otp_transaction( user.phone_number,user.email)
+            full_phone = f"{user.country_code}{user.phone_number}"
+            transaction_id = create_otp_transaction( full_phone,user.email)
             request_id = activate_otp_transaction(transaction_id)
-            user.transaction_id = transaction_id
-            user.request_id = request_id
+
+            user.akedly_transaction_id = transaction_id
+            user.akedly_request_id = request_id
             user.save()
+
         except Exception as e:
             raise ValidationError({"error": str(e)})
 
@@ -63,7 +66,7 @@ class UserViewSet(viewsets.ModelViewSet):
         User.objects.filter(id=request.user.id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=["PATCH"], serializer_class=OTPOnlySerializer)
+    @action(detail=True, methods=["PATCH"])
     def verify_otp(self, request, pk=None):
         instance = self.get_object()
         otp = request.data.get("otp")
@@ -101,12 +104,19 @@ class UserViewSet(viewsets.ModelViewSet):
     def regenerate_otp(self, request, pk=None):
         """to regenerate otp until max try"""
         instance = self.get_object()
-        if instance.max_otp_out and timezone.now() < instance.max_otp_out:
-            waiting_time = instance.max_otp_out - timezone.now()
-            return Response(f"Max OTP try reached, try after: {waiting_time.seconds // 60} minute.", status=status.HTTP_400_BAD_REQUEST)
-        instance = otp_set(user=instance)
-        send_otp(instance)
-        return Response("Successfully regenrated the new OTP.", status=status.HTTP_200_OK)
+        try:
+            full_phone = f"{instance.country_code}{instance.phone_number}"
+            transaction_id = create_otp_transaction(full_phone, instance.email)
+            request_id = activate_otp_transaction(transaction_id)
+
+            instance.akedly_transaction_id = transaction_id
+            instance.akedly_request_id = request_id
+            instance.save()
+
+            return Response("Successfully regenrated the new OTP.", status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": f"Failed to regenerate OTP: {str(e)}"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 """
     FORGOT PASSWORD APIS
@@ -117,23 +127,22 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
     def post(self, request):
         email = request.data.get("email", "")
         user = User.objects.filter(email=email).first()
-        if user:
-            if user.max_otp_out and timezone.now() < user.max_otp_out:
-                waiting_time = user.max_otp_out - timezone.now()
-                return Response(f"Max OTP try reached, try after: {waiting_time.seconds // 60} minute.", status=status.HTTP_400_BAD_REQUEST)
-            user = otp_set(user=user)
-            send_reset_password_email(email, user.otp)
-            return Response("Reset password email sent",status=status.HTTP_200_OK,)
-        else:
-            raise exceptions.NotFound({"detail": _("There is no account registered with this email.")},)
 
-class VerifyPasswordResetOTP(generics.GenericAPIView):
-    serializer_class = OTPSerializer
+        full_phone = f"{user.country_code}{user.phone_number}"
+        try:
+            transaction_id = create_otp_transaction(full_phone, user.email)
+            request_id = activate_otp_transaction(transaction_id)
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        return Response({"valid": True},status=status.HTTP_200_OK,)
+            user.akedly_transaction_id = transaction_id
+            user.akedly_request_id = request_id
+            user.save()
+
+            return Response("Reset password OTP sent successfully.", status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to send reset password OTP: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class SetNewPasswordAPIView(generics.GenericAPIView):
     serializer_class = SetNewPasswordSerializer

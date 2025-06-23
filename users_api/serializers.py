@@ -55,20 +55,9 @@ class UserSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(_("Invalid referral code."))
 
         user.save()
-
-        # Send OTP via Akedly
-        try:
-            full_phone = f"{user.country_code}{user.phone_number}"
-            transaction_id = create_otp_transaction(full_phone, user.email)
-            request_id = activate_otp_transaction(transaction_id)
-            user.akedly_transaction_id = transaction_id
-            user.akedly_request_id = request_id
-            user.save()
-        except Exception as e:
-            user.delete()
-            raise serializers.ValidationError({"otp": _(f"Akedly OTP failed: {str(e)}")})
-
         return user
+
+
 
 """
     CUSTOM TOKEN OBTAIN PAIR SERIALIZER FROM REST_FRAMEWORK_SIMPLEJWT
@@ -124,7 +113,7 @@ class ResetPasswordEmailRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
     class Meta:
         fields = ["email"]
-
+"""
 class OTPOnlySerializer(serializers.Serializer):
     otp = serializers.CharField(min_length=4, max_length=4, write_only=True)
     class Meta:
@@ -146,7 +135,7 @@ class OTPSerializer(serializers.Serializer):
         else:
             raise ValidationError({"detail": _("Invalid Email")})
         return data
-
+"""
 class SetNewPasswordSerializer(serializers.Serializer):
     password = serializers.CharField(min_length=settings.MIN_PASSWORD_LENGTH, max_length=68, write_only=True)
     otp = serializers.CharField(min_length=4, max_length=4, write_only=True)
