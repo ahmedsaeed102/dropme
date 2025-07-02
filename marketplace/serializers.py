@@ -1,84 +1,106 @@
 from rest_framework import serializers
-from competition_api.models import Resource
-from .models import Product, Cart, Entry, Category, SpecialOffer, Wishlist
-
+from .models import Product, Wishlist, Brand, Category
+from decimal import Decimal
 
 class ProductSerializer(serializers.ModelSerializer):
-    can_buy = serializers.SerializerMethodField(read_only=True)
-    count_in_car = serializers.SerializerMethodField(read_only=True)
-    is_wishlisted = serializers.SerializerMethodField(read_only=True)
+    discounted_price = serializers.SerializerMethodField()
+    is_wishlisted = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = "__all__"
-        read_only_fields = ["id", "created_at", "updated_at"]
-
-    def get_can_buy(self, obj: Product) -> bool:
-        user = self.context["request"].user
-        return user.total_points >= obj.price_points
-
-    def get_count_in_car(self, obj: Product) -> int:
-        user = self.context["request"].user
-        cart = Cart.objects.filter(user=user, active=True).first()
-        item = cart.items.filter(product=obj).first() if cart else None
-        return item.quantity if item is not None else 0
-
-    def get_is_wishlisted(self, obj: Product) -> bool:
-        user = self.context["request"].user
-        if user.is_authenticated:
-            return Wishlist.objects.filter(user=user, products=obj).exists()
-        return False
+        fields = [
+            'id', 'name_en', 'name_ar', 'price', 'discount',
+            'discounted_price', 'is_wishlisted',
+            'description_en', 'description_ar', 'img_url',
+            'product_page_link', 'brand', 'category',
+            'created_at', 'updated_at'
+        ]
+    def get_discounted_price(self, obj):
+        # ✅ Safe calculation using Decimal only
+        if not obj.price:
+            return Decimal("0.00")
+        discount = Decimal(obj.discount) / Decimal(100)
+        discounted_price = obj.price * (Decimal("1.00") - discount)
+        return round(discounted_price, 2)
+    def get_is_wishlisted(self, obj):
+        wishlist_ids = {str(i) for i in self.context.get("wishlist_product_ids", set())}
+        return str(obj.id) in wishlist_ids
 
 class WishlistSerializer(serializers.ModelSerializer):
     products = ProductSerializer(many=True, read_only=True)
+
     class Meta:
         model = Wishlist
-        fields = ['user', 'products']
+        fields = ['id', 'user', 'products']
 
-class InputEntrySerializer(serializers.ModelSerializer):
+class BrandSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Entry
-        fields = ("product", "quantity")
+        model = Brand
+        fields = ['id', 'name', 'slug']
+        read_only_fields = ['slug']
 
-class EditEntrySerializer(serializers.Serializer):
-    entry_id = serializers.IntegerField()
-    quantity = serializers.IntegerField()
-
-class OutputEntrySerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)
-    entry_id = serializers.IntegerField(source="id")
-
-    class Meta:
-        model = Entry
-        fields = ("entry_id", "product", "quantity")
-
-class CartSerializer(serializers.ModelSerializer):
-    items = OutputEntrySerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Cart
-        fields = ("items", "count", "total")
-
-
-class CategorysSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = "__all__"
+        fields = ['id', 'name', 'slug']
+        read_only_fields = ['slug']
 
 
-class MarketplaceResourcesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Resource
-        fields = "__all__"
 
-class ProductFilterSerializer(serializers.Serializer):
-    price_points = serializers.IntegerField(required=False)
-    category__category_name = serializers.CharField(required=False)
 
-class CategoryFilterSerializer(serializers.Serializer):
-    category_name = serializers.CharField(required=False)
 
-class SpecialOfferSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SpecialOffer
-        fields = "__all__"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# class InputEntrySerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Entry
+#         fields = ("product", "quantity")
+#
+# class EditEntrySerializer(serializers.Serializer):
+#     entry_id = serializers.IntegerField()
+#     quantity = serializers.IntegerField()
+#
+# class OutputEntrySerializer(serializers.ModelSerializer):
+#     product = ProductSerializer(read_only=True)
+#     entry_id = serializers.IntegerField(source="id")
+#
+#     class Meta:
+#         model = Entry
+#         fields = ("entry_id", "product", "quantity")
+#
+# class CartSerializer(serializers.ModelSerializer):
+#     items = OutputEntrySerializer(many=True, read_only=True)
+#
+#     class Meta:
+#         model = Cart
+#         fields = ("items", "count", "total")
+# class MarketplaceResourcesSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Resource
+#         fields = "__all__"
