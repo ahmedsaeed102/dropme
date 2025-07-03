@@ -49,7 +49,7 @@ class Product(models.Model):
     name_ar = models.CharField(max_length=200, blank=False, null=False)
     description_en = models.TextField()
     description_ar = models.TextField()
-    img_url = models.URLField()
+    img_urls = models.JSONField(default=list)
     product_page_link = models.URLField()
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     discount = models.IntegerField(default=0, validators=PERCENTAGE_VALIDATOR)

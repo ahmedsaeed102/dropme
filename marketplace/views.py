@@ -7,9 +7,7 @@ from .serializers import ProductSerializer, WishlistSerializer , BrandSerializer
 from .filters import ProductFilter
 from rest_framework.permissions import IsAuthenticated
 
-
 #  Product ViewSet
-
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.select_related('brand', 'category').all()
     serializer_class = ProductSerializer
@@ -29,8 +27,6 @@ class ProductViewSet(viewsets.ModelViewSet):
             context["wishlist_product_ids"] = set()
 
         return context
-
-
 
 class WishlistAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -62,13 +58,16 @@ class WishlistAPIView(APIView):
         wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
         wishlist.products.remove(product)
         return Response({"detail": "Product removed from wishlist."}, status=status.HTTP_200_OK)
+
 class BrandViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
+    lookup_field = 'slug'
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    lookup_field = 'slug'
 
 
 
