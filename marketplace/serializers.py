@@ -5,6 +5,10 @@ from decimal import Decimal
 class ProductSerializer(serializers.ModelSerializer):
     discounted_price = serializers.SerializerMethodField()
     is_wishlisted = serializers.SerializerMethodField()
+    brand = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Brand.objects.all())
+    category = serializers.SlugRelatedField(
+    slug_field='slug', queryset=Category.objects.all())
 
     class Meta:
         model = Product
@@ -16,7 +20,6 @@ class ProductSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
     def get_discounted_price(self, obj):
-        # ✅ Safe calculation using Decimal only
         if not obj.price:
             return Decimal("0.00")
         discount = Decimal(obj.discount) / Decimal(100)
