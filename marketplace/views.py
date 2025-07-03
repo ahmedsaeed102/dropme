@@ -15,13 +15,11 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, drf_filters.SearchFilter]
     filterset_class = ProductFilter
-    search_fields = ['name_en','name_ar','brand__name']
+    search_fields = ['name_en','name_ar','brand__slug']
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         user = self.request.user
-        print("User:", user)  # ✅ TEMPORARY for debugging
-
         if user.is_authenticated:
             wishlist = Wishlist.objects.filter(user=user).first()
             context["wishlist_product_ids"] = (
@@ -35,7 +33,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
 class WishlistAPIView(APIView):
-    permission_classes = [IsAuthenticated]  # ✅ Important fix
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         """Return all products in the user's wishlist"""
