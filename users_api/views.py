@@ -13,13 +13,13 @@ from faker import Faker
 from fcm_django.models import FCMDevice
 import random
 from datetime import date
-
+from utils.AkedlyClient import create_otp_transaction, activate_otp_transaction, verify_otp
 from machine_api.models import PhoneNumber, RecycleLog
 from .models import LocationModel, Feedback, UserModel, generate_referral_code, TermsAndCondition, FAQ
 from competition_api.models import Resource
 from competition_api.models import Competition
 from .services import send_otp, send_reset_password_email, send_welcome_email, otp_set, unread_notification
-from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer, OTPSerializer, OTPOnlySerializer, FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer, TermsAndConditionSerializer, FAQsSerializer, SocialLoginSerializer
+from .serializers import LocationModelserializers, UserSerializer, UserProfileSerializer, SetNewPasswordSerializer, ResetPasswordEmailRequestSerializer,  FeedbackSerializer, PreferredLanguageSerializer, TopUserSerializer, TermsAndConditionSerializer, FAQsSerializer, SocialLoginSerializer
 from competition_api.serializers import CompetitionSerializer, ResourcesSerializer
 from machine_api.utlis import get_total_recycled_items
 
@@ -32,14 +32,27 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    #def perform_create(self, serializer):
+       # print("register-data", self.request.data)
+       # user = serializer.save()
+       # fcm_data = self.request.data.get("fcm_device", {})
+       # fcm_registration_id = fcm_data.get("registration_id")
+       # fcm_device_type = fcm_data.get("type")
+       # if fcm_registration_id and fcm_device_type:
+         #   FCMDevice.objects.update_or_create(registration_id=fcm_registration_id, defaults={"user": user, "name": user.username, "type": fcm_device_type})
     def perform_create(self, serializer):
-        print("register-data", self.request.data)
         user = serializer.save()
-        fcm_data = self.request.data.get("fcm_device", {})
-        fcm_registration_id = fcm_data.get("registration_id")
-        fcm_device_type = fcm_data.get("type")
-        if fcm_registration_id and fcm_device_type:
-            FCMDevice.objects.update_or_create(registration_id=fcm_registration_id, defaults={"user": user, "name": user.username, "type": fcm_device_type})
+        try:
+            full_phone = f"{user.country_code}{user.phone_number}"
+            transaction_id = create_otp_transaction( full_phone,user.email)
+            request_id = activate_otp_transaction(transaction_id)
+
+            user.akedly_transaction_id = transaction_id
+            user.akedly_request_id = request_id
+            user.save()
+
+        except Exception as e:
+            raise ValidationError({"error": str(e)})
 
     def list(self, request, *args, **kwargs):
         if request.user.is_staff:
@@ -53,36 +66,57 @@ class UserViewSet(viewsets.ModelViewSet):
         User.objects.filter(id=request.user.id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=["PATCH"], serializer_class=OTPOnlySerializer)
+    @action(detail=True, methods=["PATCH"])
     def verify_otp(self, request, pk=None):
-        """to check if the user entered the correct otp or if he/she is already verified (is_active=True)"""
         instance = self.get_object()
-        if not instance.is_active and instance.otp_expiration and instance.otp == request.data.get("otp") and timezone.now() < instance.otp_expiration:
-            instance.is_active = True
-            instance.otp_expiration = None
-            instance.max_otp_try = settings.MAX_OTP_TRY
-            instance.max_otp_out = None
-            send_welcome_email(instance.email)
-            # check if user phone number was used to recycle before and add the points to user account
-            phone = PhoneNumber.objects.filter(phone_number=instance.phone_number).first()
-            if phone:
-                instance.total_points += phone.points
-                RecycleLog.objects.filter(phone=phone).update(user=instance)
-                phone.delete()
+        otp = request.data.get("otp")
+
+        if instance.is_active:
+            return Response("User already verified.", status=status.HTTP_400_BAD_REQUEST)
+
+        if not instance.akedly_request_id:
+            return Response("No verification session found.", status=status.HTTP_400_BAD_REQUEST)
+
+        success, result = verify_otp(instance.akedly_request_id, otp)
+
+        if not success:
+            return Response({"error": result}, status=status.HTTP_400_BAD_REQUEST)
+
+        # ✅ Akedly verified the OTP — proceed to activate user
+        instance.is_active = True
+        instance.akedly_transaction_id = None
+        instance.akedly_request_id = None
+        instance.save()
+
+        send_welcome_email(instance.email)
+
+        # ✅ If there's a temporary PhoneNumber record, merge its data
+        phone = PhoneNumber.objects.filter(phone_number=instance.phone_number).first()
+        if phone:
+            instance.total_points += phone.points
+            RecycleLog.objects.filter(phone=phone).update(user=instance)
+            phone.delete()
             instance.save()
-            return Response("Successfully verfied the user.", status=status.HTTP_200_OK)
-        return Response(_("User already verfied or OTP is incorrect."), status=status.HTTP_400_BAD_REQUEST,)
+
+        return Response("User verified successfully.", status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["GET"])
     def regenerate_otp(self, request, pk=None):
         """to regenerate otp until max try"""
         instance = self.get_object()
-        if instance.max_otp_out and timezone.now() < instance.max_otp_out:
-            waiting_time = instance.max_otp_out - timezone.now()
-            return Response(f"Max OTP try reached, try after: {waiting_time.seconds // 60} minute.", status=status.HTTP_400_BAD_REQUEST)
-        instance = otp_set(user=instance)
-        send_otp(instance)
-        return Response("Successfully regenrated the new OTP.", status=status.HTTP_200_OK)
+        try:
+            full_phone = f"{instance.country_code}{instance.phone_number}"
+            transaction_id = create_otp_transaction(full_phone, instance.email)
+            request_id = activate_otp_transaction(transaction_id)
+
+            instance.akedly_transaction_id = transaction_id
+            instance.akedly_request_id = request_id
+            instance.save()
+
+            return Response("Successfully regenrated the new OTP.", status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": f"Failed to regenerate OTP: {str(e)}"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 """
     FORGOT PASSWORD APIS
@@ -93,23 +127,22 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
     def post(self, request):
         email = request.data.get("email", "")
         user = User.objects.filter(email=email).first()
-        if user:
-            if user.max_otp_out and timezone.now() < user.max_otp_out:
-                waiting_time = user.max_otp_out - timezone.now()
-                return Response(f"Max OTP try reached, try after: {waiting_time.seconds // 60} minute.", status=status.HTTP_400_BAD_REQUEST)
-            user = otp_set(user=user)
-            send_reset_password_email(email, user.otp)
-            return Response("Reset password email sent",status=status.HTTP_200_OK,)
-        else:
-            raise exceptions.NotFound({"detail": _("There is no account registered with this email.")},)
 
-class VerifyPasswordResetOTP(generics.GenericAPIView):
-    serializer_class = OTPSerializer
+        full_phone = f"{user.country_code}{user.phone_number}"
+        try:
+            transaction_id = create_otp_transaction(full_phone, user.email)
+            request_id = activate_otp_transaction(transaction_id)
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        return Response({"valid": True},status=status.HTTP_200_OK,)
+            user.akedly_transaction_id = transaction_id
+            user.akedly_request_id = request_id
+            user.save()
+
+            return Response("Reset password OTP sent successfully.", status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to send reset password OTP: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class SetNewPasswordAPIView(generics.GenericAPIView):
     serializer_class = SetNewPasswordSerializer

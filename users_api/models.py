@@ -35,10 +35,13 @@ class UserModel(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(null=True, blank=True, max_length=11, validators=[validate_phone_number])
     country_code = models.CharField(max_length=50, default="+20")
 
-    otp = models.CharField(max_length=4)
-    otp_expiration = models.DateTimeField(null=True, blank=True)
-    max_otp_try = models.CharField(max_length=2, default=settings.MAX_OTP_TRY)
-    max_otp_out = models.DateTimeField(null=True, blank=True)
+    #otp = models.CharField(max_length=4)
+    #otp_expiration = models.DateTimeField(null=True, blank=True)
+    #max_otp_try = models.CharField(max_length=2, default=settings.MAX_OTP_TRY)
+    #max_otp_out = models.DateTimeField(null=True, blank=True)
+
+    akedly_transaction_id = models.CharField(max_length=255, null=True, blank=True)
+    akedly_request_id = models.CharField(max_length=255, null=True, blank=True)
 
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)

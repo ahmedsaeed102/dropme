@@ -20,7 +20,7 @@ urlpatterns = [
     # reset password
     path("reset_password_emaillink/", views.RequestPasswordResetEmail.as_view(), name="send_email_password",),
     path("password-reset/",  views.SetNewPasswordAPIView.as_view(), name="password-reset-complete",),
-    path("password-reset/verify-otp/", views.VerifyPasswordResetOTP.as_view(), name="password-reset-verify-otp",),
+    #path("password-reset/verify-otp/", views.VerifyPasswordResetOTP.as_view(), name="password-reset-verify-otp",),
     # edit profile
     path("<int:pk>/edit_profile/", views.ManageUserProfileView.as_view(), name="edit_profile",),
     # preferred language
