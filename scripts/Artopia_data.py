@@ -3,21 +3,21 @@ import sys
 import django
 import pandas as pd
 
-# ✅ Step 1: Django Setup
+# Step 1: Django Setup
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 sys.path.append(PROJECT_ROOT)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
-# ✅ Step 2: Import models
+# Step 2: Import models
 from marketplace.models import Product, Brand, Category
 
-# ✅ Step 3: Load Excel file
+#  Step 3: Load Excel file
 file_path = os.path.join(SCRIPT_DIR, 'Artopia_translated_products.xlsx')
 df = pd.read_excel(file_path)
 
-# ✅ Step 4: Columns check
+#  Step 4: Columns check
 required_columns = [
     'name_ar', 'name_en', 'original_price', 'discount',
     'description_ar', 'description_en', 'image_url',
@@ -27,10 +27,10 @@ for col in required_columns:
     if col not in df.columns:
         raise Exception(f"Missing column: {col}")
 
-# ✅ Step 5: Prepare brand
+#  Step 5: Prepare brand
 brand = Brand.objects.get(slug='artopia')
 
-# ✅ Step 6: Loop and import
+#  Step 6: Loop and import
 created, updated = 0, 0
 for _, row in df.iterrows():
     # Skip if essential data is missing
@@ -80,4 +80,4 @@ for _, row in df.iterrows():
     else:
         created += 1
 
-print(f"✅ {created} products created, {updated} products updated.")
+print(f"{created} products created, {updated} products updated.")
