@@ -1,67 +1,430 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drop Me - Start Your Recycling Journey</title>
+    <style>
+        /* Reset and Base Styles for Email Clients */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body, table, td, p, a, li, blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        /* Main Body Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f4f4f4;
+            direction: ltr;
+            text-align: left;
+            margin: 0;
+            padding: 0;
+            width: 100% !important;
+            min-width: 100%;
+        }
+
+        /* Container */
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+
+        /* Content Styles */
+        .main-content {
+            padding: 30px 25px;
+            font-size: 16px;
+            text-align: left !important;
+            line-height: 1.6;
+        }
+
+        .section {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            border-left: 5px solid;
+        }
+
+        .benefits-section {
+            background-color: #f8f9fa;
+            border-left-color: #8BC34A;
+        }
+
+        .getting-started-section {
+            background-color: #fff3cd;
+            border-left-color: #CDDC39;
+        }
+
+        .community-section {
+            background-color: #f0f8f0;
+            border-left-color: #4CAF50;
+        }
+
+        .section ul, .section ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .section li {
+            margin: 8px 0;
+        }
+
+        hr {
+            border: none;
+            height: 2px;
+            background-color: #e9ecef;
+            margin: 30px 0;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background-color: #f8f9fa;
+            border-top: 3px solid #8BC34A;
+            padding: 0;
+        }
+
+        .footer-content {
+            padding: 25px 20px;
+        }
+
+        .footer-section {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .footer-section h3 {
+            font-size: 18px;
+            color: #333333;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        /* Social Media Icons */
+        .social-links {
+            margin: 15px 0;
+        }
+
+        .social-links a {
+            display: inline-block;
+            margin: 5px;
+            transition: transform 0.2s ease;
+        }
+
+        .social-links a:hover {
+            transform: scale(1.1);
+        }
+
+        .social-links img {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+        }
+
+        .app-buttons {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            direction: ltr;
+        }
+
+        .app-buttons img {
+            width: 140px;
+            height: auto;
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .app-buttons a:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Company Logo */
+        .company-logo {
+            text-align: center;
+            padding: 20px 15px;
+        }
+
+        .company-logo img {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+        }
+
+        .company-tagline {
+            color: #6c757d;
+            font-size: 14px;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        /* Contact Links */
+        .contact-links {
+            margin: 10px 0;
+        }
+
+        .contact-links a {
+            display: block;
+            color: #8BC34A;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            margin: 8px 0;
+            padding: 5px 0;
+            transition: color 0.2s ease;
+        }
+
+        .contact-links a:hover {
+            color: #7CB342;
+            text-decoration: underline;
+        }
+
+        /* Footer Bottom */
+        .links
+        {
+            color:#868e96;
+            text-decoration:none;
+            transition: color 0.2s ease;
+        }
+        .links:hover
+        {
+            color: #7CB342;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .footer-bottom p {
+            margin: 5px 0;
+        }
+
+        .footer-bottom a {
+            color: #868e96;
+            text-decoration: none;
+        }
+
+        .footer-bottom a:hover {
+            text-decoration: underline;
+        }
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+            }
+
+            .main-content {
+                padding: 20px 15px !important;
+            }
+
+            .footer-content {
+                padding: 20px 10px !important;
+            }
+
+            .footer-section {
+                padding: 10px !important;
+            }
+
+            .social-links img {
+                width: 26px !important;
+                height: 26px !important;
+            }
+
+            .app-buttons img {
+                width: 105px !important;
+            }
+            .google-play
+            {
+                margin-top: 5px
+            }
+
+            .company-logo img {
+                width: 80px !important;
+                height: 80px !important;
+            }
+            .company-tagline {
+                font-size: 11px;
+            }
+
+            .section {
+                padding: 15px !important;
+                margin: 15px 0 !important;
+            }
+        }
+        /* Outlook specific fixes */
+        .outlook-fix {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+            border-collapse: collapse;
+        }
+    </style>
+</head>
 <body>
-    <p><b>Dear {{username}},</b></p>
+<table width="100%" cellpadding="0" cellspacing="0" class="outlook-fix">
+    <tr>
+        <td align="center">
+            <div class="email-container">
+                <!-- Main Content -->
+                <div class="main-content">
+                    <p><strong>Dear {{username}},</strong></p>
 
-    <p>
-        We're excited to have you with us at Drop Me! Though you haven't started recycling with us yet, 
-        we want to show you just how easy it is to make a big impact on the environment.
-    </p>
+                    <p>
+                        We're excited to have you with us at Drop Me! Though you haven't started recycling with us yet, we want to show you just how easy it is to make a big impact on the environment.
+                    </p>
 
-    <hr>
+                    <hr>
 
-    <p><strong>Why Start Recycling with Drop Me?</strong></p>
-    <ul>
-        <li><strong>Earn Rewards:</strong> Every time you recycle, you earn points that can be redeemed for rewards!</li>
-        <li><strong>Make a Difference:</strong> Even small actions contribute to a cleaner planet.</li>
-        <li><strong>Track Your Progress:</strong> Use our app to see the positive change you're making, one item at a time.</li>
-    </ul>
+                    <div class="section benefits-section">
+                        <p><strong>Why Start Recycling with Drop Me?</strong></p>
+                        <ul>
+                            <li><strong>Earn Rewards:</strong> Every time you recycle, you earn points that can be redeemed for rewards!</li>
+                            <li><strong>Make a Difference:</strong> Even small actions contribute to a cleaner planet.</li>
+                            <li><strong>Track Your Progress:</strong> Use our app to see the positive change you're making, one item at a time.</li>
+                        </ul>
+                    </div>
 
-    <hr>
+                    <hr>
 
-    <p><strong>How to Get Started:</strong></p>
-    <ol>
-        <li>Find a Drop Me machine nearby using our app.</li>
-        <li>Drop off your recyclables (plastic bottles, aluminum cans, etc.).</li>
-        <li>Watch your points grow and see your impact!</li>
-    </ol>
+                    <div class="section getting-started-section">
+                        <p><strong>⭐ How to Get Started:</strong></p>
+                        <ol>
+                            <li>Find a Drop Me machine nearby using our app.</li>
+                            <li>Drop off your recyclables (plastic bottles, aluminum cans, etc.).</li>
+                            <li>Watch your points grow and see your impact!</li>
+                        </ol>
 
-    <p>
-        It's really that simple! Plus, when you make your first transaction, you'll unlock bonus points as a welcome gift 🎁.
-    </p>
+                        <p>
+                            It's really that simple! Plus, when you make your first transaction, you'll unlock bonus points as a welcome gift
+                        </p>
+                    </div>
 
-    <hr>
+                    <hr>
 
-    <p><strong>Your Community Awaits</strong></p>
-    <p>
-        Join thousands of others on their recycling journeys. Let's reduce waste together and create a more sustainable future.
-    </p>
+                    <div class="section community-section">
+                        <p><strong>⭐ Your Community Awaits</strong></p>
+                        <p>
+                            Join thousands of others on their recycling journeys. Let's reduce waste together and create a more sustainable future.
+                        </p>
+                    </div>
 
-    <hr>
+                    <hr>
 
-    <p><strong>Need Help?</strong></p>
-    <p>
-        Our team is here to guide you! Just reply to this email or visit our FAQ section in the app to get started.
-    </p>
+                    <p><strong>💚 Need Help?</strong></p>
+                    <p>Our team is here to guide you! Just reply to this email or visit our FAQ section in the app to get started.</p>
 
-    <p>
-        Together, we can make recycling a daily habit that benefits both you and the planet! 🌍
-    </p>
+                    <br>
 
-    <p><b>Best regards,</b></p>
-    <p>Drop Me Team</p>
+                    <p><strong>📩 Ready to make a difference?</strong></p>
+                    <p>Download our app and find your nearest Drop Me machine today. Hand in hand, we're building a cleaner, greener world</p>
 
-    <p>
-        <a href="mailto:hello@dropmeeg.com">Contact Information</a> | 
-        <a href="https://linktr.ee/dropme.eg">Follow us on Social Media</a>
-    </p>
+                    <p style="text-align: left"><strong>Best regards,</strong></p>
+                    <p style="text-align: left">Drop Me Team</p>
+                </div>
 
-    <hr>
+                <!-- Footer -->
+                <div class="footer">
+                    <table width="100%" cellpadding="0" cellspacing="0" class="outlook-fix">
+                        <tr>
+                            <td>
+                                <div class="footer-content">
+                                    <table width="100%" cellpadding="0" cellspacing="0" class="outlook-fix">
+                                        <tr>
+                                            <!-- Company Logo Section -->
+                                            <td width="49%" valign="top" class="footer-section company-logo">
+                                                <img src="https://drop-me-privacy-policy.vercel.app/company_logo.png" alt="Drop Me Logo">
+                                                <div class="company-tagline">AI-powered recycling solutions</div>
+                                            </td>
 
-    <p>
-        Start Recycling Now: <a href="app_link">App Link</a><br>
-        Check Locations Near You: <a href="location_finder_link">Location Finder Link</a>
-    </p>
+                                            <!-- Social Media & Apps Section -->
+                                            <td width="49%" valign="top" class="footer-section">
+                                                <h3>Follow Us</h3>
+                                                <div class="social-links">
+                                                    <a href="https://facebook.com/dropmeeg" target="_blank">
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6c/Facebook_Logo_2023.png" alt="Facebook">
+                                                    </a>
+                                                    <a href="https://www.instagram.com/dropme.eg/" target="_blank">
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/58/Instagram-Icon.png" alt="Instagram">
+                                                    </a>
+                                                    <a href="https://linkedin.com/company/dropmeeg" target="_blank">
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e8/Linkedin-logo-blue-In-square-40px.png" alt="LinkedIn">
+                                                    </a>
+                                                    <a href="https://dropmeeg.wixsite.com/dropme" target="_blank">
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/ff/PICOL_icon_Globe-Flat.png" alt="Website">
+                                                    </a>
+                                                </div>
+
+                                                <h3>Download the App</h3>
+                                                <div class="app-buttons">
+                                                    <a href="#" target="_blank">
+                                                        <img src="https://drop-me-privacy-policy.vercel.app/appstore_button.png" alt="App Store">
+                                                    </a>
+
+                                                    <a href="https://play.google.com/store/apps/details?id=com.dropme.recycling&pcampaignid=web_share&pli=1" target="_blank" class="google-play" style="margin-top: 5px">
+                                                        <img src="https://drop-me-privacy-policy.vercel.app/googleplay_button.png" alt="Google Play">
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+
+                                <!-- Footer Bottom -->
+                                <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#e9ecef; border-top:1px solid #dee2e6; text-align:center; font-size:14px; color:#868e96; padding: 20px 0;">
+                                    <tr>
+                                        <td align="center" style="padding: 10px 20px;">
+                                            <!-- Contact and Privacy Links -->
+                                            <table cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto;">
+                                                <tr>
+                                                    <td style="padding: 0 5px;">
+                                                        <a href="mailto:hello@dropmeeg.com"  class="links">Contact Us</a>
+                                                    </td>
+                                                    <td style="padding: 0 5px;">|</td>
+                                                    <td style="padding: 0 5px;">
+                                                        <a href="https://drop-me-privacy-policy.vercel.app/" class="links">Privacy Policy</a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="center" style="padding: 5px 20px;">
+                                            <strong>Business Hours:</strong> Sunday - Thursday, 9:00 AM - 6:00 PM
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="center" style="padding: 5px 20px;">
+                                            &copy; 2025 DropMe Egypt. All rights reserved. |
+                                            <a href="#" class="links">Unsubscribe</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
 </body>
-
 </html>
