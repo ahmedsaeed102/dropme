@@ -28,7 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
         fields = (
-            "username", "email", "phone_number", "country_code",
+            "id","username", "email", "phone_number", "country_code",
             "password1", "referral_code","akedly_transaction_id", "akedly_request_id"
         )
 
