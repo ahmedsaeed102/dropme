@@ -28,7 +28,7 @@
 
 6. Install dev requirements
     ```shell
-    pip install -r requirements_dev.txt
+    pip install -r requirements.txt
     ```
 
 7. Install [GeoDjango](https://docs.djangoproject.com/en/4.1/ref/contrib/gis/install/)
