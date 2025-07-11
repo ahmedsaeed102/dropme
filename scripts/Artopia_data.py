@@ -42,8 +42,12 @@ for _, row in df.iterrows():
     try:
         category = Category.objects.get(slug=category_slug)
     except Category.DoesNotExist:
-        print(f"❌ Category not found for slug: {category_slug}")
-        continue
+        # Create the category if not found
+        category = Category.objects.create(
+            name=row['category'].strip(),
+            slug=category_slug
+        )
+        print(f"✅ Created new category: {row['category'].strip()} with slug: {category_slug}")
 
     # Multiple image handling
     image_urls = [url.strip() for url in str(row['image_url']).split(',') if url.strip()]
