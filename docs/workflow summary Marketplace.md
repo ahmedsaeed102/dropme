@@ -1,11 +1,5 @@
-Here's a **detailed workflow documentation** for your full Django e-commerce app, including:
+# workflow summary Marketplace APP
 
-* Workflow by feature
-* HTTP methods + endpoints
-* Request/response formats
-* Filtering/search support
-* Tier/point application logic
-* Code architecture diagram (described)
 
 ---
 
@@ -197,7 +191,7 @@ Returns tier list for specific brand
 
 ---
 
-## 🔁 **System Workflow Diagram **
+## 🔁 **System Workflow Diagram**
 
 ---
 
