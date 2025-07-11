@@ -1,13 +1,15 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ProductViewSet, WishlistAPIView , BrandViewSet , CategoryViewSet
+
+from .views import ProductViewSet, WishlistAPIView, BrandViewSet, CategoryViewSet
+
 router = DefaultRouter()
 router.register(r'products', ProductViewSet, basename='product')
 router.register(r'brands', BrandViewSet, basename='brand')
 router.register(r'categories', CategoryViewSet, basename='category')
 
 urlpatterns = [
-    path('', include(router.urls)),                          # /products/ and /products/<id>/
-    path('wishlist/', WishlistAPIView.as_view()),            # GET wishlist
-    path('wishlist/<int:id>/', WishlistAPIView.as_view()),   # POST and DELETE by product ID
+    path('', include(router.urls)),  # /products/ and /products/<id>/
+    path('wishlist/', WishlistAPIView.as_view()),  # GET wishlist
+    path('wishlist/<int:id>/', WishlistAPIView.as_view()),  # POST and DELETE by product ID
 ]

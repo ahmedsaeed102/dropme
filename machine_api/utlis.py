@@ -6,24 +6,24 @@ from django.utils import timezone
 from django.utils.timezone import make_aware
 from rest_framework.exceptions import APIException
 from users_api.services import user_get
-from marketplace.services import special_offer_apply
+# from marketplace.services import special_offer_apply
 from .models import RecycleLog
 from competition_api.models import CompetitionRanking
 
-def update_user_points(user_pk, points):
-    user = user_get(id=user_pk)
-    special_points = special_offer_apply(user=user, points=points)
-    if CompetitionRanking.objects.filter(user=user):
-        competition_ranking = CompetitionRanking.objects.filter(user=user).first()
-        if competition_ranking.competition.is_ongoing:
-            competition_ranking.points += points + special_points
-            competition_ranking.save()
-        else:
-            user.total_points += points + special_points
-            user.save()
-    else:
-        user.total_points += points + special_points
-        user.save()
+# def update_user_points(user_pk, points):
+#     user = user_get(id=user_pk)
+#     special_points = special_offer_apply(user=user, points=points)
+#     if CompetitionRanking.objects.filter(user=user):
+#         competition_ranking = CompetitionRanking.objects.filter(user=user).first()
+#         if competition_ranking.competition.is_ongoing:
+#             competition_ranking.points += points + special_points
+#             competition_ranking.save()
+#         else:
+#             user.total_points += points + special_points
+#             user.save()
+#     else:
+#         user.total_points += points + special_points
+#         user.save()
 
 def claculate_travel_distance(userlocation, machinelocation):
     timebyfoot = requests.get(f"https://routing.openstreetmap.de/routed-foot/route/v1/driving/{userlocation[0]},{userlocation[1]};{machinelocation[0]},{machinelocation[1]}").json()

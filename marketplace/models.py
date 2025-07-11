@@ -1,12 +1,12 @@
-from datetime import date
-from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db import models
 from django.utils.text import slugify
 
 User = get_user_model()
 
 PERCENTAGE_VALIDATOR = [MinValueValidator(0), MaxValueValidator(100)]
+
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
@@ -26,6 +26,7 @@ class Category(models.Model):
     def __str__(self):
         return self.slug
 
+
 class Brand(models.Model):
     name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50, unique=True, blank=True)
@@ -44,6 +45,7 @@ class Brand(models.Model):
     def __str__(self):
         return self.slug
 
+
 class Product(models.Model):
     name_en = models.CharField(max_length=200, blank=False, null=False)
     name_ar = models.CharField(max_length=200, blank=False, null=False)
@@ -57,8 +59,10 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="products")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return self.slug
+
 
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="wishlist")
@@ -66,45 +70,3 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s wishlist"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# class Cart(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cart")
-#     count = models.PositiveIntegerField(default=0)
-#     total = models.IntegerField(default=0)
-#     active = models.BooleanField(default=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-#
-#     def __str__(self) -> str:
-#         return self.user.username
-#
-# class Entry(models.Model):
-#     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
-#     product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True)
-#     quantity = models.PositiveIntegerField(default=1)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-#
-#     def __str__(self) -> str:
-#         return self.product.product_name + " | " + str(self.quantity)
