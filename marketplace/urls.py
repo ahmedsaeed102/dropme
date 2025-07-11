@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import ProductViewSet, WishlistAPIView, BrandViewSet, CategoryViewSet , CartSummaryAPIView , CartItemAPIView
+from .views import ProductViewSet, WishlistAPIView, BrandViewSet, CategoryViewSet , CartSummaryAPIView , CartItemAPIView , BrandTierDetailAPIView , GroupedTiersAPIView
 
 router = DefaultRouter()
 router.register(r'products', ProductViewSet, basename='product')
@@ -16,6 +16,8 @@ urlpatterns = [
     path('cart/items/', CartItemAPIView.as_view(), name='cart-items'),          # GET all or POST add
     path('cart/items/<int:pk>/', CartItemAPIView.as_view(), name='cart-item'),  # PATCH/DELETE single item
 
-    # Cart summary (total + discount + final + points)
+    # Cart summary (total + discount + final + points + can do checkout or no)
     path('cart/', CartSummaryAPIView.as_view(), name='cart-summary'),
+    path('tiers/<slug:brand_slug>/', BrandTierDetailAPIView.as_view(), name='brand-tier-detail'),
+    path('tiers/', GroupedTiersAPIView.as_view(), name='tier-list'),
 ]
