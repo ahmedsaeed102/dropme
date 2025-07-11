@@ -60,6 +60,9 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def get_final_price(self):
+        return self.price * (1 - self.discount / 100)
+
     def __str__(self):
         return self.slug
 
@@ -70,3 +73,55 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s wishlist"
+
+
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cart")
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name="cart")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def total_price(self):
+        return sum(item.total_price() for item in self.cart_items.all())
+
+    def __str__(self):
+        return f"{self.user.username}'s cart"
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_items")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="cart_items")
+    quantity = models.IntegerField(default=1)
+
+    class Meta:
+        unique_together = ('cart', 'product')
+
+    def total_price(self):
+        return self.product.get_final_price() * self.quantity
+
+    def __str__(self):
+        return f"{self.product.name_en} x {self.quantity}"
+
+class Tier(models.Model):
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='tiers')
+    points_required = models.PositiveIntegerField()
+    discount_percent = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ['points_required']  # So we can pick the highest matched tier
+
+    def __str__(self):
+        return f"{self.brand.name} - {self.discount_percent}% @ {self.points_required} pts"
+
+
+class UserBrandPoints(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
+    points = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        unique_together = ('user', 'brand')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.brand.name} - {self.points} pts"
+
+

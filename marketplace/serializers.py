@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from rest_framework import serializers
 
-from .models import Product, Wishlist, Brand, Category
+from .models import Product, Wishlist, Brand, Category , CartItem , Cart
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -55,3 +55,45 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'name', 'slug']
         read_only_fields = ['slug']
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name_en', read_only=True)
+    price = serializers.SerializerMethodField()
+    total_price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product', 'product_name', 'price', 'quantity', 'total_price']
+
+    def get_price(self, obj):
+        return obj.product.get_final_price()
+
+    def get_total_price(self, obj):
+        return obj.total_price()
+
+class CartSerializer(serializers.ModelSerializer):
+    cart_items = CartItemSerializer(many=True, read_only=True)
+    total_price = serializers.SerializerMethodField()
+    tier_discount = serializers.SerializerMethodField()
+    estimated_total = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Cart
+        fields = ['id', 'brand', 'total_price', 'tier_discount', 'estimated_total', 'cart_items']
+
+    def get_total_price(self, obj):
+        return obj.total_price()
+
+    def get_tier_discount(self, obj):
+        user = self.context['request'].user
+        try:
+            user_points = UserBrandPoints.objects.get(user=user, brand=obj.brand).points
+        except UserBrandPoints.DoesNotExist:
+            return 0
+
+        tier = Tier.objects.filter(brand=obj.brand, points_required__lte=user_points).order_by('-points_required').first()
+        return tier.discount_percent if tier else 0
+
+    def get_estimated_total(self, obj):
+        discount = self.get_tier_discount(obj)
+        return obj.total_price() * (1 - discount / 100)
