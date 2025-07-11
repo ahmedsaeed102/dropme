@@ -2,8 +2,8 @@ from rest_framework import viewsets, status, filters as drf_filters , permission
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Product, Wishlist ,Brand,Category,Cart, CartItem
-from .serializers import ProductSerializer, WishlistSerializer , BrandSerializer, CategorySerializer , CartItemSerializer
+from .models import Product, Wishlist ,Brand,Category,Cart, CartItem , UserBrandPoints
+from .serializers import ProductSerializer, WishlistSerializer , BrandSerializer, CategorySerializer , CartItemSerializer , CartSerializer
 from .filters import ProductFilter
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
@@ -36,7 +36,7 @@ class WishlistAPIView(APIView):
         """Return all products in the user's wishlist"""
         wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
         serializer = WishlistSerializer(wishlist, context={"request": request})
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, id):
         """Add product (by ID from URL) to the wishlist"""
@@ -58,7 +58,7 @@ class WishlistAPIView(APIView):
 
         wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
         wishlist.products.remove(product)
-        return Response({"detail": "Product removed from wishlist."}, status=status.HTTP_200_OK)
+        return Response({"detail": "Product removed from wishlist."}, status=status.HTTP_204_NO_CONTENT)
 
 class BrandViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
@@ -71,78 +71,78 @@ class CategoryViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
 
 
+class CartItemAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
-class CartItemListCreateAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    def get_cart(self, user):
+        cart, _ = Cart.objects.get_or_create(user=user)
+        return cart
 
     def get(self, request):
-        cart, _ = Cart.objects.get_or_create(user=request.user)
-        cart_items = cart.cart_items.all()
-        serializer = CartItemSerializer(cart_items, many=True)
-        return Response(serializer.data)
+        cart = self.get_cart(request.user)
+        items = cart.cart_items.all()
+        serializer = CartItemSerializer(items, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = CartItemSerializer(data=request.data)
         if serializer.is_valid():
             product = serializer.validated_data['product']
             quantity = serializer.validated_data.get('quantity', 1)
+            cart = self.get_cart(request.user)
 
-            cart, _ = Cart.objects.get_or_create(user=request.user)
-
-            # One-brand-only
             if cart.brand and cart.brand != product.brand:
-                return Response({"error": "You can only add products from one brand."}, status=400)
+                return Response({"error": "Only one brand allowed per cart."}, status=status.HTTP_400_BAD_REQUEST)
 
             if not cart.brand:
                 cart.brand = product.brand
                 cart.save()
 
-            # Check if product already in cart
-            cart_item = CartItem.objects.filter(cart=cart, product=product).first()
-            if cart_item:
-                cart_item.quantity += quantity
-                cart_item.save()
-                return Response(CartItemSerializer(cart_item).data, status=200)
+            item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+            if not created:
+                item.quantity += quantity
+                item.save()
             else:
-                cart_item = serializer.save(cart=cart)
-                return Response(CartItemSerializer(cart_item).data, status=201)
+                item.quantity = quantity
+                item.save()
 
-        return Response(serializer.errors, status=400)
-
-
-class CartItemDetailAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+            return Response(CartItemSerializer(item).data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, pk):
-        cart = get_object_or_404(Cart, user=request.user)
+        cart = self.get_cart(request.user)
         item = get_object_or_404(CartItem, pk=pk, cart=cart)
-
         serializer = CartItemSerializer(item, data=request.data, partial=True)
         if serializer.is_valid():
-            product = serializer.validated_data.get('product', item.product)
-
-            # You can't update to another brand product
-            if product.brand != cart.brand:
-                return Response({"error": "Brand mismatch in cart."}, status=400)
-
             serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        cart = get_object_or_404(Cart, user=request.user)
+        cart = self.get_cart(request.user)
         item = get_object_or_404(CartItem, pk=pk, cart=cart)
-
         item.delete()
 
-        # Clear cart brand if empty
         if not cart.cart_items.exists():
             cart.brand = None
             cart.save()
+            return Response({"detail": "Item deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
-        return Response({"message": "Item removed"}, status=204)
 
+class CartSummaryAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        try:
+            cart = Cart.objects.get(user=request.user)
+        except Cart.DoesNotExist:
+            return Response({"detail": "Cart is empty."}, status=404)
+
+        if not cart.cart_items.exists():
+            return Response({"detail": "No items in cart."}, status=400)
+
+        serializer = CartSerializer(cart, context={"request": request})
+        return Response(serializer.data)
 
 
 

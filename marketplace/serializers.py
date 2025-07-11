@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from rest_framework import serializers
 
-from .models import Product, Wishlist, Brand, Category , CartItem , Cart
+from .models import Product, Wishlist, Brand, Category , CartItem , Cart ,UserBrandPoints ,Tier
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -72,28 +72,45 @@ class CartItemSerializer(serializers.ModelSerializer):
         return obj.total_price()
 
 class CartSerializer(serializers.ModelSerializer):
+    brand = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Brand.objects.all())
     cart_items = CartItemSerializer(many=True, read_only=True)
     total_price = serializers.SerializerMethodField()
     tier_discount = serializers.SerializerMethodField()
-    estimated_total = serializers.SerializerMethodField()
+    final_price = serializers.SerializerMethodField()
+    points = serializers.SerializerMethodField()
+    can_checkout = serializers.SerializerMethodField()  # 🟢 Checkout Button Logic
 
     class Meta:
         model = Cart
-        fields = ['id', 'brand', 'total_price', 'tier_discount', 'estimated_total', 'cart_items']
+        fields = ['id', 'brand', 'total_price', 'tier_discount', 'final_price', 'points', 'can_checkout', 'cart_items']
 
     def get_total_price(self, obj):
         return obj.total_price()
 
-    def get_tier_discount(self, obj):
-        user = self.context['request'].user
+    def get_user_points(self, user, brand):
         try:
-            user_points = UserBrandPoints.objects.get(user=user, brand=obj.brand).points
+            return UserBrandPoints.objects.get(user=user, brand=brand).points
         except UserBrandPoints.DoesNotExist:
             return 0
 
-        tier = Tier.objects.filter(brand=obj.brand, points_required__lte=user_points).order_by('-points_required').first()
+    def get_tier_discount(self, obj):
+        user = self.context['request'].user
+        points = self.get_user_points(user, obj.brand)
+        tier = Tier.objects.filter(brand=obj.brand, points_required__lte=points).order_by('-points_required').first()
         return tier.discount_percent if tier else 0
 
-    def get_estimated_total(self, obj):
+    def get_points(self, obj):
+        user = self.context['request'].user
+        return self.get_user_points(user, obj.brand)
+
+    def get_final_price(self, obj):
+        total = obj.total_price()
         discount = self.get_tier_discount(obj)
-        return obj.total_price() * (1 - discount / 100)
+        return total * (1 - discount / 100)
+
+    def get_can_checkout(self, obj):
+        user = self.context['request'].user
+        points = self.get_user_points(user, obj.brand)
+        has_valid_tier = Tier.objects.filter(brand=obj.brand, points_required__lte=points).exists()
+        return has_valid_tier
