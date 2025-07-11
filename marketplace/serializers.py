@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 from rest_framework import serializers
 
@@ -71,13 +71,6 @@ class CartItemSerializer(serializers.ModelSerializer):
     def get_total_price(self, obj):
         return obj.total_price()
 
-from rest_framework import serializers
-from decimal import Decimal, ROUND_HALF_UP
-
-from .models import Cart, UserBrandPoints, Tier, Brand
-from .serializers import CartItemSerializer
-
-
 class CartSerializer(serializers.ModelSerializer):
     brand = serializers.SlugRelatedField(
         slug_field='slug', queryset=Brand.objects.all()
@@ -88,7 +81,6 @@ class CartSerializer(serializers.ModelSerializer):
     tier_discount = serializers.SerializerMethodField()
     discounted_total_price = serializers.SerializerMethodField()
     points = serializers.SerializerMethodField()         # User total points
-    # brand_points = serializers.SerializerMethodField()   # Brand-specific points
     current_tier = serializers.SerializerMethodField()   # Tier info
     can_checkout = serializers.SerializerMethodField()   # Checkout button logic
 

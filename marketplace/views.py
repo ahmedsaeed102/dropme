@@ -73,45 +73,50 @@ class CategoryViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
 
 
+#CartView to Handle cart item retrieval, addition, update, and deletion for users
 class CartItemAPIView(APIView):
     permission_classes = [IsAuthenticated]
-
+    # Retrieve or create a cart for the user
     def get_cart(self, user):
         cart, _ = Cart.objects.get_or_create(user=user)
         return cart
 
     def get(self, request):
+        # Get all items in the user's cart
         cart = self.get_cart(request.user)
         items = cart.cart_items.all()
         serializer = CartItemSerializer(items, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        # Add a product to the cart or update its quantity
         serializer = CartItemSerializer(data=request.data)
         if serializer.is_valid():
             product = serializer.validated_data['product']
             quantity = serializer.validated_data.get('quantity', 1)
             cart = self.get_cart(request.user)
-
+            # Ensure only one brand per cart
             if cart.brand and cart.brand != product.brand:
                 return Response({"error": "Only one brand allowed per cart."}, status=status.HTTP_400_BAD_REQUEST)
-
+            # Set cart brand if not already set
             if not cart.brand:
                 cart.brand = product.brand
                 cart.save()
 
             item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+            # Get or create the cart item
             if not created:
-                item.quantity += quantity
+                item.quantity += quantity  # If item exists, increment quantity
                 item.save()
             else:
-                item.quantity = quantity
+                item.quantity = quantity # If new item, set quantity
                 item.save()
 
             return Response(CartItemSerializer(item).data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, pk):
+        # Update a cart item's quantity or details
         cart = self.get_cart(request.user)
         item = get_object_or_404(CartItem, pk=pk, cart=cart)
         serializer = CartItemSerializer(item, data=request.data, partial=True)
@@ -121,6 +126,7 @@ class CartItemAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
+        # Remove a cart item; reset cart brand if cart is empty
         cart = self.get_cart(request.user)
         item = get_object_or_404(CartItem, pk=pk, cart=cart)
         item.delete()
@@ -131,21 +137,25 @@ class CartItemAPIView(APIView):
             return Response({"detail": "Item deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 
+#view for get all cart summary
 class CartSummaryAPIView(APIView):
     permission_classes = [IsAuthenticated]
-
+    #get :
     def get(self, request):
         try:
             cart = Cart.objects.get(user=request.user)
+            #if no cart applied before
         except Cart.DoesNotExist:
-            return Response({"detail": "Cart is empty."}, status=404)
-
+            return Response({"detail": "Cart is empty."}, status=status.HTTP_404_NOT_FOUND)
+        #if no items in cart
         if not cart.cart_items.exists():
-            return Response({"detail": "No items in cart."}, status=400)
+            return Response({"detail": "No items in cart."}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = CartSerializer(cart, context={"request": request})
-        return Response(serializer.data)
+        #return data
+        return Response(serializer.data , status=status.HTTP_200_OK)
 
+#view to list every brand and dic of tiers
 class GroupedTiersAPIView(APIView):
     def get(self, request):
         tiers = Tier.objects.select_related('brand').order_by('brand__name', 'points_required')
@@ -163,6 +173,7 @@ class GroupedTiersAPIView(APIView):
 
         return Response(result)
 
+#view for specific brand tier
 class BrandTierDetailAPIView(APIView):
     def get(self, request, brand_slug):
         try:

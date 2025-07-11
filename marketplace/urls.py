@@ -18,6 +18,8 @@ urlpatterns = [
 
     # Cart summary (total + discount + final + points + can do checkout or no)
     path('cart/', CartSummaryAPIView.as_view(), name='cart-summary'),
+    # get specific brand tiers & discount percentage
     path('tiers/<slug:brand_slug>/', BrandTierDetailAPIView.as_view(), name='brand-tier-detail'),
+    # get all brands tiers
     path('tiers/', GroupedTiersAPIView.as_view(), name='tier-list'),
 ]
