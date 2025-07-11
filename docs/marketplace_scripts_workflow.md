@@ -1,4 +1,4 @@
-# Product Import Scripts Guide for Stakeholders
+# how to add data to marketplace products Import Scripts Guide for Stakeholders
 
 This document outlines how to use our data import scripts to push product entries into the database from Excel files. Each script is designed to work with a specific brand and expects the data in a predefined structure.
 

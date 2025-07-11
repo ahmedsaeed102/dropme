@@ -4,7 +4,6 @@ from rest_framework import serializers
 
 from .models import Product, Wishlist, Brand, Category , CartItem , Cart ,UserBrandPoints ,Tier
 
-
 class ProductSerializer(serializers.ModelSerializer):
     discounted_price = serializers.SerializerMethodField()
     is_wishlisted = serializers.SerializerMethodField()
