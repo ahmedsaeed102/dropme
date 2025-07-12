@@ -106,5 +106,4 @@ If you want to import data for a new brand:
 > ⚠️ **Reminder:** Once all data is successfully imported and verified, please remove all Excel files before deployment to maintain clean and secure storage.
 
 ---
-
-For any issues or updates, contact the backend team.
+#### all rights back to Bassanthossamxx

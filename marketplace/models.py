@@ -26,10 +26,11 @@ class Category(models.Model):
     def __str__(self):
         return self.slug
 
+
 class Brand(models.Model):
     name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50, unique=True, blank=True)
-    website_url = models.URLField( null=True , blank=True)
+    website_url = models.URLField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -44,6 +45,7 @@ class Brand(models.Model):
 
     def __str__(self):
         return self.slug
+
 
 class Product(models.Model):
     name_en = models.CharField(max_length=200, blank=False, null=False)
@@ -65,6 +67,7 @@ class Product(models.Model):
     def __str__(self):
         return self.slug
 
+
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="wishlist")
     products = models.ManyToManyField(Product, related_name="wishlisted_by")
@@ -72,18 +75,21 @@ class Wishlist(models.Model):
     def __str__(self):
         return f"{self.user.username}'s wishlist"
 
+
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="cart")
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name="cart" , null=True , blank=True)
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name="cart", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def total_price(self):
         return sum(item.total_price() for item in self.cart_items.all())
+
     def item_count(self):
         return self.cart_items.count()
 
     def __str__(self):
         return f"{self.user.username}'s cart"
+
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_items")
@@ -99,6 +105,7 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.product.name_en} x {self.quantity}"
 
+
 class Tier(models.Model):
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='tiers')
     points_required = models.PositiveIntegerField()
@@ -110,6 +117,7 @@ class Tier(models.Model):
     def __str__(self):
         return f"{self.brand.name} - {self.discount_percent}% @ {self.points_required} pts"
 
+
 class UserBrandPoints(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
@@ -120,6 +128,7 @@ class UserBrandPoints(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.brand.name} - {self.points} pts"
+
 
 class Coupon(models.Model):
     STATUS_CHOICES = [
@@ -141,5 +150,3 @@ class Coupon(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.type} - {self.status}"
-
-

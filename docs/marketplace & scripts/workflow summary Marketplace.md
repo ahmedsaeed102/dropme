@@ -1,6 +1,5 @@
 # workflow summary Marketplace APP
 
-
 ---
 
 ## **1. Product Browsing and Search**
@@ -22,15 +21,15 @@ Returns a paginated list of products.
 
 ### **Filters** (via DjangoFilter + SearchFilter):
 
-* `brand__slug`
-* `category__slug`
+* `brand` "Slug"
+* `category` "Slug"
 * `price` (min/max)
-* `search=name_en,name_ar,brand__slug`
+* `search=name_en,name_ar,brand "Slug"`
 
 ### **Example Request**:
 
 ```http
-GET /products/?search=cream&brand__slug=curlit&category__slug=hair
+GET /products/?search=cream&brand=curlit&category=cosmetics
 ```
 
 ### **Example Response**:
@@ -44,7 +43,7 @@ GET /products/?search=cream&brand__slug=curlit&category__slug=hair
   "discounted_price": 180,
   "is_wishlisted": true,
   "brand": "curlit",
-  "category": "hair"
+  "category": "cosmetics"
 }
 ```
 
@@ -79,13 +78,13 @@ GET /products/?search=cream&brand__slug=curlit&category__slug=hair
 
 ### **GET /brands/**
 
-Returns all brands
-Supports: `search=name`
+Returns all brands 
+`Name , Slug`
 
 ### **GET /categories/**
 
 Returns all categories
-Supports: `search=name`
+`Name , Slug`
 
 ---
 
@@ -135,7 +134,7 @@ Returns full cart with pricing + tier logic + checkout eligibility
 * `discounted_total_price` → total - discount
 * `points` → User's total points
 * `current_tier` → Best matched tier (if exists)
-* `can_checkout` → True only if tier exists
+* `can_checkout` → True only if tier exists "button logic"
 
 ### **Example Response**:
 
@@ -173,27 +172,53 @@ Returns tier list for specific brand
 
 ---
 
-## **7. Request/Response Body Cheatsheet**
+## **7. Checkout System** 
 
-| Endpoint                 | Method | Request Body                | Notes                                                                                                                                                                |
-|--------------------------|--------| --------------------------- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `/products/`             | GET    | None                        | Filters: brand, category & search basend on name_ar , name_en , brand_slug  , also if added in header access token will get product list marked if wishlisted or not |
-| `/brands/`               | GET    | None                        | get all brands name & slug                                                                                                                                           |
-| `/categories/`             | GET    | None                        | get all categories name & slug                                                                                                                                       |
-| `/wishlist/{{product_id}}/` | POST   | None                        | add or remove product from wishlist                                                                                                                                  |
-| `/wishlist/` | get    | None                        | get specific user wishlist                                                                                                                                           |
-| `/cart/items/`           | POST   | `{product: 1, quantity: 2}` | Adds to cart                                                                                                                                                         |
-| `/cart/items/{{item_id}}/` | PATCH  | `{quantity: 3}`             | Update qty                                                                                                                                                           |
-| `/cart/items/{{item_id}}/` | DELETE | None                        | Removes item                                                                                                                                                         |
-| `/cart/`                 | GET    | None                        | Returns full cart summary                                                                                                                                            |
-| `/tiers/`                | GET    | None                        | list of tiers Grouped by brand                                                                                                                                       |
-| `/tiers/{{brand_slug}}/` | GET    | None                        | Tiers for brand                                                                                                                                                      |
+### **POST /checkout/**
+
+Checks if user has enough brand points for a discount. If so:
+
+* Applies best matched tier
+* Deducts points (from brand or total)
+* Returns matching coupon
+* Clears cart
+
+### **Example Response**:
+
+```json
+{
+  "brand": "curlit",
+  "discount": 10,
+  "discounted_price": "380.70",
+  "coupon_code": "CURLIT_10_J1AZH2M7UN",
+  "website_url": null,
+  "message": "Congrats! You've unlocked 10% off using your 200 points."
+}
+```
+
+---
+
+## **8. Request/Response Body Cheatsheet**
+
+| Endpoint                    | Method | Request Body                | Notes                                                                                                           |
+| --------------------------- | ------ | --------------------------- |-----------------------------------------------------------------------------------------------------------------|
+| `/products/`                | GET    | None                        | Filters: brand, category & search by name_ar, name_en, brand "slug". `is_wishlisted` work if user authenticated |
+| `/brands/`                  | GET    | None                        | Get all brands name & slug                                                                                      |
+| `/categories/`              | GET    | None                        | Get all categories name & slug                                                                                  |
+| `/wishlist/{{product_id}}/` | POST   | None                        | Add product to wishlist                                                                                         |
+| `/wishlist/{{product_id}}/` | DELETE | None                        | Remove product from wishlist                                                                                    |
+| `/wishlist/`                | GET    | None                        | Get user’s wishlist                                                                                             |
+| `/cart/items/`              | POST   | `{product: 1, quantity: 2}` | Adds product to cart                                                                                            |
+| `/cart/items/{{item_id}}/`  | PATCH  | `{quantity: 3}`             | Update item quantity                                                                                            |
+| `/cart/items/{{item_id}}/`  | DELETE | None                        | Remove item from cart                                                                                           |
+| `/cart/`                    | GET    | None                        | Get cart summary                                                                                                |
+| `/tiers/`                   | GET    | None                        | List all tiers grouped by brand                                                                                 |
+| `/tiers/{{brand_slug}}/`    | GET    | None                        | Tiers for brand                                                                                                 |
+| `/checkout/`                | POST   | None                        | Applies discount, deducts points, get coupon and mark it used, clears cart                                      |
 
 ---
 
 ## 🔁 **System Workflow Diagram**
-
----
 
 ```
 [User - Frontend]
@@ -291,14 +316,15 @@ Body:
 [Checkout Button UI State]
 
      |
-     | 8. Final Step (not yet implemented):
+     | 8. Final Step
      v
 [POST /checkout/]
      |
-     |---> (To Be Developed)
-     |        ↳ Deduct points
-     |        ↳ get copoun
-     |        ↳ Clear cart
+     |---> [CheckoutAPIView.post()]
+     |        ↳ Applies tier-based discount
+     |        ↳ Deducts points
+     |        ↳ uses coupon
+     |        ↳ Clears cart
      |
      v
 [Success screen + order summary]
@@ -306,7 +332,7 @@ Body:
 
 ---
 
-## ✅ Summary of Workflow Steps:
+## Summary of Workflow Steps:
 
 1. Product list filtered & searchable
 2. Product detail view with discount logic
@@ -314,12 +340,14 @@ Body:
 4. Cart items overview
 5. Cart summary:
 
-  * Full pricing
-  * Points
-  * Tier match
-  * Discount
-  * Checkout logic
+* Full pricing
+* Points
+* Tier match
+* Discount
+* Checkout logic
+
 6. Tier-based discount logic applied dynamically
 7. User only allowed to checkout if `can_checkout = true`
-
-
+8. Checkout API returns coupon + clears cart
+---
+#### all rights back to Bassanthossamxx

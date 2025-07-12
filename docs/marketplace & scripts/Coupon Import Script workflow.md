@@ -77,5 +77,5 @@ Your Excel file **must contain these exact columns** (with proper capitalization
 🔁 3 coupons updated
 ⚠️ 1 rows skipped due to missing/invalid data
 ```
-
 ---
+#### all rights back to Bassanthossamxx

@@ -1,25 +1,27 @@
-from rest_framework import viewsets, status, filters as drf_filters , permissions
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
-from .models import Product, Wishlist ,Brand,Category,Cart, CartItem , UserBrandPoints , Tier , Coupon
-from .serializers import ProductSerializer, WishlistSerializer , BrandSerializer, CategorySerializer , CartItemSerializer , CartSerializer , BrandTierSerializer , TierDetailSerializer
-from .filters import ProductFilter
-from rest_framework.permissions import IsAuthenticated
-from django.shortcuts import get_object_or_404
-from rest_framework.generics import ListAPIView
 from collections import defaultdict
 from decimal import Decimal
+
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, status, filters as drf_filters
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .filters import ProductFilter
+from .models import Product, Wishlist, Brand, Category, Cart, CartItem, UserBrandPoints, Tier, Coupon
 from .serializers import CheckoutResponseSerializer
+from .serializers import ProductSerializer, WishlistSerializer, BrandSerializer, CategorySerializer, CartItemSerializer, \
+    CartSerializer, TierDetailSerializer
 
 
-#  Product ViewSet
+#  Product ViewSet "crud , filter , search"
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.select_related('brand', 'category').all()
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, drf_filters.SearchFilter]
     filterset_class = ProductFilter
-    search_fields = ['name_en','name_ar','brand__slug']
+    search_fields = ['name_en', 'name_ar', 'brand__slug']
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -34,6 +36,22 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return context
 
+
+# brand ViewSet "crud"
+class BrandViewSet(viewsets.ModelViewSet):
+    queryset = Brand.objects.all()
+    serializer_class = BrandSerializer
+    lookup_field = 'slug'
+
+
+#  category ViewSet "crud"
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    lookup_field = 'slug'
+
+
+# Wishlist API View: Handles retrieval, addition, and removal of wishlist products for authenticated users
 class WishlistAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -65,20 +83,11 @@ class WishlistAPIView(APIView):
         wishlist.products.remove(product)
         return Response({"detail": "Product removed from wishlist."}, status=status.HTTP_204_NO_CONTENT)
 
-class BrandViewSet(viewsets.ModelViewSet):
-    queryset = Brand.objects.all()
-    serializer_class = BrandSerializer
-    lookup_field = 'slug'
 
-class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    lookup_field = 'slug'
-
-
-#CartView to Handle cart item retrieval, addition, update, and deletion for users
+# CartView to Handle cart item retrieval, addition, update, and deletion for users
 class CartItemAPIView(APIView):
     permission_classes = [IsAuthenticated]
+
     # Retrieve or create a cart for the user
     def get_cart(self, user):
         cart, _ = Cart.objects.get_or_create(user=user)
@@ -112,7 +121,7 @@ class CartItemAPIView(APIView):
                 item.quantity += quantity  # If item exists, increment quantity
                 item.save()
             else:
-                item.quantity = quantity # If new item, set quantity
+                item.quantity = quantity  # If new item, set quantity
                 item.save()
 
             return Response(CartItemSerializer(item).data, status=status.HTTP_200_OK)
@@ -140,25 +149,27 @@ class CartItemAPIView(APIView):
             return Response({"detail": "Item deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 
-#view for get all cart summary
+# view for get all cart summary
 class CartSummaryAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    #get :
+
+    # get :
     def get(self, request):
         try:
             cart = Cart.objects.get(user=request.user)
-            #if no cart applied before
+            # if no cart applied before
         except Cart.DoesNotExist:
             return Response({"detail": "Cart is empty."}, status=status.HTTP_404_NOT_FOUND)
-        #if no items in cart
+        # if no items in cart
         if not cart.cart_items.exists():
             return Response({"detail": "No items in cart."}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = CartSerializer(cart, context={"request": request})
-        #return data
-        return Response(serializer.data , status=status.HTTP_200_OK)
+        # return data
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-#view to list every brand and dic of tiers
+
+# view to list every brand and dic of tiers
 class ListTiersAPIView(APIView):
     def get(self, request):
         tiers = Tier.objects.select_related('brand').order_by('brand__name', 'points_required')
@@ -174,9 +185,10 @@ class ListTiersAPIView(APIView):
                 "tiers": TierDetailSerializer(brand_tiers, many=True).data
             })
 
-        return Response(result)
+        return Response(result, status=status.HTTP_200_OK)
 
-#view for specific brand tier
+
+# view for specific brand tier
 class BrandTierAPIView(APIView):
     def get(self, request, brand_slug):
         try:
@@ -193,8 +205,7 @@ class BrandTierAPIView(APIView):
         return Response(data, status=200)
 
 
-from django.utils.crypto import get_random_string
-
+# Checkout View Handles applying tier discounts, using coupons, deducting points, and clearing the cart
 class CheckoutAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -212,7 +223,8 @@ class CheckoutAPIView(APIView):
         brand_points_obj, _ = UserBrandPoints.objects.get_or_create(user=user, brand=brand, defaults={'points': 0})
         brand_points = brand_points_obj.points or user.total_points
 
-        applicable_tier = Tier.objects.filter(brand=brand, points_required__lte=brand_points).order_by('-points_required').first()
+        applicable_tier = Tier.objects.filter(brand=brand, points_required__lte=brand_points).order_by(
+            '-points_required').first()
 
         if not applicable_tier:
             return Response({"detail": "Not enough points to apply any discount."}, status=status.HTTP_400_BAD_REQUEST)
@@ -223,7 +235,7 @@ class CheckoutAPIView(APIView):
         discounted_price = total * (1 - Decimal(discount) / 100)
         discounted_price = discounted_price.quantize(Decimal('0.01'))
 
-        # Use or generate coupon that matches this tier's discount
+        # Use coupon that matches this tier's discount
         coupon = Coupon.objects.filter(brand=brand, discount=discount, status="unused").first()
         coupon.status = "used"
         coupon.save()
