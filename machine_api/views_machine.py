@@ -18,7 +18,8 @@ from users_api.serializers import UserSerializer
 from notification.services import notification_send, fcmdevice_get
 from .serializers import QRCodeSerializer, UpdateRecycleLog, MachineVideoSerializer
 from .models import Machine, RecycleLog, PhoneNumber, MachineVideo
-from .utlis import update_user_points, calculate_points
+# from .utlis import update_user_points, calculate_points
+from .utlis import calculate_points
 from notification.models import NotificationImage
 
 class MachineQRCode(APIView):
@@ -219,7 +220,7 @@ class UpdateRecycle(APIView):
         log.save()
         channel_layer = get_channel_layer()
 
-        update_user_points(log.user.id, total_points)
+        # update_user_points(log.user.id, total_points)
 
         print("done update")
         # try 3 times

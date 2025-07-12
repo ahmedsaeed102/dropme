@@ -1,185 +1,267 @@
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-from django.db.models import Sum
-from datetime import date
-from rest_framework import generics, permissions, status
+from collections import defaultdict
+from decimal import Decimal
+
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, status, filters as drf_filters
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.pagination import LimitOffsetPagination
-from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-from competition_api.models import Resource
-from .muqbis_products.populate_database import populate
-from .models import Product, Category, SpecialOffer, Wishlist
-from machine_api.models import RecycleLog
-from .serializers import ProductSerializer, ProductFilterSerializer, CartSerializer, InputEntrySerializer, EditEntrySerializer, MarketplaceResourcesSerializer, CategorysSerializer, CategoryFilterSerializer, SpecialOfferSerializer, WishlistSerializer
-from machine_api.serializers import RecycleLogSerializer
-from .services import product_list, product_get, EntryService, checkout, category_list
-from machine_api.utlis import get_total_recycled_items
+from .filters import ProductFilter
+from .models import Product, Wishlist, Brand, Category, Cart, CartItem, UserBrandPoints, Tier, Coupon
+from .serializers import CheckoutResponseSerializer
+from .serializers import ProductSerializer, WishlistSerializer, BrandSerializer, CategorySerializer, CartItemSerializer, \
+    CartSerializer, TierDetailSerializer
 
-class CategoryList(generics.ListAPIView):
+
+#  Product ViewSet "crud , filter , search"
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.select_related('brand', 'category').all()
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend, drf_filters.SearchFilter]
+    filterset_class = ProductFilter
+    search_fields = ['name_en', 'name_ar', 'brand__slug']
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        user = self.request.user
+        if user.is_authenticated:
+            wishlist = Wishlist.objects.filter(user=user).first()
+            context["wishlist_product_ids"] = (
+                set(wishlist.products.values_list("id", flat=True)) if wishlist else set()
+            )
+        else:
+            context["wishlist_product_ids"] = set()
+
+        return context
+
+
+# brand ViewSet "crud"
+class BrandViewSet(viewsets.ModelViewSet):
+    queryset = Brand.objects.all()
+    serializer_class = BrandSerializer
+    lookup_field = 'slug'
+
+
+#  category ViewSet "crud"
+class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
-    serializer_class = CategorysSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = CategorySerializer
+    lookup_field = 'slug'
 
-    def get_queryset(self):
-        filters_serializer = CategoryFilterSerializer(data=self.request.query_params)
-        filters_serializer.is_valid(raise_exception=True)
-        categorys = category_list(filters=filters_serializer.validated_data)
-        return categorys
 
-    @extend_schema(parameters=[ OpenApiParameter(name="category_name", location=OpenApiParameter.QUERY, description="category name", required=False, type=str,),],)
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-class ProductsPagination(LimitOffsetPagination):
-    default_limit = 5
-    max_limit = 100
-
-class ProductsList(generics.ListAPIView):
-    serializer_class = ProductSerializer
-    permission_classes = (permissions.IsAuthenticated,)
-    pagination_class = ProductsPagination
-
-    def get_queryset(self):
-        filters_serializer = ProductFilterSerializer(data=self.request.query_params)
-        filters_serializer.is_valid(raise_exception=True)
-        products = product_list(filters=filters_serializer.validated_data)
-        return products
-
-    @extend_schema(parameters=[OpenApiParameter(name="price_points", location=OpenApiParameter.QUERY, description="product price points", required=False, type=int,),OpenApiParameter(name="category__category_name", location=OpenApiParameter.QUERY, description="product category", required=False, type=str,),],)
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-class ProductDetail(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    permission_classes = (permissions.IsAuthenticated,)
-
-class RelatedProducts(generics.ListAPIView):
-    serializer_class = ProductSerializer
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def get_queryset(self):
-        product = product_get(pk=self.kwargs["pk"])
-        return (Product.objects.filter(price_points__lte=product.price_points).exclude(id=product.id).order_by("-price_points")[:5])
-
-class WishlistView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        wishlist, created = Wishlist.objects.get_or_create(user=user)
-        serializer = WishlistSerializer(wishlist, context={"request": request})
-        return Response(serializer.data)
-
-class AddToWishlistView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def post(self, request, product_id, *args, **kwargs):
-        user = request.user
-        try:
-            product = Product.objects.get(id=product_id)
-        except Product.DoesNotExist:
-            return Response({"error": "product not found"}, status=status.HTTP_404_NOT_FOUND)
-        wishlist, created = Wishlist.objects.get_or_create(user=user)
-        wishlist.products.add(product)
-        return Response({"status": "Products added to wishlist"}, status=status.HTTP_201_CREATED)
-
-class RemoveFromWishlistView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def delete(self, request, product_id, *args, **kwargs):
-        user = request.user
-        try:
-            wishlist = Wishlist.objects.get(user=user)
-        except Wishlist.DoesNotExist:
-            return Response({"error": "Wishlist not found"}, status=status.HTTP_404_NOT_FOUND)
-        wishlist.products.remove(product_id)
-        return Response({"status": "Products removed from wishlist"}, status=status.HTTP_204_NO_CONTENT)
-
-class UserCart(APIView):
-    serializer_class = CartSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+# Wishlist API View: Handles retrieval, addition, and removal of wishlist products for authenticated users
+class WishlistAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user_cart = request.user.cart.filter(active=True).first()
-        return Response(self.serializer_class(user_cart, context={"request": request}).data)
+        """Return all products in the user's wishlist"""
+        wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
+        serializer = WishlistSerializer(wishlist, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class AddToCart(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = InputEntrySerializer
+    def post(self, request, id):
+        """Add product (by ID from URL) to the wishlist"""
+        try:
+            product = Product.objects.get(id=id)
+        except Product.DoesNotExist:
+            return Response({"detail": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
+        wishlist.products.add(product)
+        return Response({"detail": "Product added to wishlist."}, status=status.HTTP_200_OK)
+
+    def delete(self, request, id):
+        """Remove product (by ID from URL) from the wishlist"""
+        try:
+            product = Product.objects.get(id=id)
+        except Product.DoesNotExist:
+            return Response({"detail": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
+        wishlist.products.remove(product)
+        return Response({"detail": "Product removed from wishlist."}, status=status.HTTP_204_NO_CONTENT)
+
+
+# CartView to Handle cart item retrieval, addition, update, and deletion for users
+class CartItemAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    # Retrieve or create a cart for the user
+    def get_cart(self, user):
+        cart, _ = Cart.objects.get_or_create(user=user)
+        return cart
+
+    def get(self, request):
+        # Get all items in the user's cart
+        cart = self.get_cart(request.user)
+        items = cart.cart_items.all()
+        serializer = CartItemSerializer(items, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        entry = EntryService(user=request.user)
-        entry.entry_add(data=serializer.validated_data)
-        return Response("Added to cart", status=status.HTTP_201_CREATED)
+        # Add a product to the cart or update its quantity
+        serializer = CartItemSerializer(data=request.data)
+        if serializer.is_valid():
+            product = serializer.validated_data['product']
+            quantity = serializer.validated_data.get('quantity', 1)
+            cart = self.get_cart(request.user)
+            # Ensure only one brand per cart
+            if cart.brand and cart.brand != product.brand:
+                return Response({"error": "Only one brand allowed per cart."}, status=status.HTTP_400_BAD_REQUEST)
+            # Set cart brand if not already set
+            if not cart.brand:
+                cart.brand = product.brand
+                cart.save()
 
-class EditCartEntry(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = EditEntrySerializer
+            item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+            # Get or create the cart item
+            if not created:
+                item.quantity += quantity  # If item exists, increment quantity
+                item.save()
+            else:
+                item.quantity = quantity  # If new item, set quantity
+                item.save()
 
-    def patch(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        entry = EntryService(user=request.user)
-        entry.entry_update(entry_id=serializer.data["entry_id"], qunatitiy=serializer.data["quantity"])
-        return Response("Updated")
+            return Response(CartItemSerializer(item).data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class RemoveFromCart(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    def patch(self, request, pk):
+        # Update a cart item's quantity or details
+        cart = self.get_cart(request.user)
+        item = get_object_or_404(CartItem, pk=pk, cart=cart)
+        serializer = CartItemSerializer(item, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, entry_id):
-        entry = EntryService(user=request.user)
-        entry.entry_delete(entry_id=entry_id)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request, pk):
+        # Remove a cart item; reset cart brand if cart is empty
+        cart = self.get_cart(request.user)
+        item = get_object_or_404(CartItem, pk=pk, cart=cart)
+        item.delete()
 
-class Checkout(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
+        if not cart.cart_items.exists():
+            cart.brand = None
+            cart.save()
+            return Response({"detail": "Item deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
+
+# view for get all cart summary
+class CartSummaryAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    # get :
     def get(self, request):
-        coupons = checkout(user=request.user)
-        return Response(coupons)
+        try:
+            cart = Cart.objects.get(user=request.user)
+            # if no cart applied before
+        except Cart.DoesNotExist:
+            return Response({"detail": "Cart is empty."}, status=status.HTTP_404_NOT_FOUND)
+        # if no items in cart
+        if not cart.cart_items.exists():
+            return Response({"detail": "No items in cart."}, status=status.HTTP_400_BAD_REQUEST)
 
-class MarketplaceSlider(generics.ListAPIView):
-    queryset = Resource.objects.filter(resource_type="marketplace")
-    serializer_class = MarketplaceResourcesSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+        serializer = CartSerializer(cart, context={"request": request})
+        # return data
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class SpecialOffersList(generics.ListAPIView):
-    queryset = SpecialOffer.objects.filter(end_date__gte=date.today())
-    serializer_class = SpecialOfferSerializer
-    permission_classes = (permissions.IsAuthenticated,)
 
-class WalletPageView(generics.GenericAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
+# view to list every brand and dic of tiers
+class ListTiersAPIView(APIView):
     def get(self, request):
+        tiers = Tier.objects.select_related('brand').order_by('brand__name', 'points_required')
+        grouped = defaultdict(list)
+
+        for tier in tiers:
+            grouped[tier.brand.slug].append(tier)
+
+        result = []
+        for brand_slug, brand_tiers in grouped.items():
+            result.append({
+                "brand": brand_slug,
+                "tiers": TierDetailSerializer(brand_tiers, many=True).data
+            })
+
+        return Response(result, status=status.HTTP_200_OK)
+
+
+# view for specific brand tier
+class BrandTierAPIView(APIView):
+    def get(self, request, brand_slug):
+        try:
+            brand = Brand.objects.get(slug=brand_slug)
+        except Brand.DoesNotExist:
+            return Response({"detail": "Brand not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        tiers = Tier.objects.filter(brand=brand).order_by('points_required')
+        data = {
+            "brand": brand.slug,
+            "tiers": TierDetailSerializer(tiers, many=True).data
+        }
+
+        return Response(data, status=200)
+
+
+# Checkout View Handles applying tier discounts, using coupons, deducting points, and clearing the cart
+class CheckoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
         user = request.user
-        user_points = user.total_points
-        logs = RecycleLog.objects.filter(user=request.user.id, is_complete=True).order_by('created_at')
-        log_serializer = RecycleLogSerializer(logs, many=True, context={"request": request}).data
-        return Response(
-            {
-                "user_points": user_points,
-                "recycled_items": get_total_recycled_items(user.id),
-                "bottles_number": logs.aggregate(Sum("bottles"))["bottles__sum"] if logs else 0,
-                "cans_number": logs.aggregate(Sum("cans"))["cans__sum"] if logs else 0,
-                "other_number": 0,
-                "recycle_logs": log_serializer
-            }, status=200
-        )
+        try:
+            cart = Cart.objects.get(user=user)
+        except Cart.DoesNotExist:
+            return Response({"detail": "Cart not found."}, status=status.HTTP_404_NOT_FOUND)
 
-class PopulateData(APIView):
-    """For populating database with muqbis products"""
+        if not cart.cart_items.exists():
+            return Response({"detail": "Your cart is empty."}, status=status.HTTP_400_BAD_REQUEST)
 
-    permission_classes = (permissions.IsAdminUser,)
+        brand = cart.brand
+        brand_points_obj, _ = UserBrandPoints.objects.get_or_create(user=user, brand=brand, defaults={'points': 0})
+        brand_points = brand_points_obj.points or user.total_points
 
-    def get(self, request):
-        populate()
-        return Response("success")
+        applicable_tier = Tier.objects.filter(brand=brand, points_required__lte=brand_points).order_by(
+            '-points_required').first()
+
+        if not applicable_tier:
+            return Response({"detail": "Not enough points to apply any discount."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Apply discount
+        discount = applicable_tier.discount_percent
+        total = Decimal(cart.total_price())
+        discounted_price = total * (1 - Decimal(discount) / 100)
+        discounted_price = discounted_price.quantize(Decimal('0.01'))
+
+        # Use coupon that matches this tier's discount
+        coupon = Coupon.objects.filter(brand=brand, discount=discount, status="unused").first()
+        coupon.status = "used"
+        coupon.save()
+
+        # Deduct points
+        if brand_points_obj.points >= applicable_tier.points_required:
+            brand_points_obj.points -= applicable_tier.points_required
+            brand_points_obj.save()
+        else:
+            user.total_points -= applicable_tier.points_required
+            user.save()
+
+        # Clear the cart
+        cart.cart_items.all().delete()
+        cart.brand = None
+        cart.save()
+
+        # Response
+        response_data = {
+            "brand": brand.slug,
+            "discount": discount,
+            "discounted_price": discounted_price,
+            "coupon_code": coupon.code,
+            "website_url": brand.website_url,
+            "message": f"Congrats! You've unlocked {discount}% off using your {applicable_tier.points_required} points."
+        }
+
+        serializer = CheckoutResponseSerializer(response_data)
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -46,11 +46,11 @@ class UserSerializer(serializers.ModelSerializer):
         if referral_code:
             try:
                 referring_user = UserModel.objects.get(referral_code=referral_code)
-                reward = int((10 * referring_user.total_points) / 100) if referring_user.total_points > 0 else 5
+                reward = 40
                 referring_user.total_points += reward
                 referring_user.referral_usage_count += 1
                 referring_user.save()
-                user.total_points += 5
+                user.total_points += 40
             except UserModel.DoesNotExist:
                 raise serializers.ValidationError(_("Invalid referral code."))
 

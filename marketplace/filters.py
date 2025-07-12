@@ -1,24 +1,19 @@
 import django_filters
-from .models import Product, Category
+
+from .models import Product
 
 
 class ProductFilter(django_filters.FilterSet):
-    price_points = django_filters.NumberFilter(lookup_expr="lte")
-    category__category_name = django_filters.CharFilter(lookup_expr="iexact")
+    """
+   FilterSet for filtering Product objects by brand and category slugs.
+
+    Fields:
+    brand (CharFilter): Filter by brand slug (case-insensitive).
+    category (CharFilter): Filter by category slug (case-insensitive).
+    """
+    brand = django_filters.CharFilter(field_name='brand__slug', lookup_expr='iexact')
+    category = django_filters.CharFilter(field_name='category__slug', lookup_expr='iexact')
 
     class Meta:
         model = Product
-        fields = ("price_points", "category__category_name")
-    # @property
-    # def qs(self):
-    #     parent = super().qs
-    #     author = getattr(self.request, 'user', None)
-
-    #     return parent.filter(price_points=True) and parent.filter(author=author)
-
-class CategoryFilter(django_filters.FilterSet):
-    category_name = django_filters.CharFilter(lookup_expr="icontains")
-
-    class Meta:
-        model = Category
-        fields = ["category_name"]
+        fields = ['brand', 'category']
