@@ -6,44 +6,30 @@ from sentry_sdk.integrations.django import DjangoIntegration
 from django.utils.translation import gettext_lazy as _
 from datetime import timedelta
 from pathlib import Path
-from firebase_admin import initialize_app
-from firebase_admin import credentials
-from dotenv import load_dotenv
-from urllib.parse import urlparse
+from firebase_admin import initialize_app, credentials
+import dj_database_url
 
-# Load environment variables
-load_dotenv()
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 env = environ.Env()
 env.read_env(BASE_DIR / ".env")
 
-MAX_OTP_TRY = 3
-AUTH_USER_MODEL = "users_api.UserModel"
-MIN_PASSWORD_LENGTH = 8
-
+# Core Settings
 SECRET_KEY = env("SECRET_KEY")
-DEBUG = env.bool("DEBUG")
-
-CSRF_TRUSTED_ORIGINS = ["https://*.railway.app", "https://127.0.0.1"]
+DEBUG = True
 ALLOWED_HOSTS = ["*"]
 CORS_ALLOW_ALL_ORIGINS = True
+CSRF_TRUSTED_ORIGINS = ["https://*.railway.app", "https://127.0.0.1"]
+SITE_ID = env.int("SITE_ID")
 
-# Sentry for error reporting
+# Sentry
 sentry_sdk.init(
     dsn=env("sentry"),
-    integrations=[
-        DjangoIntegration(),
-    ],
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    # We recommend adjusting this value in production.
+    integrations=[DjangoIntegration()],
     traces_sample_rate=1.0,
     send_default_pii=True,
 )
 
+# Installed Apps
 INSTALLED_APPS = [
     "daphne",
     "django.contrib.admin",
@@ -53,7 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.gis",
-    # Third party app
+    # Third-party
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_api_key",
@@ -65,7 +51,9 @@ INSTALLED_APPS = [
     "corsheaders",
     "storages",
     "kronos",
-    # Internal apps
+    "core",
+    'django_filters',
+    # Internal
     "users_api",
     "community_api",
     "machine_api",
@@ -74,10 +62,8 @@ INSTALLED_APPS = [
     "marketplace",
 ]
 
-
-private_key = str.encode(env("private_key"))
-private_key = base64.b64decode(private_key).decode("utf-8")
-
+# Firebase Setup
+private_key = base64.b64decode(str.encode(env("private_key"))).decode("utf-8")
 cert = {
     "type": env("type"),
     "project_id": env("project_id"),
@@ -90,59 +76,21 @@ cert = {
     "auth_provider_x509_cert_url": env("auth_provider_x509_cert_url"),
     "client_x509_cert_url": env("client_x509_cert_url"),
 }
-cred = credentials.Certificate(cert)
-FIREBASE_APP = initialize_app(cred)
+FIREBASE_APP = initialize_app(credentials.Certificate(cert))
 
 FCM_DJANGO_SETTINGS = {
-    # an instance of firebase_admin.App to be used as default for all fcm-django requests
-    # default: None (the default Firebase app)
     "DEFAULT_FIREBASE_APP": FIREBASE_APP,
     "APP_VERBOSE_NAME": "notification",
-    # true if you want to have only one active device per registered user at a time
-    # default: False
     "ONE_DEVICE_PER_USER": False,
-    # devices to which notifications cannot be sent,
-    # are deleted upon receiving error response from FCM
-    # default: False
     "DELETE_INACTIVE_DEVICES": False,
-    # Transform create of an existing Device (based on registration id) into
-    # an update. See the section
-    # "Update of device with duplicate registration ID" for more details.
-    # default: False
     "UPDATE_ON_DUPLICATE_REG_ID": True,
 }
 
+# Auth
+AUTH_USER_MODEL = "users_api.UserModel"
 AUTHENTICATION_BACKENDS = ["core.backends.AuthBackend"]
 
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
-    ],
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
-
-SPECTACULAR_SETTINGS = {
-    "TITLE": "Dropme Project api",
-    "VERSION": "1.0.0",
-    "SWAGGER_UI_DIST": "SIDECAR",
-    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
-}
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-    },
-}
-
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "cache_table",
-    }
-}
-
+# JWT
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -153,7 +101,45 @@ SIMPLE_JWT = {
     "USER_AUTHENTICATION_RULE": "core.backends.simple_jwt_authentication_rule",
 }
 
+# DRF
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+    ]
+}
 
+# Swagger
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Dropme Project api",
+    "VERSION": "1.0.0",
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+}
+
+# Channels
+ASGI_APPLICATION = "core.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
+
+# Cache
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "cache_table",
+    }
+}
+
+# Middleware
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -172,6 +158,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
@@ -179,110 +166,77 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
-            "loaders": [
-                "django.template.loaders.filesystem.Loader",
-                "django.template.loaders.app_directories.Loader",
-            ],
         },
     },
 ]
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-ASGI_APPLICATION = "core.asgi.application"
-
-# Database Configuration - Using Neon for both DEBUG and production
-tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': tmpPostgres.path.replace('/', ''),
-        'USER': tmpPostgres.username,
-        'PASSWORD': tmpPostgres.password,
-        'HOST': tmpPostgres.hostname,
-        'PORT': 5432,
-    }
+    "default": dj_database_url.parse(env("DATABASE_URL"), conn_max_age=600, ssl_require=False),
 }
-
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760
-
-if os.name == "nt":
-    import platform
-
-    OSGEO4W = r"C:\OSGeo4W"
-    if "64" in platform.architecture()[0]:
-        # OSGEO4W += "64"
-        pass
-
-    assert os.path.isdir(OSGEO4W), "Directory does not exist: " + OSGEO4W
-    os.environ["OSGEO4W_ROOT"] = OSGEO4W
-    os.environ["GDAL_DATA"] = "C:\Program Files\GDAL\gdal-data"
-    os.environ["PROJ_LIB"] = OSGEO4W + r"\share\proj"
-    GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal310.dll"
-    os.environ["PATH"] = OSGEO4W + r"\bin;" + os.environ["PATH"]
-
-# GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal306.dll'
+DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
 
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
-]
-
-
-LANGUAGE_CODE = "en"
-
-TIME_ZONE = "UTC"
-
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = True
-
-LANGUAGES = [
-    ("en", _("English")),
-    ("ar", _("Arabic")),
-]
-
-LOCALE_PATHS = [
-    BASE_DIR / "locale/",
-    ]
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# sending email configuration
+# Email
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.zoho.com"
-EMAIL_USE_SSL = False
 EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 EMAIL_PORT = 587
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 
+# Storage / Static / Media
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME")
+AWS_S3_ENDPOINT_URL = f"https://s3.{AWS_S3_REGION_NAME}.backblazeb2.com"
+AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
+
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Media files configuration
-if DEBUG:
-    MEDIA_ROOT = BASE_DIR / "media"
-    MEDIA_URL = "/media/"
-else:
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME")
-    AWS_S3_ENDPOINT_URL = f"https://s3.{AWS_S3_REGION_NAME}.backblazeb2.com"
-    AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
-    AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
+# File Upload Limits
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+
+# GDAL (for Windows local dev if needed)
+if os.name == "nt":
+    import platform
+
+    OSGEO4W = r"C:\OSGeo4W"
+    os.environ["OSGEO4W_ROOT"] = OSGEO4W
+    os.environ["GDAL_DATA"] = OSGEO4W + r"\share\gdal"
+    os.environ["PROJ_LIB"] = OSGEO4W + r"\share\proj"
+    os.environ["PATH"] = OSGEO4W + r"\bin;" + os.environ["PATH"]
+
+# This tells Django/GeoDjango where the GDAL bindings live
+GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal310.dll"
+
+
+# Password Validators
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+# Languages
+LANGUAGE_CODE = "en"
+LANGUAGES = [
+    ("en", _("English")),
+    ("ar", _("Arabic")),
+]
+LOCALE_PATHS = [BASE_DIR / "locale/"]
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
+TIME_ZONE = "UTC"
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+MAX_OTP_TRY = 3
+MIN_PASSWORD_LENGTH = 8
