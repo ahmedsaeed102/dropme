@@ -8,7 +8,11 @@ from datetime import timedelta
 from pathlib import Path
 from firebase_admin import initialize_app
 from firebase_admin import credentials
+from dotenv import load_dotenv
+from urllib.parse import urlparse
 
+# Load environment variables
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -168,13 +172,16 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+            ],
+            "loaders": [
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
             ],
         },
     },
@@ -183,17 +190,18 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 ASGI_APPLICATION = "core.asgi.application"
-# Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
+
+# Database Configuration - Using Neon for both DEBUG and production
+tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "HOST": env("db_host"),
-        "NAME": env("db_name"),
-        "PASSWORD": env("db_password"),
-        "PORT": int(env("db_port")),
-        "USER": "postgres",
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': tmpPostgres.path.replace('/', ''),
+        'USER': tmpPostgres.username,
+        'PASSWORD': tmpPostgres.password,
+        'HOST': tmpPostgres.hostname,
+        'PORT': 5432,
     }
 }
 
@@ -212,7 +220,7 @@ if os.name == "nt":
     os.environ["OSGEO4W_ROOT"] = OSGEO4W
     os.environ["GDAL_DATA"] = "C:\Program Files\GDAL\gdal-data"
     os.environ["PROJ_LIB"] = OSGEO4W + r"\share\proj"
-    GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal306"
+    GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal310.dll"
     os.environ["PATH"] = OSGEO4W + r"\bin;" + os.environ["PATH"]
 
 # GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal306.dll'
@@ -251,7 +259,7 @@ LANGUAGES = [
 
 LOCALE_PATHS = [
     BASE_DIR / "locale/",
-]
+    ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -267,18 +275,8 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# Media files configuration
 if DEBUG:
-    env.read_env(BASE_DIR / ".env.local")
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.contrib.gis.db.backends.postgis",
-            "HOST": env("local_db_host"),
-            "NAME": env("local_db_name"),
-            "PASSWORD": env("local_db_password"),
-            "PORT": int(env("local_db_port")),
-            "USER": env("local_db_user"),
-        },
-    }
     MEDIA_ROOT = BASE_DIR / "media"
     MEDIA_URL = "/media/"
 else:
