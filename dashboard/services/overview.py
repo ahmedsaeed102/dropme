@@ -2,6 +2,8 @@
 from users_api.models import UserModel
 from django.core.cache import cache
 from django.db.models import Sum
+from machine_api.models import RecycleLog
+from datetime import date
 
 
 def get_total_users():
@@ -13,9 +15,10 @@ def get_total_users():
 
 
 def get_active_users():
+	today = date.today()
 	count = cache.get('total_users_count')
 	if count is None:
-		count = UserModel.objects.filter(is_active=True).count()
+		count = RecycleLog.objects.filter(created_at__date=today).values('phone').distinct().count()
 		cache.set('total_users_count', count, timeout=60 * 60)
 	return count
 
