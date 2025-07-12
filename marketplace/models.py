@@ -29,6 +29,7 @@ class Category(models.Model):
 class Brand(models.Model):
     name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50, unique=True, blank=True)
+    website_url = models.URLField( null=True , blank=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -119,5 +120,26 @@ class UserBrandPoints(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.brand.name} - {self.points} pts"
+
+class Coupon(models.Model):
+    STATUS_CHOICES = [
+        ('used', 'Used'),
+        ('unused', 'Unused')
+    ]
+    TYPE_CHOICES = [
+        ('online', 'Online'),
+        ('offline', 'Offline')
+    ]
+
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='coupons')
+    code = models.CharField(max_length=30, unique=True)
+    discount = models.PositiveIntegerField()
+    points_required = models.PositiveIntegerField()
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='online')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unused')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.code} - {self.type} - {self.status}"
 
 
