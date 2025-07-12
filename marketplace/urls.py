@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import ProductViewSet, WishlistAPIView, BrandViewSet, CategoryViewSet , CartSummaryAPIView , CartItemAPIView , BrandTierDetailAPIView , GroupedTiersAPIView
+from .views import ProductViewSet, WishlistAPIView, BrandViewSet, CategoryViewSet , CartSummaryAPIView , CartItemAPIView , BrandTierAPIView , ListTiersAPIView , CheckoutAPIView
 
 router = DefaultRouter()
 router.register(r'products', ProductViewSet, basename='product')
@@ -19,7 +19,9 @@ urlpatterns = [
     # Cart summary (total + discount + final + points + can do checkout or no)
     path('cart/', CartSummaryAPIView.as_view(), name='cart-summary'),
     # get specific brand tiers & discount percentage
-    path('tiers/<slug:brand_slug>/', BrandTierDetailAPIView.as_view(), name='brand-tier-detail'),
+    path('tiers/<slug:brand_slug>/', BrandTierAPIView.as_view(), name='brand-tier-detail'),
     # get all brands tiers
-    path('tiers/', GroupedTiersAPIView.as_view(), name='tier-list'),
+    path('tiers/', ListTiersAPIView.as_view(), name='tier-list'),
+    path('checkout/', CheckoutAPIView.as_view(), name='checkout'),
+
 ]

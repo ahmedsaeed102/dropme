@@ -2,13 +2,16 @@ from rest_framework import viewsets, status, filters as drf_filters , permission
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Product, Wishlist ,Brand,Category,Cart, CartItem , UserBrandPoints , Tier
+from .models import Product, Wishlist ,Brand,Category,Cart, CartItem , UserBrandPoints , Tier , Coupon
 from .serializers import ProductSerializer, WishlistSerializer , BrandSerializer, CategorySerializer , CartItemSerializer , CartSerializer , BrandTierSerializer , TierDetailSerializer
 from .filters import ProductFilter
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListAPIView
 from collections import defaultdict
+from decimal import Decimal
+from .serializers import CheckoutResponseSerializer
+
 
 #  Product ViewSet
 class ProductViewSet(viewsets.ModelViewSet):
@@ -156,7 +159,7 @@ class CartSummaryAPIView(APIView):
         return Response(serializer.data , status=status.HTTP_200_OK)
 
 #view to list every brand and dic of tiers
-class GroupedTiersAPIView(APIView):
+class ListTiersAPIView(APIView):
     def get(self, request):
         tiers = Tier.objects.select_related('brand').order_by('brand__name', 'points_required')
         grouped = defaultdict(list)
@@ -174,7 +177,7 @@ class GroupedTiersAPIView(APIView):
         return Response(result)
 
 #view for specific brand tier
-class BrandTierDetailAPIView(APIView):
+class BrandTierAPIView(APIView):
     def get(self, request, brand_slug):
         try:
             brand = Brand.objects.get(slug=brand_slug)
@@ -190,3 +193,63 @@ class BrandTierDetailAPIView(APIView):
         return Response(data, status=200)
 
 
+from django.utils.crypto import get_random_string
+
+class CheckoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        try:
+            cart = Cart.objects.get(user=user)
+        except Cart.DoesNotExist:
+            return Response({"detail": "Cart not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if not cart.cart_items.exists():
+            return Response({"detail": "Your cart is empty."}, status=status.HTTP_400_BAD_REQUEST)
+
+        brand = cart.brand
+        brand_points_obj, _ = UserBrandPoints.objects.get_or_create(user=user, brand=brand, defaults={'points': 0})
+        brand_points = brand_points_obj.points or user.total_points
+
+        applicable_tier = Tier.objects.filter(brand=brand, points_required__lte=brand_points).order_by('-points_required').first()
+
+        if not applicable_tier:
+            return Response({"detail": "Not enough points to apply any discount."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Apply discount
+        discount = applicable_tier.discount_percent
+        total = Decimal(cart.total_price())
+        discounted_price = total * (1 - Decimal(discount) / 100)
+        discounted_price = discounted_price.quantize(Decimal('0.01'))
+
+        # Use or generate coupon that matches this tier's discount
+        coupon = Coupon.objects.filter(brand=brand, discount=discount, status="unused").first()
+        coupon.status = "used"
+        coupon.save()
+
+        # Deduct points
+        if brand_points_obj.points >= applicable_tier.points_required:
+            brand_points_obj.points -= applicable_tier.points_required
+            brand_points_obj.save()
+        else:
+            user.total_points -= applicable_tier.points_required
+            user.save()
+
+        # Clear the cart
+        cart.cart_items.all().delete()
+        cart.brand = None
+        cart.save()
+
+        # Response
+        response_data = {
+            "brand": brand.slug,
+            "discount": discount,
+            "discounted_price": discounted_price,
+            "coupon_code": coupon.code,
+            "website_url": brand.website_url,
+            "message": f"Congrats! You've unlocked {discount}% off using your {applicable_tier.points_required} points."
+        }
+
+        serializer = CheckoutResponseSerializer(response_data)
+        return Response(serializer.data, status=status.HTTP_200_OK)

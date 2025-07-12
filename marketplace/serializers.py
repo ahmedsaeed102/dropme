@@ -143,8 +143,11 @@ class BrandTierSerializer(serializers.Serializer):
     brand = serializers.CharField()
     tiers = TierDetailSerializer(many=True)
 
-class CheckoutResultSerializer(serializers.Serializer):
-    coupon_code = serializers.CharField()
-    discount = serializers.IntegerField()
+class CheckoutResponseSerializer(serializers.Serializer):
     brand = serializers.CharField()
-    brand_website = serializers.URLField()
+    discount = serializers.IntegerField()
+    discounted_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    coupon_code = serializers.CharField()
+    website_url = serializers.URLField()
+    message = serializers.CharField()
+

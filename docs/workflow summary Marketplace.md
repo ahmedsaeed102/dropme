@@ -186,7 +186,7 @@ Returns tier list for specific brand
 | `/cart/items/{{item_id}}/` | PATCH  | `{quantity: 3}`             | Update qty                                                                                                                                                           |
 | `/cart/items/{{item_id}}/` | DELETE | None                        | Removes item                                                                                                                                                         |
 | `/cart/`                 | GET    | None                        | Returns full cart summary                                                                                                                                            |
-| `/tiers/`                | GET    | None                        | Grouped by brand                                                                                                                                                     |
+| `/tiers/`                | GET    | None                        | list of tiers Grouped by brand                                                                                                                                       |
 | `/tiers/{{brand_slug}}/` | GET    | None                        | Tiers for brand                                                                                                                                                      |
 
 ---
